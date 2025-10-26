@@ -3,11 +3,13 @@
  * Supports local development (Ollama) and cloud production (Google Cloud Run)
  */
 
-const ENV = 'development'; // 'development' | 'production'
+let ENV = 'development'; // 'development' | 'production'
 
 const LLM_CONFIG = {
   // Development: Local Ollama on Mac M1 Max
   development: {
+    mode: 'direct', // 'direct' = call Ollama directly, 'backend' = use Express backend
+    backendURL: 'http://localhost:8080', // Backend API URL
     qwen: {
       baseURL: 'http://localhost:11434',
       model: 'qwen2.5:72b',
@@ -22,17 +24,17 @@ const LLM_CONFIG = {
     },
   },
 
-  // Production: Google Cloud Run or Hugging Face
+  // Production: Google Cloud Run backend
   production: {
+    mode: 'backend', // Always use backend in production
+    backendURL: process.env.BACKEND_URL || 'https://speakeasy-api-xxxxx-uc.a.run.app',
+    apiKey: process.env.CLOUD_LLM_API_KEY, // Optional auth
     qwen: {
-      baseURL: 'https://speakeasy-llm.run.app', // Your Cloud Run endpoint
       model: 'qwen2.5:72b',
       temperature: 0.7,
       maxTokens: 4096,
-      apiKey: process.env.CLOUD_LLM_API_KEY, // Optional auth
     },
     llama: {
-      baseURL: 'https://speakeasy-llm.run.app',
       model: 'llama3.1:8b',
       temperature: 0.8,
       maxTokens: 2048,

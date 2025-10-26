@@ -2,6 +2,8 @@
 node_modules/
 npm-debug.log
 yarn-error.log
+.npm
+.yarn
 
 # Expo
 .expo/
@@ -16,6 +18,7 @@ ios/
 # Git
 .git/
 .gitignore
+.gitattributes
 
 # IDE
 .vscode/
@@ -28,17 +31,34 @@ ios/
 .DS_Store
 Thumbs.db
 
-# Misc
-*.log
-.env
-.env.local
-*.md
-!DEPLOYMENT.md
-
-# Documentation
-docs/
-
-# Tests
+# Testing
+coverage/
+.nyc_output/
 __tests__/
 *.test.js
 *.spec.js
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+
+# Backend
+backend/node_modules
+backend/npm-debug.log
+
+# Documentation
+*.md
+!README.md
+!DEPLOYMENT.md
+docs/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+cloudbuild*.yaml
+.gcloudignore
