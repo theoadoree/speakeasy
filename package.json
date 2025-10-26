@@ -1,12 +1,20 @@
 {
-  "name": "fluentai",
+  "name": "speakeasy",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "build:web": "expo export --platform web",
+    "build:ios": "eas build --platform ios --profile production",
+    "build:android": "eas build --platform android --profile production",
+    "build:all": "eas build --platform all --profile production",
+    "deploy:web": "npm run build:web && gcloud run deploy speakeasy-web --source .",
+    "deploy:backend": "cd backend && gcloud run deploy speakeasy-backend --source .",
+    "deploy:local": "./scripts/deploy-local.sh",
+    "setup:gcloud": "./scripts/setup-gcloud.sh"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",
