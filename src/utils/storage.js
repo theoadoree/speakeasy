@@ -5,7 +5,9 @@ const KEYS = {
   LLM_CONFIG: '@fluentai:llmConfig',
   CONTENT_LIBRARY: '@fluentai:contentLibrary',
   CONVERSATION_HISTORY: '@fluentai:conversationHistory',
-  ONBOARDING_COMPLETE: '@fluentai:onboardingComplete'
+  ONBOARDING_COMPLETE: '@fluentai:onboardingComplete',
+  AUTH_TOKEN: '@fluentai:authToken',
+  USER_DATA: '@fluentai:userData'
 };
 
 class StorageService {
@@ -135,6 +137,70 @@ class StorageService {
   async clearAll() {
     try {
       await AsyncStorage.multiRemove(Object.values(KEYS));
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Authentication methods
+  async saveAuthToken(token) {
+    try {
+      await AsyncStorage.setItem(KEYS.AUTH_TOKEN, token);
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getAuthToken() {
+    try {
+      const token = await AsyncStorage.getItem(KEYS.AUTH_TOKEN);
+      return token;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async removeAuthToken() {
+    try {
+      await AsyncStorage.removeItem(KEYS.AUTH_TOKEN);
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async saveUserData(userData) {
+    try {
+      await AsyncStorage.setItem(KEYS.USER_DATA, JSON.stringify(userData));
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getUserData() {
+    try {
+      const data = await AsyncStorage.getItem(KEYS.USER_DATA);
+      return data ? JSON.parse(data) : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async removeUserData() {
+    try {
+      await AsyncStorage.removeItem(KEYS.USER_DATA);
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async clearAuthData() {
+    try {
+      await AsyncStorage.multiRemove([KEYS.AUTH_TOKEN, KEYS.USER_DATA]);
       return { success: true };
     } catch (error) {
       return { success: false, error: error.message };

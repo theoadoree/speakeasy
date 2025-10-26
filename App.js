@@ -4,9 +4,12 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, Text, StyleSheet } from 'react-native';
 import { AppProvider, useApp } from './src/contexts/AppContext';
+import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 import StorageService from './src/utils/storage';
 
 // Screens
+import LoginScreen from './src/screens/LoginScreen';
+import SignUpScreen from './src/screens/SignUpScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import PracticeScreen from './src/screens/PracticeScreen';
@@ -56,22 +59,27 @@ function TabNavigator() {
 }
 
 function AppNavigator() {
-  const { isLoading } = useApp();
+  const { isLoading: appLoading } = useApp();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [onboardingComplete, setOnboardingComplete] = useState(null);
 
   useEffect(() => {
-    checkOnboarding();
-  }, []);
+    if (isAuthenticated) {
+      checkOnboarding();
+    }
+  }, [isAuthenticated]);
 
   const checkOnboarding = async () => {
     const complete = await StorageService.isOnboardingComplete();
     setOnboardingComplete(complete);
   };
 
-  if (isLoading || onboardingComplete === null) {
+  // Show loading screen while checking auth and app state
+  if (authLoading || appLoading || (isAuthenticated && onboardingComplete === null)) {
     return (
       <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>FluentAI 🚀</Text>
+        <Text style={styles.loadingText}>SpeakEasy 🚀</Text>
+        <Text style={styles.loadingSubtext}>Your AI Language Tutor</Text>
       </View>
     );
   }
@@ -83,9 +91,17 @@ function AppNavigator() {
           headerShown: false
         }}
       >
-        {!onboardingComplete ? (
+        {!isAuthenticated ? (
+          // Authentication Flow
+          <>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="SignUp" component={SignUpScreen} />
+          </>
+        ) : !onboardingComplete ? (
+          // Onboarding Flow
           <Stack.Screen name="Onboarding" component={OnboardingScreen} />
         ) : (
+          // Main App Flow
           <>
             <Stack.Screen name="Main" component={TabNavigator} />
             <Stack.Screen
@@ -107,9 +123,11 @@ function AppNavigator() {
 
 export default function App() {
   return (
-    <AppProvider>
-      <AppNavigator />
-    </AppProvider>
+    <AuthProvider>
+      <AppProvider>
+        <AppNavigator />
+      </AppProvider>
+    </AuthProvider>
   );
 }
 
@@ -124,6 +142,11 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: 'bold',
     color: '#007AFF'
+  },
+  loadingSubtext: {
+    fontSize: 16,
+    color: '#666',
+    marginTop: 8
   },
   tabBar: {
     height: 60,

@@ -7,12 +7,15 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
-  Alert
+  Alert,
+  Platform
 } from 'react-native';
 import { useApp } from '../contexts/AppContext';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function SettingsScreen() {
   const { userProfile, llmConfig, setLLMConfig, testLLMConnection, llmConnected } = useApp();
+  const { user, logout } = useAuth();
   const [baseURL, setBaseURL] = useState('http://localhost:11434');
   const [model, setModel] = useState('llama2');
   const [isTesting, setIsTesting] = useState(false);
@@ -56,6 +59,29 @@ export default function SettingsScreen() {
     Alert.alert('Success! ✅', 'Configuration saved');
   };
 
+  const handleLogout = () => {
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to logout?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel'
+        },
+        {
+          text: 'Logout',
+          style: 'destructive',
+          onPress: async () => {
+            const result = await logout();
+            if (!result.success) {
+              Alert.alert('Error', result.error || 'Failed to logout');
+            }
+          }
+        }
+      ]
+    );
+  };
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {/* Header */}
@@ -63,15 +89,35 @@ export default function SettingsScreen() {
         <Text style={styles.title}>Settings ⚙️</Text>
       </View>
 
-      {/* User Profile Section */}
-      {userProfile && (
+      {/* Account Section */}
+      {user && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Your Profile</Text>
+          <Text style={styles.sectionTitle}>Account</Text>
           <View style={styles.profileCard}>
             <View style={styles.profileRow}>
               <Text style={styles.profileLabel}>Name:</Text>
-              <Text style={styles.profileValue}>{userProfile.name}</Text>
+              <Text style={styles.profileValue}>{user.name}</Text>
             </View>
+            <View style={styles.profileRow}>
+              <Text style={styles.profileLabel}>Email:</Text>
+              <Text style={styles.profileValue}>{user.email}</Text>
+            </View>
+          </View>
+
+          <TouchableOpacity
+            style={styles.logoutButton}
+            onPress={handleLogout}
+          >
+            <Text style={styles.logoutButtonText}>Logout</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* User Profile Section */}
+      {userProfile && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Learning Profile</Text>
+          <View style={styles.profileCard}>
             <View style={styles.profileRow}>
               <Text style={styles.profileLabel}>Learning:</Text>
               <Text style={styles.profileValue}>{userProfile.targetLanguage}</Text>
@@ -386,5 +432,19 @@ const styles = StyleSheet.create({
   versionText: {
     fontSize: 12,
     color: '#999'
+  },
+  logoutButton: {
+    marginTop: 16,
+    padding: 16,
+    borderRadius: 12,
+    backgroundColor: '#FFF',
+    borderWidth: 2,
+    borderColor: '#FF3B30',
+    alignItems: 'center'
+  },
+  logoutButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FF3B30'
   }
 });
