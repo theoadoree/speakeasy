@@ -16,7 +16,7 @@ const LLM_CONFIG = {
     },
     llama: {
       baseURL: 'http://localhost:11434',
-      model: 'llama3.3:8b',
+      model: 'llama3.1:8b',
       temperature: 0.8,
       maxTokens: 2048,
     },
@@ -33,7 +33,7 @@ const LLM_CONFIG = {
     },
     llama: {
       baseURL: 'https://speakeasy-llm.run.app',
-      model: 'llama3.3:8b',
+      model: 'llama3.1:8b',
       temperature: 0.8,
       maxTokens: 2048,
     },
