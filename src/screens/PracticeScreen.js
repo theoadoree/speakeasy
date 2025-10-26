@@ -39,6 +39,7 @@ export default function PracticeScreen() {
 
   // UI preferences
   const [voiceMode, setVoiceMode] = useState(true);
+  const [autoMode, setAutoMode] = useState(true); // Auto-listen after AI speaks
   const [showTextInput, setShowTextInput] = useState(false);
   const [inputText, setInputText] = useState('');
 
@@ -73,6 +74,13 @@ export default function PracticeScreen() {
 
       if (voiceMode) {
         await speakText(welcomeMessage);
+
+        // Auto-start listening in auto mode
+        if (autoMode) {
+          setTimeout(() => {
+            handleVoiceInput();
+          }, 500);
+        }
       }
     }
 
@@ -172,6 +180,13 @@ export default function PracticeScreen() {
       // Speak response if in voice mode
       if (voiceMode) {
         await speakText(response);
+
+        // Auto-continue conversation in auto mode
+        if (autoMode && !showTextInput) {
+          setTimeout(() => {
+            handleVoiceInput();
+          }, 500);
+        }
       }
 
       // Scroll to bottom
@@ -295,6 +310,13 @@ export default function PracticeScreen() {
 
       if (voiceMode) {
         await speakText(lessonIntro);
+
+        // Auto-start listening in auto mode
+        if (autoMode) {
+          setTimeout(() => {
+            handleVoiceInput();
+          }, 500);
+        }
       }
     } catch (error) {
       Alert.alert('Error', 'Failed to generate new lesson. Please try again.');
@@ -325,9 +347,21 @@ export default function PracticeScreen() {
           </View>
 
           <View style={styles.headerRight}>
+            {/* Auto Mode Toggle */}
+            {voiceMode && (
+              <TouchableOpacity
+                style={[styles.autoModeButton, autoMode && styles.autoModeButtonActive]}
+                onPress={() => setAutoMode(!autoMode)}
+              >
+                <Text style={[styles.autoModeButtonText, autoMode && styles.autoModeButtonTextActive]}>
+                  {autoMode ? '🔁 Auto' : '👆 Tap'}
+                </Text>
+              </TouchableOpacity>
+            )}
+
             {/* Voice Mode Toggle */}
             <View style={styles.toggleContainer}>
-              <Text style={styles.toggleLabel}>🎤 Voice</Text>
+              <Text style={styles.toggleLabel}>🎤</Text>
               <Switch
                 value={voiceMode}
                 onValueChange={setVoiceMode}
@@ -417,17 +451,28 @@ export default function PracticeScreen() {
         <View style={styles.inputArea}>
           {voiceMode && !showTextInput ? (
             <>
-              {/* Voice Button */}
-              <View style={styles.voiceButtonContainer}>
-                <VoiceButton
-                  isListening={isListening}
-                  isSpeaking={isSpeaking}
-                  isProcessing={isProcessing}
-                  onPress={handleVoiceInput}
-                  size="large"
-                  disabled={isListening || isSpeaking || isProcessing}
-                />
-              </View>
+              {/* Auto Mode Indicator or Voice Button */}
+              {autoMode ? (
+                <View style={styles.autoModeIndicator}>
+                  <Text style={styles.autoModeIndicatorText}>
+                    {isListening && '🎤 Listening...'}
+                    {isSpeaking && '🔊 Speaking...'}
+                    {isProcessing && '🤔 Thinking...'}
+                    {!isListening && !isSpeaking && !isProcessing && '⏸️ Ready - Just speak!'}
+                  </Text>
+                </View>
+              ) : (
+                <View style={styles.voiceButtonContainer}>
+                  <VoiceButton
+                    isListening={isListening}
+                    isSpeaking={isSpeaking}
+                    isProcessing={isProcessing}
+                    onPress={handleVoiceInput}
+                    size="large"
+                    disabled={isListening || isSpeaking || isProcessing}
+                  />
+                </View>
+              )}
 
               {/* Text Input Toggle */}
               <TouchableOpacity
@@ -536,9 +581,29 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
   },
   toggleLabel: {
-    fontSize: typography.fontSize.sm,
+    fontSize: typography.fontSize.base,
     color: colors.text.primary,
     fontWeight: typography.fontWeight.medium,
+  },
+  autoModeButton: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.background.secondary,
+    borderWidth: 2,
+    borderColor: colors.neutral[300],
+  },
+  autoModeButtonActive: {
+    backgroundColor: colors.primary.main,
+    borderColor: colors.primary.main,
+  },
+  autoModeButtonText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.primary,
+    fontWeight: typography.fontWeight.semibold,
+  },
+  autoModeButtonTextActive: {
+    color: colors.primary.contrast,
   },
   iconButton: {
     width: 40,
@@ -638,6 +703,15 @@ const styles = StyleSheet.create({
   },
   voiceButtonContainer: {
     alignItems: 'center',
+  },
+  autoModeIndicator: {
+    alignItems: 'center',
+    paddingVertical: spacing.xl,
+  },
+  autoModeIndicatorText: {
+    fontSize: typography.fontSize.xl,
+    color: colors.text.secondary,
+    fontWeight: typography.fontWeight.semibold,
   },
   textToggle: {
     alignItems: 'center',

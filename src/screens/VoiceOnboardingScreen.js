@@ -40,6 +40,7 @@ export default function VoiceOnboardingScreen({ navigation }) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [conversationMessages, setConversationMessages] = useState([]);
   const [currentTranscript, setCurrentTranscript] = useState('');
+  const [autoMode, setAutoMode] = useState(true); // Auto-listen after AI speaks
 
   // Collected data from conversation
   const [collectedData, setCollectedData] = useState({
@@ -75,8 +76,15 @@ export default function VoiceOnboardingScreen({ navigation }) {
 
     const greeting = `Hi ${name}! I'm excited to help you learn ${targetLanguage}. Let's have a quick chat so I can understand what you're interested in and create the perfect learning plan for you. What do you enjoy doing in your free time?`;
 
-    await speakText(greeting);
     addMessage('assistant', greeting);
+    await speakText(greeting);
+
+    // Auto-start listening after greeting
+    if (autoMode) {
+      setTimeout(() => {
+        handleVoiceInput();
+      }, 500);
+    }
   };
 
   /**
@@ -119,6 +127,11 @@ export default function VoiceOnboardingScreen({ navigation }) {
       // Check if we should finalize
       if (conversationMessages.length >= 6) {
         await finalizeProfile();
+      } else if (autoMode) {
+        // Auto-continue conversation
+        setTimeout(() => {
+          handleVoiceInput();
+        }, 500);
       }
     } catch (error) {
       setIsProcessing(false);
@@ -345,10 +358,22 @@ export default function VoiceOnboardingScreen({ navigation }) {
         { opacity: fadeAnim, transform: [{ translateY: slideAnim }] },
       ]}
     >
-      <Text style={styles.title}>Let's chat!</Text>
-      <Text style={styles.subtitle}>
-        Tell me about your interests so I can personalize your learning
-      </Text>
+      <View style={styles.headerRow}>
+        <View>
+          <Text style={styles.title}>Let's chat!</Text>
+          <Text style={styles.subtitle}>
+            {autoMode ? '🎤 Auto mode - Just speak naturally' : 'Tap the mic when ready'}
+          </Text>
+        </View>
+        <TouchableOpacity
+          style={styles.autoModeToggle}
+          onPress={() => setAutoMode(!autoMode)}
+        >
+          <Text style={styles.autoModeText}>
+            {autoMode ? '🔁 Auto' : '👆 Manual'}
+          </Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Waveform Visualizer */}
       <WaveformVisualizer
@@ -377,16 +402,29 @@ export default function VoiceOnboardingScreen({ navigation }) {
         )}
       </ScrollView>
 
-      {/* Voice Button */}
-      <View style={styles.voiceButtonContainer}>
-        <VoiceButton
-          isListening={isListening}
-          isSpeaking={isSpeaking}
-          isProcessing={isProcessing}
-          onPress={handleVoiceInput}
-          size="large"
-        />
-      </View>
+      {/* Voice Button - Only show in manual mode or when not auto-listening */}
+      {!autoMode && (
+        <View style={styles.voiceButtonContainer}>
+          <VoiceButton
+            isListening={isListening}
+            isSpeaking={isSpeaking}
+            isProcessing={isProcessing}
+            onPress={handleVoiceInput}
+            size="large"
+          />
+        </View>
+      )}
+
+      {autoMode && (
+        <View style={styles.autoModeIndicator}>
+          <Text style={styles.autoModeIndicatorText}>
+            {isListening && '🎤 Listening...'}
+            {isSpeaking && '🔊 Speaking...'}
+            {isProcessing && '🤔 Thinking...'}
+            {!isListening && !isSpeaking && !isProcessing && '⏸️ Waiting...'}
+          </Text>
+        </View>
+      )}
     </Animated.View>
   );
 
@@ -425,18 +463,41 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginVertical: spacing.xl,
   },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: spacing.xl,
+  },
   title: {
     fontSize: typography.fontSize['3xl'],
     fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
-    textAlign: 'center',
     marginBottom: spacing.sm,
   },
   subtitle: {
-    fontSize: typography.fontSize.lg,
+    fontSize: typography.fontSize.base,
     color: colors.text.secondary,
-    textAlign: 'center',
-    marginBottom: spacing.xl,
+  },
+  autoModeToggle: {
+    backgroundColor: colors.primary.main,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.md,
+  },
+  autoModeText: {
+    color: colors.primary.contrast,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
+  },
+  autoModeIndicator: {
+    alignItems: 'center',
+    paddingVertical: spacing.xl,
+  },
+  autoModeIndicatorText: {
+    fontSize: typography.fontSize.xl,
+    color: colors.text.secondary,
+    fontWeight: typography.fontWeight.medium,
   },
   featureCard: {
     marginBottom: spacing.md,
