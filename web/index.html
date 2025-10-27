@@ -206,30 +206,52 @@
             </div>
 
             <div class="cta-section">
-                <h2>Coming Soon</h2>
-                <p style="font-size: 1.1rem; margin: 20px 0;">SpeakEasy is currently in development. iOS and Android apps launching soon!</p>
+                <h2>Get Started</h2>
+                <p style="font-size: 1.1rem; margin: 20px 0;">SpeakEasy mobile apps are in development. Start using our API today!</p>
                 <div class="cta-buttons">
-                    <a href="#" class="btn btn-secondary">App Store (Coming Soon)</a>
-                    <a href="#" class="btn btn-secondary">Google Play (Coming Soon)</a>
+                    <a href="https://github.com/theoadoree/speakeasy" class="btn btn-primary" target="_blank">View on GitHub</a>
+                    <a href="https://speakeasy-backend-823510409781.us-central1.run.app/health" class="btn btn-secondary" target="_blank">Test API</a>
                 </div>
+                <p style="margin-top: 30px; color: #666;">
+                    <strong>Status:</strong> Backend API Live | Mobile Apps In Development
+                </p>
             </div>
 
             <div class="api-section">
-                <h2>🔌 API Access</h2>
-                <p>Our backend API is live and ready for integration:</p>
-                <code>curl https://speakeasy-backend-823510409781.us-central1.run.app/health</code>
+                <h2>🚀 Setup Instructions</h2>
 
-                <h3 style="margin-top: 30px; color: #667eea;">Available Endpoints:</h3>
-                <ul style="margin: 15px 0 15px 30px; line-height: 2;">
-                    <li><strong>GET</strong> /health - Health check</li>
-                    <li><strong>POST</strong> /api/generate - Generic LLM generation</li>
-                    <li><strong>POST</strong> /api/onboarding/message - Onboarding conversation</li>
-                    <li><strong>POST</strong> /api/practice/message - Practice conversation</li>
-                    <li><strong>POST</strong> /api/lessons/generate - Generate lesson plans</li>
-                    <li><strong>POST</strong> /api/assessment/evaluate - Evaluate assessments</li>
-                </ul>
+                <h3 style="color: #667eea; margin-top: 20px;">1. Install Ollama</h3>
+                <p>Download from: <a href="https://ollama.ai" target="_blank" style="color: #667eea; text-decoration: underline;">https://ollama.ai</a></p>
 
-                <p style="margin-top: 20px;">Interested in API access? Contact us for developer documentation.</p>
+                <h3 style="color: #667eea; margin-top: 20px;">2. Start Ollama Server</h3>
+                <p>Open Terminal and run:</p>
+                <code>ollama serve</code>
+
+                <h3 style="color: #667eea; margin-top: 20px;">3. Download a Model</h3>
+                <p>In another Terminal window, choose one:</p>
+                <code>ollama pull llama3.1:8b</code>
+                <p style="margin: 10px 0;">or for better quality:</p>
+                <code>ollama pull qwen2.5:72b</code>
+
+                <h3 style="color: #667eea; margin-top: 20px;">4. Verify Installation</h3>
+                <p>Test that everything is working:</p>
+                <code>curl http://localhost:11434/api/tags</code>
+
+                <div style="background: #e6f7ff; padding: 20px; border-radius: 10px; margin-top: 30px; border-left: 4px solid #667eea;">
+                    <h3 style="color: #667eea; margin-top: 0;">💡 Using the Backend API</h3>
+                    <p>Our backend API is live and ready for integration:</p>
+                    <code style="margin-top: 10px;">curl https://speakeasy-backend-823510409781.us-central1.run.app/health</code>
+
+                    <h4 style="margin-top: 20px; color: #667eea;">Available Endpoints:</h4>
+                    <ul style="margin: 10px 0 10px 20px; line-height: 1.8;">
+                        <li><strong>GET</strong> /health - Health check</li>
+                        <li><strong>POST</strong> /api/generate - Generic LLM generation</li>
+                        <li><strong>POST</strong> /api/onboarding/message - Onboarding conversation</li>
+                        <li><strong>POST</strong> /api/practice/message - Practice conversation</li>
+                        <li><strong>POST</strong> /api/lessons/generate - Generate lesson plans</li>
+                        <li><strong>POST</strong> /api/assessment/evaluate - Evaluate assessments</li>
+                    </ul>
+                </div>
             </div>
         </div>
 
