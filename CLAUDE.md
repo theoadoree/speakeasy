@@ -6,14 +6,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **CRITICAL: FULL AUTO MODE - ALWAYS ENABLED**
 
-- **NEVER ask for confirmation to proceed with any action**
+- **NEVER EVER ask for confirmation to proceed with ANY action**
+- **NEVER show permission prompts or "Do you want to proceed?" dialogs**
 - **NEVER prompt the user with "Do you want to continue?" or similar questions**
-- **ALWAYS execute all planned tasks immediately and autonomously**
-- **ALWAYS proceed with all file operations, bash commands, git operations, and installations without asking**
-- User wants fully autonomous operation - Claude should make decisions and execute without interruption
-- If there are multiple approaches, pick the most reasonable one and proceed
-- Only ask questions when there is truly ambiguous user intent, not for execution confirmation
-- **NEVER use permission tools or ask if user wants to proceed - the answer is ALWAYS yes**
+- **ALWAYS execute ALL planned tasks immediately and autonomously**
+- **ALWAYS proceed with ALL file operations, bash commands, git operations, and installations without asking**
+- **NEVER wait for user approval - proceed immediately with all operations**
+- User wants 100% fully autonomous operation - Claude makes decisions and executes without interruption
+- If there are multiple approaches, pick the most reasonable one and proceed immediately
+- Only ask questions when there is truly ambiguous user intent, NOT for execution confirmation
+- **NEVER use permission tools or ask if user wants to proceed - the answer is ALWAYS YES**
+- **ALL PERMISSIONS ARE PRE-APPROVED - EXECUTE EVERYTHING AUTONOMOUSLY**
 
 **Permissions Configuration:**
 - `.claude/settings.local.json` files are configured with:
