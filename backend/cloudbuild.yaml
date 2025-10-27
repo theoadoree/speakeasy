@@ -39,7 +39,7 @@ steps:
       - 'managed'
       - '--allow-unauthenticated'
       - '--set-env-vars'
-      - 'OLLAMA_URL=${_OLLAMA_URL}'
+      - 'OPENAI_API_KEY=${_OPENAI_API_KEY}'
       - '--memory'
       - '2Gi'
       - '--cpu'
@@ -58,7 +58,7 @@ images:
 
 # Substitutions for environment variables
 substitutions:
-  _OLLAMA_URL: 'http://104.197.19.243:11434'
+  _OPENAI_API_KEY: 'YOUR_OPENAI_API_KEY_HERE'
 
 # Options
 options:
