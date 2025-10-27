@@ -54,22 +54,34 @@
 
         .mouth { transition: all 0.08s ease; }
         .mouth.talking {
-            animation: talk 0.12s infinite alternate;
+            animation: talk 0.1s infinite alternate;
         }
 
         @keyframes talk {
             0% { 
                 d: path('M 130 210 Q 160 230 190 210');
-                transform: scaleY(1);
+                transform: scaleY(1) scaleX(1);
+            }
+            25% { 
+                d: path('M 130 210 Q 160 240 190 210');
+                transform: scaleY(1.1) scaleX(1.05);
+            }
+            50% { 
+                d: path('M 130 210 Q 160 235 190 210');
+                transform: scaleY(1.05) scaleX(1.1);
+            }
+            75% { 
+                d: path('M 130 210 Q 160 245 190 210');
+                transform: scaleY(1.15) scaleX(1.02);
             }
             100% { 
                 d: path('M 130 210 Q 160 240 190 210');
-                transform: scaleY(1.1);
+                transform: scaleY(1.1) scaleX(1.05);
             }
         }
 
         .mouth.talking #teacherTongue {
-            animation: tongueMove 0.12s infinite alternate;
+            animation: tongueMove 0.1s infinite alternate;
         }
 
         @keyframes tongueMove {
@@ -77,12 +89,40 @@
                 rx: 8; 
                 ry: 4;
                 opacity: 0.8;
+                transform: translateY(0);
             }
-            100% { 
+            50% { 
                 rx: 10; 
                 ry: 5;
                 opacity: 1;
+                transform: translateY(-1px);
             }
+            100% { 
+                rx: 9; 
+                ry: 4.5;
+                opacity: 0.9;
+                transform: translateY(0.5px);
+            }
+        }
+
+        /* Enhanced eye animation */
+        .eyes.talking {
+            animation: blink 0.15s infinite alternate;
+        }
+
+        @keyframes blink {
+            0% { transform: scaleY(1); }
+            100% { transform: scaleY(0.1); }
+        }
+
+        /* Head movement while talking */
+        .teacher-avatar.talking {
+            animation: headBob 0.2s infinite alternate;
+        }
+
+        @keyframes headBob {
+            0% { transform: translateY(0) rotate(0deg); }
+            100% { transform: translateY(-2px) rotate(0.5deg); }
         }
 
         .teacher-name {
@@ -484,9 +524,165 @@
             font-size: 0.875rem;
         }
 
-        @media (max-width: 968px) {
-            .app { grid-template-columns: 1fr; }
-            .teacher-panel { display: none; }
+        /* Voice Mode Interface */
+        .voice-mode {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .voice-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .voice-toggle:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+        }
+
+        .voice-toggle.active {
+            background: #ef4444;
+            animation: pulse 1s infinite;
+        }
+
+        .voice-toggle.active:hover {
+            background: #dc2626;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
+            50% { box-shadow: 0 4px 12px rgba(239, 68, 68, 0.6); }
+            100% { box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
+        }
+
+        .voice-indicator {
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.7;
+        }
+
+        .voice-indicator.active {
+            animation: voicePulse 0.5s infinite;
+        }
+
+        @keyframes voicePulse {
+            0% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.5); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.7; }
+        }
+
+        /* Voice Waveform */
+        .voice-waveform {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            z-index: 1000;
+        }
+
+        .voice-waveform.active {
+            display: flex;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+
+        .waveform-container {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            padding: 1rem 2rem;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .waveform-bar {
+            width: 4px;
+            background: var(--primary);
+            border-radius: 2px;
+            animation: waveform 1s infinite ease-in-out;
+        }
+
+        .waveform-bar:nth-child(1) { height: 20px; animation-delay: 0s; }
+        .waveform-bar:nth-child(2) { height: 35px; animation-delay: 0.1s; }
+        .waveform-bar:nth-child(3) { height: 25px; animation-delay: 0.2s; }
+        .waveform-bar:nth-child(4) { height: 40px; animation-delay: 0.3s; }
+        .waveform-bar:nth-child(5) { height: 30px; animation-delay: 0.4s; }
+        .waveform-bar:nth-child(6) { height: 45px; animation-delay: 0.5s; }
+        .waveform-bar:nth-child(7) { height: 25px; animation-delay: 0.6s; }
+        .waveform-bar:nth-child(8) { height: 35px; animation-delay: 0.7s; }
+        .waveform-bar:nth-child(9) { height: 20px; animation-delay: 0.8s; }
+
+        @keyframes waveform {
+            0%, 100% { transform: scaleY(0.3); }
+            50% { transform: scaleY(1); }
+        }
+
+        .voice-status {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .voice-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .voice-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .voice-btn.stop {
+            background: #ef4444;
+            color: white;
+        }
+
+        .voice-btn.stop:hover {
+            background: #dc2626;
+            transform: scale(1.1);
+        }
+
+        .voice-btn.send {
+            background: var(--accent);
+            color: white;
+        }
+
+        .voice-btn.send:hover {
+            background: #059669;
+            transform: scale(1.1);
         }
     </style>
 </head>
@@ -548,6 +744,34 @@
         </div>
     </div>
 
+    <!-- Voice Mode Toggle -->
+    <div class="voice-mode" id="voiceMode" style="display: none;">
+        <button class="voice-toggle" id="voiceToggle" onclick="toggleVoiceMode()">
+            <div class="voice-indicator" id="voiceIndicator"></div>
+            <span id="voiceToggleText">Voice Mode</span>
+        </button>
+    </div>
+
+    <!-- Voice Waveform -->
+    <div class="voice-waveform" id="voiceWaveform">
+        <div class="waveform-container">
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+        </div>
+        <div class="voice-status" id="voiceStatus">Listening...</div>
+        <div class="voice-controls">
+            <button class="voice-btn stop" onclick="stopRecording()" title="Stop">⏹️</button>
+            <button class="voice-btn send" onclick="sendVoiceMessage()" title="Send">➤</button>
+        </div>
+    </div>
+
     <!-- Main App -->
     <div class="app" id="mainApp" style="display: none;">
         <!-- Teacher Panel -->
@@ -568,12 +792,14 @@
                     <line x1="152" y1="145" x2="168" y2="145" stroke="#000000" stroke-width="4"/>
                     
                     <!-- Eyes (light brown) -->
-                    <circle cx="120" cy="145" r="12" fill="#d2b48c"/>
-                    <circle cx="200" cy="145" r="12" fill="#d2b48c"/>
-                    <circle cx="120" cy="145" r="8" fill="#8b4513"/>
-                    <circle cx="200" cy="145" r="8" fill="#8b4513"/>
-                    <circle cx="122" cy="143" r="2" fill="white"/>
-                    <circle cx="202" cy="143" r="2" fill="white"/>
+                    <g class="eyes">
+                        <circle cx="120" cy="145" r="12" fill="#d2b48c"/>
+                        <circle cx="200" cy="145" r="12" fill="#d2b48c"/>
+                        <circle cx="120" cy="145" r="8" fill="#8b4513"/>
+                        <circle cx="200" cy="145" r="8" fill="#8b4513"/>
+                        <circle cx="122" cy="143" r="2" fill="white"/>
+                        <circle cx="202" cy="143" r="2" fill="white"/>
+                    </g>
                     
                     <!-- Eyebrows (dark brown) -->
                     <path d="M 88 125 Q 120 120 145 125" stroke="#654321" stroke-width="3" fill="none" stroke-linecap="round"/>
@@ -843,6 +1069,7 @@
         function showMainApp() {
             document.getElementById('onboardingModal').classList.remove('active');
             document.getElementById('mainApp').style.display = 'grid';
+            document.getElementById('voiceMode').style.display = 'block';
             
             // Update UI with user info
             document.getElementById('userAvatar').textContent = profile.name[0].toUpperCase();
@@ -928,13 +1155,20 @@
         function animateMouth(start) {
             const mouth = document.getElementById('teacherMouth');
             const tongue = document.getElementById('teacherTongue');
+            const eyes = document.querySelector('.eyes');
+            const avatar = document.querySelector('.teacher-avatar');
+            
             if (start) {
                 mouth.classList.add('talking');
                 tongue.classList.add('talking');
+                eyes.classList.add('talking');
+                avatar.classList.add('talking');
                 setTeacherStatus('Speaking...', 'speaking');
             } else {
                 mouth.classList.remove('talking');
                 tongue.classList.remove('talking');
+                eyes.classList.remove('talking');
+                avatar.classList.remove('talking');
                 setTeacherStatus('Ready to help!');
             }
         }
@@ -1082,6 +1316,162 @@
                 localStorage.setItem(`chat_${user.id}`, '[]');
                 addTranscriptLine('teacher', 'Chat cleared. Let\'s start fresh!');
             }
+        }
+
+        // Voice Mode Variables
+        let isVoiceMode = false;
+        let isRecording = false;
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let recognition = null;
+
+        // Voice Mode Functions
+        function toggleVoiceMode() {
+            isVoiceMode = !isVoiceMode;
+            const toggle = document.getElementById('voiceToggle');
+            const indicator = document.getElementById('voiceIndicator');
+            const text = document.getElementById('voiceToggleText');
+            
+            if (isVoiceMode) {
+                toggle.classList.add('active');
+                indicator.classList.add('active');
+                text.textContent = 'Voice Active';
+                startVoiceMode();
+            } else {
+                toggle.classList.remove('active');
+                indicator.classList.remove('active');
+                text.textContent = 'Voice Mode';
+                stopVoiceMode();
+            }
+        }
+
+        function startVoiceMode() {
+            // Hide text input, show voice interface
+            document.getElementById('messageInput').style.display = 'none';
+            document.getElementById('voiceWaveform').classList.add('active');
+            
+            // Initialize speech recognition
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.lang = getLanguageCode(profile.targetLanguage);
+                
+                recognition.onstart = () => {
+                    isRecording = true;
+                    document.getElementById('voiceStatus').textContent = 'Listening...';
+                };
+                
+                recognition.onresult = (event) => {
+                    let transcript = '';
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        transcript += event.results[i][0].transcript;
+                    }
+                    document.getElementById('voiceStatus').textContent = transcript || 'Listening...';
+                };
+                
+                recognition.onerror = (event) => {
+                    console.error('Speech recognition error:', event.error);
+                    document.getElementById('voiceStatus').textContent = 'Error: ' + event.error;
+                };
+                
+                recognition.start();
+            } else {
+                document.getElementById('voiceStatus').textContent = 'Speech recognition not supported';
+            }
+        }
+
+        function stopVoiceMode() {
+            // Show text input, hide voice interface
+            document.getElementById('messageInput').style.display = 'block';
+            document.getElementById('voiceWaveform').classList.remove('active');
+            
+            if (recognition) {
+                recognition.stop();
+                recognition = null;
+            }
+            isRecording = false;
+        }
+
+        function stopRecording() {
+            if (recognition) {
+                recognition.stop();
+            }
+            document.getElementById('voiceStatus').textContent = 'Processing...';
+        }
+
+        async function sendVoiceMessage() {
+            const transcript = document.getElementById('voiceStatus').textContent;
+            if (transcript && transcript !== 'Listening...' && transcript !== 'Processing...') {
+                // Send the voice transcript as a message
+                await sendMessageFromText(transcript);
+                document.getElementById('voiceStatus').textContent = 'Listening...';
+                
+                // Restart recognition
+                if (recognition) {
+                    recognition.start();
+                }
+            }
+        }
+
+        async function sendMessageFromText(message) {
+            addTranscriptLine('user', message);
+            
+            const btn = document.getElementById('sendBtn');
+            btn.disabled = true;
+            showTyping();
+            
+            try {
+                const response = await fetch(`${API_URL}/api/practice/message`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message,
+                        targetLanguage: profile.targetLanguage,
+                        userLevel: profile.level || 'beginner',
+                        useVoice: true
+                    })
+                });
+                
+                const data = await response.json();
+                hideTyping();
+                
+                const reply = data.response || 'I\'m sorry, I didn\'t catch that.';
+                addTranscriptLine('teacher', reply);
+                
+                // Play OpenAI TTS audio if available
+                if (data.audioBuffer) {
+                    await playOpenAIAudio(data.audioBuffer);
+                } else {
+                    // Fallback to browser TTS
+                    await speakWithMouth(reply, profile.targetLanguage);
+                }
+                
+                // Save conversation
+                saveMessage('user', message);
+                saveMessage('assistant', reply);
+                
+            } catch (error) {
+                hideTyping();
+                animateMouth(false);
+                console.error(error);
+                addTranscriptLine('teacher', '⚠️ Connection error. Please try again.');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        function getLanguageCode(language) {
+            const langMap = {
+                Spanish: 'es-ES',
+                French: 'fr-FR',
+                German: 'de-DE',
+                Italian: 'it-IT',
+                Portuguese: 'pt-PT',
+                Japanese: 'ja-JP'
+            };
+            return langMap[language] || 'en-US';
         }
 
         // Input handlers
