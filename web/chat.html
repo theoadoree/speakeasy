@@ -54,12 +54,35 @@
 
         .mouth { transition: all 0.08s ease; }
         .mouth.talking {
-            animation: talk 0.15s infinite alternate;
+            animation: talk 0.12s infinite alternate;
         }
 
         @keyframes talk {
-            0% { d: path('M 140 200 Q 160 205 180 200'); }
-            100% { d: path('M 140 200 Q 160 215 180 200'); }
+            0% { 
+                d: path('M 130 210 Q 160 230 190 210');
+                transform: scaleY(1);
+            }
+            100% { 
+                d: path('M 130 210 Q 160 240 190 210');
+                transform: scaleY(1.1);
+            }
+        }
+
+        .mouth.talking #teacherTongue {
+            animation: tongueMove 0.12s infinite alternate;
+        }
+
+        @keyframes tongueMove {
+            0% { 
+                rx: 8; 
+                ry: 4;
+                opacity: 0.8;
+            }
+            100% { 
+                rx: 10; 
+                ry: 5;
+                opacity: 1;
+            }
         }
 
         .teacher-name {
@@ -535,42 +558,55 @@
                     <!-- Face -->
                     <circle cx="160" cy="160" r="140" fill="#fcd5b5"/>
                     
-                    <!-- Hair (professional style) -->
-                    <path d="M 160 40 Q 220 50 240 100 Q 245 80 250 70 Q 240 40 200 30 Q 170 20 160 20 Q 150 20 120 30 Q 80 40 70 70 Q 75 80 80 100 Q 100 50 160 40 Z" fill="#8b6f47"/>
-                    <ellipse cx="75" cy="120" rx="28" ry="85" fill="#8b6f47"/>
-                    <ellipse cx="245" cy="120" rx="28" ry="85" fill="#8b6f47"/>
-                    <path d="M 70 100 Q 90 90 110 95 Q 120 85 130 90 Q 140 80 150 85 Q 165 80 170 85 Q 180 80 190 90 Q 200 85 210 95 Q 230 90 250 100" fill="#8b6f47"/>
+                    <!-- Hair (bob cut with waves) -->
+                    <path d="M 160 20 Q 200 15 240 30 Q 250 50 245 80 Q 240 100 220 110 Q 200 120 180 125 Q 160 130 140 125 Q 120 120 100 110 Q 80 100 75 80 Q 70 50 80 30 Q 120 15 160 20 Z" fill="#8b4513"/>
+                    <path d="M 70 80 Q 90 70 110 75 Q 130 80 150 85 Q 170 90 190 85 Q 210 80 230 75 Q 250 70 270 80" fill="#8b4513"/>
                     
-                    <!-- Glasses (modern frames) -->
-                    <circle cx="120" cy="145" r="30" fill="none" stroke="#2d2d2d" stroke-width="3.5"/>
-                    <circle cx="200" cy="145" r="30" fill="none" stroke="#2d2d2d" stroke-width="3.5"/>
-                    <line x1="150" y1="145" x2="170" y2="145" stroke="#2d2d2d" stroke-width="3.5"/>
+                    <!-- Glasses (black frames) -->
+                    <circle cx="120" cy="145" r="32" fill="none" stroke="#000000" stroke-width="4"/>
+                    <circle cx="200" cy="145" r="32" fill="none" stroke="#000000" stroke-width="4"/>
+                    <line x1="152" y1="145" x2="168" y2="145" stroke="#000000" stroke-width="4"/>
                     
-                    <!-- Eyes (friendly) -->
-                    <circle cx="120" cy="145" r="10" fill="#3d2817"/>
-                    <circle cx="200" cy="145" r="10" fill="#3d2817"/>
-                    <circle cx="123" cy="142" r="3" fill="white"/>
-                    <circle cx="203" cy="142" r="3" fill="white"/>
+                    <!-- Eyes (light brown) -->
+                    <circle cx="120" cy="145" r="12" fill="#d2b48c"/>
+                    <circle cx="200" cy="145" r="12" fill="#d2b48c"/>
+                    <circle cx="120" cy="145" r="8" fill="#8b4513"/>
+                    <circle cx="200" cy="145" r="8" fill="#8b4513"/>
+                    <circle cx="122" cy="143" r="2" fill="white"/>
+                    <circle cx="202" cy="143" r="2" fill="white"/>
                     
-                    <!-- Eyebrows (expressive) -->
-                    <path d="M 92 125 Q 120 120 145 125" stroke="#6d5537" stroke-width="3" fill="none" stroke-linecap="round"/>
-                    <path d="M 175 125 Q 200 120 228 125" stroke="#6d5537" stroke-width="3" fill="none" stroke-linecap="round"/>
+                    <!-- Eyebrows (dark brown) -->
+                    <path d="M 88 125 Q 120 120 145 125" stroke="#654321" stroke-width="3" fill="none" stroke-linecap="round"/>
+                    <path d="M 175 125 Q 200 120 232 125" stroke="#654321" stroke-width="3" fill="none" stroke-linecap="round"/>
                     
                     <!-- Nose -->
                     <path d="M 160 160 L 160 185" stroke="#d4a574" stroke-width="2.5" fill="none"/>
                     <path d="M 153 185 Q 160 188 167 185" stroke="#d4a574" stroke-width="2" fill="none"/>
                     
-                    <!-- Mouth (ANIMATED) -->
-                    <path id="teacherMouth" class="mouth" d="M 135 210 Q 160 220 185 210" stroke="#c97064" stroke-width="4" fill="none" stroke-linecap="round"/>
+                    <!-- Mouth (ANIMATED - wide smile with tongue) -->
+                    <path id="teacherMouth" class="mouth" d="M 130 210 Q 160 230 190 210" stroke="#c97064" stroke-width="4" fill="none" stroke-linecap="round"/>
+                    <ellipse id="teacherTongue" class="mouth" cx="160" cy="215" rx="8" ry="4" fill="#ff69b4" opacity="0.8"/>
                     
-                    <!-- Blush -->
-                    <ellipse cx="105" cy="175" rx="15" ry="10" fill="#f5b8b8" opacity="0.5"/>
-                    <ellipse cx="215" cy="175" rx="15" ry="10" fill="#f5b8b8" opacity="0.5"/>
+                    <!-- Blush (pink) -->
+                    <ellipse cx="100" cy="175" rx="18" ry="12" fill="#ffb6c1" opacity="0.6"/>
+                    <ellipse cx="220" cy="175" rx="18" ry="12" fill="#ffb6c1" opacity="0.6"/>
                     
-                    <!-- Neck & Collar -->
-                    <rect x="135" y="285" width="50" height="40" fill="#fcd5b5"/>
-                    <path d="M 115 305 L 135 325 L 185 325 L 205 305 L 195 295 L 125 295 Z" fill="#10b981"/>
-                    <polygon points="160,290 170,300 150,300" fill="white"/>
+                    <!-- Neck -->
+                    <rect x="140" y="285" width="40" height="35" fill="#fcd5b5"/>
+                    
+                    <!-- White Collar -->
+                    <path d="M 120 300 L 140 320 L 180 320 L 200 300 L 190 290 L 130 290 Z" fill="white"/>
+                    
+                    <!-- Dark Green V-neck Top -->
+                    <path d="M 130 290 Q 160 285 190 290 L 200 300 L 180 320 L 140 320 L 120 300 Z" fill="#2d5016"/>
+                    
+                    <!-- Red Apple Pin -->
+                    <circle cx="140" cy="300" r="6" fill="#ff0000"/>
+                    <path d="M 140 294 Q 142 292 144 294" stroke="#228b22" stroke-width="2" fill="none"/>
+                    
+                    <!-- Earrings -->
+                    <circle cx="88" cy="160" r="3" fill="white"/>
+                    <circle cx="232" cy="160" r="3" fill="white"/>
                 </svg>
             </div>
             <div class="teacher-status" id="teacherStatus">Ready to help!</div>
@@ -777,11 +813,14 @@
 
         function animateMouth(start) {
             const mouth = document.getElementById('teacherMouth');
+            const tongue = document.getElementById('teacherTongue');
             if (start) {
                 mouth.classList.add('talking');
+                tongue.classList.add('talking');
                 setTeacherStatus('Speaking...', 'speaking');
             } else {
                 mouth.classList.remove('talking');
+                tongue.classList.remove('talking');
                 setTeacherStatus('Ready to help!');
             }
         }
@@ -797,10 +836,22 @@
             
             const btn = document.getElementById('sendBtn');
             btn.disabled = true;
-            showTyping();
+            
+            // Show streaming response
+            const transcript = document.getElementById('transcript');
+            const streamingDiv = document.createElement('div');
+            streamingDiv.id = 'streamingResponse';
+            streamingDiv.className = 'transcript-line teacher';
+            streamingDiv.innerHTML = `
+                <div class="speaker-label teacher">Teacher</div>
+                <div class="transcript-text" id="streamingText"></div>
+            `;
+            transcript.appendChild(streamingDiv);
+            transcript.scrollTop = transcript.scrollHeight;
             
             try {
-                const response = await fetch(`${API_URL}/api/practice/message`, {
+                // Use streaming for instant feedback
+                const response = await fetch(`${API_URL}/api/practice/stream`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -810,28 +861,89 @@
                     })
                 });
                 
-                const data = await response.json();
-                hideTyping();
+                if (!response.ok) throw new Error('Stream failed');
                 
-                const reply = data.response || 'I\'m sorry, I didn\'t catch that.';
-                addTranscriptLine('teacher', reply);
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let fullResponse = '';
                 
-                // Speak with animated mouth
-                await speakWithMouth(reply, profile.targetLanguage);
+                // Stream the response
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    const chunk = decoder.decode(value);
+                    fullResponse += chunk;
+                    
+                    // Update UI with streaming text
+                    document.getElementById('streamingText').textContent = fullResponse;
+                    transcript.scrollTop = transcript.scrollHeight;
+                }
                 
-                // Save
+                // Now get audio for the complete response
+                const audioResponse = await fetch(`${API_URL}/api/practice/message`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message,
+                        targetLanguage: profile.targetLanguage,
+                        userLevel: profile.level || 'beginner',
+                        useVoice: true
+                    })
+                });
+                
+                const audioData = await audioResponse.json();
+                
+                // Play OpenAI TTS audio if available
+                if (audioData.audioBuffer) {
+                    await playOpenAIAudio(audioData.audioBuffer);
+                } else {
+                    // Fallback to browser TTS
+                    await speakWithMouth(fullResponse, profile.targetLanguage);
+                }
+                
+                // Save conversation
                 saveMessage('user', message);
-                saveMessage('assistant', reply);
+                saveMessage('assistant', fullResponse);
                 
             } catch (error) {
-                hideTyping();
-                animateMouth(false);
                 console.error(error);
-                addTranscriptLine('teacher', '⚠️ Connection error. Please try again.');
+                document.getElementById('streamingText').textContent = '⚠️ Connection error. Please try again.';
+                animateMouth(false);
             } finally {
                 btn.disabled = false;
                 input.focus();
             }
+        }
+
+        async function playOpenAIAudio(base64Audio) {
+            return new Promise((resolve) => {
+                try {
+                    const audioBlob = new Blob([
+                        Uint8Array.from(atob(base64Audio), c => c.charCodeAt(0))
+                    ], { type: 'audio/mp3' });
+                    
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    const audio = new Audio(audioUrl);
+                    
+                    audio.onplay = () => animateMouth(true);
+                    audio.onended = () => {
+                        animateMouth(false);
+                        URL.revokeObjectURL(audioUrl);
+                        resolve();
+                    };
+                    audio.onerror = () => {
+                        animateMouth(false);
+                        URL.revokeObjectURL(audioUrl);
+                        resolve();
+                    };
+                    
+                    audio.play();
+                } catch (error) {
+                    console.error('Audio playback error:', error);
+                    resolve();
+                }
+            });
         }
 
         async function speakWithMouth(text, lang) {

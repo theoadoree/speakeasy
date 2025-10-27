@@ -100,67 +100,102 @@ Keep responses conversational, encouraging, and under 3 sentences.`;
   }
 });
 
-// Practice conversation endpoint
-app.post('/api/practice/message', async (req, res) => {
-  try {
-    const { message, lesson, userProfile, targetLanguage, userLevel, conversationHistory, useVoice } = req.body;
+  // Practice conversation endpoint
+  app.post('/api/practice/message', async (req, res) => {
+    try {
+      const { message, lesson, userProfile, targetLanguage, userLevel, conversationHistory, useVoice } = req.body;
 
-    // Support both mobile app format (userProfile) and web format (targetLanguage + userLevel)
-    const lang = userProfile?.targetLanguage || targetLanguage || 'Spanish';
-    const level = userProfile?.level || userLevel || 'beginner';
-    const topic = lesson?.topic || 'general conversation';
+      // Support both mobile app format (userProfile) and web format (targetLanguage + userLevel)
+      const lang = userProfile?.targetLanguage || targetLanguage || 'Spanish';
+      const level = userProfile?.level || userLevel || 'beginner';
+      const topic = lesson?.topic || 'general conversation';
 
-    const systemPrompt = `You are a friendly female ${lang} language tutor.
-The user is practicing: ${topic}
-Their level: ${level}
-Keep responses natural, warm, encouraging, and conversational.
-Gently correct errors when needed.
-Keep responses concise (2-3 sentences) for natural conversation.
-Respond in ${lang}.`;
+      // Optimized system prompt for faster, more natural responses
+      const systemPrompt = `You are Maria, a warm female ${lang} tutor. Level: ${level}. Keep responses conversational, encouraging, and concise (1-2 sentences). Respond naturally in ${lang}.`;
 
-    const completion = await openai.chat.completions.create({
-      model: MODEL,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: message }
-      ],
-      temperature: 0.8,
-      max_tokens: 150,
-    });
+      const completion = await openai.chat.completions.create({
+        model: MODEL,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: message }
+        ],
+        temperature: 0.7, // Reduced for faster, more consistent responses
+        max_tokens: 100, // Reduced for faster generation
+        stream: false, // We'll implement streaming separately
+      });
 
-    const responseText = completion.choices[0].message.content.trim();
+      const responseText = completion.choices[0].message.content.trim();
 
-    // If voice is requested, generate audio using OpenAI TTS
-    let audioUrl = null;
-    if (useVoice) {
-      try {
-        const mp3 = await openai.audio.speech.create({
-          model: "tts-1",
-          voice: "nova", // Female voice - warm and natural
-          input: responseText,
-          speed: 0.95
-        });
-        
-        // For now, return without audio URL (would need storage solution)
-        // audioUrl = await uploadAudioToStorage(mp3);
-      } catch (audioError) {
-        console.error('TTS error:', audioError.message);
+      // Generate audio with OpenAI TTS for natural voice
+      let audioBuffer = null;
+      if (useVoice) {
+        try {
+          const mp3 = await openai.audio.speech.create({
+            model: "tts-1",
+            voice: "nova", // Female voice - warm and natural
+            input: responseText,
+            speed: 1.0, // Natural speed
+            response_format: "mp3"
+          });
+          
+          // Convert to base64 for immediate playback
+          const buffer = await mp3.arrayBuffer();
+          audioBuffer = Buffer.from(buffer).toString('base64');
+        } catch (audioError) {
+          console.error('TTS error:', audioError.message);
+        }
       }
-    }
 
-    res.json({
-      response: responseText,
-      model: MODEL,
-      audioUrl: audioUrl
-    });
-  } catch (error) {
-    console.error('Practice error:', error.message);
-    res.status(500).json({
-      error: 'Failed to process practice message',
-      details: error.message
-    });
-  }
-});
+      res.json({
+        response: responseText,
+        model: MODEL,
+        audioBuffer: audioBuffer, // Base64 encoded audio
+        audioFormat: 'mp3'
+      });
+    } catch (error) {
+      console.error('Practice error:', error.message);
+      res.status(500).json({
+        error: 'Failed to process practice message',
+        details: error.message
+      });
+    }
+  });
+
+  // Streaming endpoint for instant feedback
+  app.post('/api/practice/stream', async (req, res) => {
+    try {
+      const { message, targetLanguage, userLevel } = req.body;
+      
+      res.setHeader('Content-Type', 'text/plain');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+      
+      const systemPrompt = `You are Maria, a warm female ${targetLanguage} tutor. Level: ${userLevel}. Keep responses conversational, encouraging, and concise (1-2 sentences). Respond naturally in ${targetLanguage}.`;
+
+      const stream = await openai.chat.completions.create({
+        model: MODEL,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: message }
+        ],
+        temperature: 0.7,
+        max_tokens: 100,
+        stream: true,
+      });
+
+      for await (const chunk of stream) {
+        const content = chunk.choices[0]?.delta?.content || '';
+        if (content) {
+          res.write(content);
+        }
+      }
+      
+      res.end();
+    } catch (error) {
+      console.error('Streaming error:', error.message);
+      res.status(500).end('Error generating response');
+    }
+  });
 
 // Generate lesson plan endpoint
 app.post('/api/lessons/generate', async (req, res) => {
