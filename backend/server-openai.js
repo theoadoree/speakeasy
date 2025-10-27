@@ -19,7 +19,7 @@ const openai = new OpenAI({
 });
 
 // Google OAuth client
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID || '823510409781-abc123def456.apps.googleusercontent.com');
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID || '823510409781-s5d3hrffelmjcl8kjvchcv3tlbp0shbo.apps.googleusercontent.com');
 
 // Simple in-memory user store (in production, use a database)
 const users = new Map();
@@ -44,17 +44,17 @@ app.get('/health', (req, res) => {
     try {
       const { idToken, name, email, imageUrl } = req.body;
 
-      // TEMPORARY: Skip token verification for demo purposes
-      // TODO: Enable proper token verification once OAuth credentials are set up
-      console.log('Google OAuth request received:', { name, email, imageUrl });
-      
-      // For demo purposes, create a mock payload
-      const payload = {
-        sub: 'demo_user_' + Date.now(),
-        name: name || 'Google User',
-        email: email || 'user@example.com',
-        picture: imageUrl || 'https://via.placeholder.com/150'
-      };
+      // Verify Google ID token
+      const ticket = await googleClient.verifyIdToken({
+        idToken: idToken,
+        audience: process.env.GOOGLE_CLIENT_ID || '823510409781-s5d3hrffelmjcl8kjvchcv3tlbp0shbo.apps.googleusercontent.com'
+      });
+
+      const payload = ticket.getPayload();
+
+      if (!payload) {
+        return res.status(400).json({ error: 'Invalid Google token' });
+      }
     
     // Generate session ID
     const sessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
