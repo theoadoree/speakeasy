@@ -692,9 +692,11 @@
                     },
                     body: JSON.stringify({
                         message: transcript,
-                        conversationHistory: conversationHistory,
-                        targetLanguage: selectedLanguage,
-                        userLevel: 'beginner'
+                        lesson: { topic: 'general conversation' },
+                        userProfile: {
+                            targetLanguage: selectedLanguage,
+                            level: 'beginner'
+                        }
                     })
                 });
                 
