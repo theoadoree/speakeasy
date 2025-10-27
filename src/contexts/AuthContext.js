@@ -64,13 +64,23 @@ export const AuthProvider = ({ children }) => {
       const result = await AuthService.login(email, password);
 
       if (result.success) {
-        setUser(result.data.user);
-        setIsAuthenticated(true);
-        return { success: true };
-      } else {
-        setAuthError(result.error);
-        return { success: false, error: result.error };
+        const validation = await AuthService.validateToken();
+        if (validation.valid) {
+          setUser(validation.user);
+          setIsAuthenticated(true);
+          return { success: true };
+        }
+        setAuthError('Login failed');
+        return { success: false, error: 'Login failed' };
       }
+
+      if (result.verificationRequired) {
+        // Do not set error; UI should navigate to verification
+        return { success: false, verificationRequired: true, email: result.email, error: result.error };
+      }
+
+      setAuthError(result.error);
+      return { success: false, error: result.error };
     } catch (error) {
       const errorMessage = error.message || 'Login failed';
       setAuthError(errorMessage);
@@ -90,16 +100,101 @@ export const AuthProvider = ({ children }) => {
       setAuthError(null);
       const result = await AuthService.register(email, password, name);
 
-      if (result.success) {
-        setUser(result.data.user);
-        setIsAuthenticated(true);
-        return { success: true };
-      } else {
-        setAuthError(result.error);
-        return { success: false, error: result.error };
+      if (result.success && result.verificationRequired) {
+        return { success: true, verificationRequired: true, email: result.email };
       }
+
+      if (result.success) {
+        const validation = await AuthService.validateToken();
+        if (validation.valid) {
+          setUser(validation.user);
+          setIsAuthenticated(true);
+          return { success: true };
+        }
+      }
+
+      setAuthError(result.error);
+      return { success: false, error: result.error };
     } catch (error) {
       const errorMessage = error.message || 'Registration failed';
+      setAuthError(errorMessage);
+      return { success: false, error: errorMessage };
+    }
+  };
+
+  const verifyEmail = async (email, code) => {
+    try {
+      setAuthError(null);
+      const result = await AuthService.verifyEmail(email, code);
+      if (result.success) {
+        const validation = await AuthService.validateToken();
+        if (validation.valid) {
+          setUser(validation.user);
+          setIsAuthenticated(true);
+          return { success: true };
+        }
+      }
+      setAuthError(result.error || 'Verification failed');
+      return { success: false, error: result.error || 'Verification failed' };
+    } catch (error) {
+      const errorMessage = error.message || 'Verification failed';
+      setAuthError(errorMessage);
+      return { success: false, error: errorMessage };
+    }
+  };
+
+  const resendVerification = async (email) => {
+    try {
+      setAuthError(null);
+      const result = await AuthService.resendVerification(email);
+      if (!result.success) {
+        setAuthError(result.error);
+      }
+      return result;
+    } catch (error) {
+      const errorMessage = error.message || 'Failed to resend verification';
+      setAuthError(errorMessage);
+      return { success: false, error: errorMessage };
+    }
+  };
+
+  const signInWithGoogle = async (idToken, email, name) => {
+    try {
+      setAuthError(null);
+      const result = await AuthService.signInWithGoogle(idToken, email, name);
+      if (result.success) {
+        const validation = await AuthService.validateToken();
+        if (validation.valid) {
+          setUser(validation.user);
+          setIsAuthenticated(true);
+          return { success: true };
+        }
+      }
+      setAuthError(result.error);
+      return { success: false, error: result.error };
+    } catch (error) {
+      const errorMessage = error.message || 'Google sign-in failed';
+      setAuthError(errorMessage);
+      return { success: false, error: errorMessage };
+    }
+  };
+
+  const signInWithApple = async (idToken, email, name) => {
+    try {
+      setAuthError(null);
+      const result = await AuthService.signInWithApple(idToken, email, name);
+      if (result.success) {
+        const validation = await AuthService.validateToken();
+        if (validation.valid) {
+          setUser(validation.user);
+          setIsAuthenticated(true);
+          return { success: true };
+        }
+      }
+      setAuthError(result.error);
+      return { success: false, error: result.error };
+    } catch (error) {
+      const errorMessage = error.message || 'Apple sign-in failed';
       setAuthError(errorMessage);
       return { success: false, error: errorMessage };
     }
@@ -174,6 +269,10 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
+    verifyEmail,
+    resendVerification,
+    signInWithGoogle,
+    signInWithApple,
     requestPasswordReset,
     clearError,
     updateUser,

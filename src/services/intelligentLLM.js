@@ -7,6 +7,7 @@
 import axios from 'axios';
 import { getCurrentConfig, TASK_ROUTING } from '../config/llm.config';
 import StorageService from '../utils/storage';
+import AuthService from './auth';
 
 class IntelligentLLMService {
   constructor() {
@@ -282,7 +283,23 @@ Feedback:`;
 
   async saveHistory() {
     try {
+      // Save locally
       await StorageService.saveConversationHistory(this.conversationHistory);
+      // Also sync to backend if authenticated
+      const isAuthed = await AuthService.isAuthenticated();
+      if (isAuthed) {
+        try {
+          await axios.post('http://localhost:8080/api/conversations/history', { messages: this.conversationHistory }, {
+            headers: {
+              Authorization: `Bearer ${await StorageService.getAuthToken()}`,
+            },
+            timeout: 10000,
+          });
+        } catch (e) {
+          // Non-fatal: backend sync failed
+          console.warn('Conversation sync failed:', e?.message || e);
+        }
+      }
     } catch (error) {
       console.error('Failed to save conversation history:', error);
     }
@@ -290,6 +307,26 @@ Feedback:`;
 
   async loadHistory() {
     try {
+      // Prefer backend history if authenticated; fallback to local
+      const isAuthed = await AuthService.isAuthenticated();
+      if (isAuthed) {
+        try {
+          const response = await axios.get('http://localhost:8080/api/conversations/history', {
+            headers: {
+              Authorization: `Bearer ${await StorageService.getAuthToken()}`,
+            },
+            timeout: 10000,
+          });
+          if (response.data?.success) {
+            this.conversationHistory = response.data.history || [];
+            // Mirror to local cache
+            await StorageService.saveConversationHistory(this.conversationHistory);
+            return;
+          }
+        } catch (e) {
+          // Ignore and fallback
+        }
+      }
       const history = await StorageService.getConversationHistory();
       this.conversationHistory = history || [];
     } catch (error) {
@@ -300,6 +337,21 @@ Feedback:`;
   clearHistory() {
     this.conversationHistory = [];
     StorageService.clearConversationHistory();
+    // Attempt to clear backend copy as well
+    AuthService.isAuthenticated().then(async (isAuthed) => {
+      if (isAuthed) {
+        try {
+          await axios.delete('http://localhost:8080/api/conversations/history', {
+            headers: {
+              Authorization: `Bearer ${await StorageService.getAuthToken()}`,
+            },
+            timeout: 10000,
+          });
+        } catch (e) {
+          // ignore
+        }
+      }
+    });
   }
 
   getHistory() {

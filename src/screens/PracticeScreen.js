@@ -62,8 +62,15 @@ export default function PracticeScreen() {
    * Initialize practice session
    */
   const initializePractice = async () => {
+    // Load cloud-synced conversation history (fallbacks internally)
+    try {
+      await IntelligentLLMService.loadHistory();
+    } catch (e) {
+      // ignore load failure, fallback to local below
+    }
     // Load conversation history
-    const history = await StorageService.getConversationHistory();
+    const history = IntelligentLLMService.getHistory?.()
+      || await StorageService.getConversationHistory();
     if (history && history.length > 0) {
       setMessages(history);
     } else {

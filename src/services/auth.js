@@ -2,7 +2,7 @@ import axios from 'axios';
 import StorageService from '../utils/storage';
 
 // Configure your API base URL here
-const API_BASE_URL = 'https://api.fluentai.app'; // Replace with your actual API URL
+const API_BASE_URL = 'http://localhost:8080';
 
 class AuthService {
   constructor() {
@@ -50,47 +50,29 @@ class AuthService {
    */
   async register(email, password, name) {
     try {
-      // TODO: Replace with actual API call
-      // const response = await this.apiClient.post('/auth/register', {
-      //   email,
-      //   password,
-      //   name,
-      // });
-
-      // Mock implementation - remove this when integrating with real API
-      await this.simulateNetworkDelay();
-
-      // Simulate email already exists error (for demo purposes)
-      if (email === 'test@test.com') {
+      const response = await this.apiClient.post('/auth/register', {
+        email,
+        password,
+        name,
+      });
+      if (response.data?.verificationRequired) {
         return {
-          success: false,
-          error: 'Email already registered',
+          success: true,
+          verificationRequired: true,
+          email: response.data.email,
         };
       }
-
-      const mockUser = {
-        id: Date.now().toString(),
-        email,
-        name,
-        createdAt: new Date().toISOString(),
-      };
-
-      const mockToken = `mock_token_${Date.now()}`;
-
-      await StorageService.saveAuthToken(mockToken);
-      await StorageService.saveUserData(mockUser);
-
-      return {
-        success: true,
-        data: {
-          user: mockUser,
-          token: mockToken,
-        },
-      };
+      // In case backend returns token directly (should not for email flow)
+      if (response.data?.data?.token) {
+        await StorageService.saveAuthToken(response.data.data.token);
+        await StorageService.saveUserData(response.data.data.user);
+        return { success: true };
+      }
+      return { success: true };
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.message || error.message || 'Registration failed',
+        error: error.response?.data?.error || error.message || 'Registration failed',
       };
     }
   }
@@ -103,46 +85,31 @@ class AuthService {
    */
   async login(email, password) {
     try {
-      // TODO: Replace with actual API call
-      // const response = await this.apiClient.post('/auth/login', {
-      //   email,
-      //   password,
-      // });
-
-      // Mock implementation - remove this when integrating with real API
-      await this.simulateNetworkDelay();
-
-      // Simulate invalid credentials (for demo purposes)
-      if (password.length < 6) {
+      const response = await this.apiClient.post('/auth/login', { email, password });
+      if (response.data?.success) {
+        const { token, user } = response.data.data || {};
+        if (token && user) {
+          await StorageService.saveAuthToken(token);
+          await StorageService.saveUserData(user);
+        }
+        return { success: true };
+      }
+      if (response.data?.verificationRequired) {
         return {
           success: false,
-          error: 'Invalid email or password',
+          verificationRequired: true,
+          email: response.data.email || email,
+          error: response.data.error,
         };
       }
-
-      const mockUser = {
-        id: Date.now().toString(),
-        email,
-        name: email.split('@')[0],
-        createdAt: new Date().toISOString(),
-      };
-
-      const mockToken = `mock_token_${Date.now()}`;
-
-      await StorageService.saveAuthToken(mockToken);
-      await StorageService.saveUserData(mockUser);
-
       return {
-        success: true,
-        data: {
-          user: mockUser,
-          token: mockToken,
-        },
+        success: false,
+        error: 'Login failed',
       };
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.message || error.message || 'Login failed',
+        error: error.response?.data?.error || error.message || 'Login failed',
       };
     }
   }
@@ -197,23 +164,10 @@ class AuthService {
    */
   async validateToken() {
     try {
-      // TODO: Replace with actual API call
-      // const response = await this.apiClient.get('/auth/validate');
-      // return {
-      //   valid: true,
-      //   user: response.data.user,
-      // };
-
-      // Mock implementation
-      const token = await StorageService.getAuthToken();
-      if (!token) {
-        return { valid: false };
-      }
-
-      const userData = await StorageService.getUserData();
+      const response = await this.apiClient.get('/auth/validate');
       return {
-        valid: true,
-        user: userData,
+        valid: !!response.data?.valid,
+        user: response.data?.user,
       };
     } catch (error) {
       return { valid: false };
@@ -227,19 +181,73 @@ class AuthService {
    */
   async requestPasswordReset(email) {
     try {
-      // TODO: Replace with actual API call
-      // await this.apiClient.post('/auth/reset-password', { email });
-
-      await this.simulateNetworkDelay();
-
-      return {
-        success: true,
-      };
+      // Not implemented on backend; simulate success UI for now
+      return { success: true };
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.message || 'Failed to send reset email',
+        error: error.response?.data?.error || 'Failed to send reset email',
       };
+    }
+  }
+
+  async verifyEmail(email, code) {
+    try {
+      const response = await this.apiClient.post('/auth/verify-email', { email, code });
+      if (response.data?.success) {
+        const { token, user } = response.data.data || {};
+        if (token && user) {
+          await StorageService.saveAuthToken(token);
+          await StorageService.saveUserData(user);
+        }
+        return { success: true };
+      }
+      return { success: false, error: 'Verification failed' };
+    } catch (error) {
+      return { success: false, error: error.response?.data?.error || 'Verification failed' };
+    }
+  }
+
+  async resendVerification(email) {
+    try {
+      await this.apiClient.post('/auth/resend', { email });
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error.response?.data?.error || 'Failed to resend code' };
+    }
+  }
+
+  async signInWithGoogle(idToken, email, name) {
+    try {
+      const response = await this.apiClient.post('/auth/oauth/google', { idToken, email, name });
+      if (response.data?.success) {
+        const { token, user } = response.data.data || {};
+        if (token && user) {
+          await StorageService.saveAuthToken(token);
+          await StorageService.saveUserData(user);
+        }
+        return { success: true };
+      }
+      return { success: false, error: 'Google sign-in failed' };
+    } catch (error) {
+      return { success: false, error: error.response?.data?.error || 'Google sign-in failed' };
+    }
+  }
+
+  async signInWithApple(idToken, email, name) {
+    try {
+      const response = await this.apiClient.post('/auth/oauth/apple', { idToken, email, name });
+      if (response.data?.success) {
+        const { token, user } = response.data.data || {};
+        if (token && user) {
+          await StorageService.saveAuthToken(token);
+          await StorageService.saveUserData(user);
+        }
+        return { success: true };
+      }
+      return { success: false, error: 'Apple sign-in failed' };
+    } catch (error) {
+      return { success: false, error: error.response?.data?.error || 'Apple sign-in failed' };
     }
   }
 

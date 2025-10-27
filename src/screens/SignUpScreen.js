@@ -14,7 +14,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 
 export default function SignUpScreen({ navigation }) {
-  const { register, authError, clearError } = useAuth();
+  const { register, authError, clearError, signInWithGoogle, signInWithApple } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -39,8 +39,8 @@ export default function SignUpScreen({ navigation }) {
 
     if (!password) {
       newErrors.password = 'Password is required';
-    } else if (password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+    } else if (password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters';
     }
 
     if (!confirmPassword) {
@@ -65,6 +65,11 @@ export default function SignUpScreen({ navigation }) {
     try {
       const result = await register(email, password, name);
 
+      if (result.success && result.verificationRequired) {
+        navigation.navigate('VerifyEmail', { email: result.email || email });
+        return;
+      }
+
       if (!result.success) {
         Alert.alert('Sign Up Failed', result.error || 'Unable to create account');
       }
@@ -73,6 +78,32 @@ export default function SignUpScreen({ navigation }) {
       Alert.alert('Error', 'An unexpected error occurred');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleGoogle = async () => {
+    if (!email.trim()) {
+      Alert.alert('Enter Email', 'Enter your email to continue with Google');
+      return;
+    }
+    setIsLoading(true);
+    const result = await signInWithGoogle('dev_token', email, name || email.split('@')[0]);
+    setIsLoading(false);
+    if (!result.success) {
+      Alert.alert('Google Sign-In Failed', result.error || 'Please try again');
+    }
+  };
+
+  const handleApple = async () => {
+    if (!email.trim()) {
+      Alert.alert('Enter Email', 'Enter your email to continue with Apple');
+      return;
+    }
+    setIsLoading(true);
+    const result = await signInWithApple('dev_token', email, name || email.split('@')[0]);
+    setIsLoading(false);
+    if (!result.success) {
+      Alert.alert('Apple Sign-In Failed', result.error || 'Please try again');
     }
   };
 
@@ -138,7 +169,7 @@ export default function SignUpScreen({ navigation }) {
             <Text style={styles.label}>Password</Text>
             <TextInput
               style={[styles.input, errors.password && styles.inputError]}
-              placeholder="At least 6 characters"
+              placeholder="At least 8 characters"
               placeholderTextColor="#999"
               value={password}
               onChangeText={(text) => {
@@ -194,6 +225,19 @@ export default function SignUpScreen({ navigation }) {
             ) : (
               <Text style={styles.buttonText}>Create Account</Text>
             )}
+          </TouchableOpacity>
+
+          <View style={styles.dividerContainer}>
+            <View style={styles.divider} />
+            <Text style={styles.dividerText}>or</Text>
+            <View style={styles.divider} />
+          </View>
+
+          <TouchableOpacity style={styles.oauthButton} onPress={handleGoogle} disabled={isLoading}>
+            <Text style={styles.oauthText}>Sign up with Google 🔵</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.oauthButton} onPress={handleApple} disabled={isLoading}>
+            <Text style={styles.oauthText}>Sign up with Apple ⚫</Text>
           </TouchableOpacity>
 
           <View style={styles.termsContainer}>
@@ -299,6 +343,34 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginVertical: 8,
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#E0E0E0',
+  },
+  dividerText: {
+    color: '#999',
+  },
+  oauthButton: {
+    backgroundColor: '#F5F5F5',
+    borderRadius: 12,
+    padding: 14,
+    alignItems: 'center',
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+  oauthText: {
+    color: '#1A1A1A',
+    fontSize: 15,
+    fontWeight: '600',
   },
   termsContainer: {
     marginBottom: 24,

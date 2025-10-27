@@ -11,6 +11,7 @@ import StorageService from './src/utils/storage';
 import LoginScreen from './src/screens/LoginScreen';
 import SignUpScreen from './src/screens/SignUpScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
+import VerifyEmailScreen from './src/screens/VerifyEmailScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import PracticeScreen from './src/screens/PracticeScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
@@ -19,11 +20,17 @@ import ReaderScreen from './src/screens/ReaderScreen';
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
-function TabNavigator() {
+function TabNavigator({ navigation }) {
+  const AccountIcon = () => (
+    <Text onPress={() => navigation.navigate('Settings')} style={{ fontSize: 20 }}>👤</Text>
+  );
+
   return (
     <Tab.Navigator
       screenOptions={{
-        headerShown: false,
+        headerShown: true,
+        headerRight: () => <AccountIcon />,
+        headerTitle: '',
         tabBarStyle: styles.tabBar,
         tabBarActiveTintColor: '#007AFF',
         tabBarInactiveTintColor: '#999',
@@ -96,6 +103,7 @@ function AppNavigator() {
           <>
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="SignUp" component={SignUpScreen} />
+            <Stack.Screen name="VerifyEmail" component={VerifyEmailScreen} />
           </>
         ) : !onboardingComplete ? (
           // Onboarding Flow
