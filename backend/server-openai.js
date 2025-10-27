@@ -25,9 +25,9 @@ const openai = new OpenAI({
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID || '823510409781-s5d3hrffelmjcl8kjvchcv3tlbp0shbo.apps.googleusercontent.com');
 
 // Apple Sign In configuration
-const APPLE_TEAM_ID = process.env.APPLE_TEAM_ID;
+const APPLE_TEAM_ID = process.env.APPLE_TEAM_ID || 'E7B9UE64SF';
 const APPLE_KEY_ID = process.env.APPLE_KEY_ID;
-const APPLE_CLIENT_ID = process.env.APPLE_CLIENT_ID || 'com.speakeasy.web';
+const APPLE_CLIENT_ID = process.env.APPLE_CLIENT_ID || 'com.speakeasy.webapp';
 const APPLE_PRIVATE_KEY = process.env.APPLE_PRIVATE_KEY;
 
 // Simple in-memory user store (in production, use a database)
