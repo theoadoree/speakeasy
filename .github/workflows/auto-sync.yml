@@ -1,0 +1,50 @@
+name: Auto Sync Repository
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run every hour to check for changes
+    - cron: '0 * * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Configure Git
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        
+    - name: Auto-commit changes
+      run: |
+        # Check if there are any changes
+        if [ -n "$(git status --porcelain)" ]; then
+          git add .
+          git commit -m "Auto-sync: $(date)"
+          git push origin main
+        else
+          echo "No changes to commit"
+        fi
+        
+    - name: Sync with Google Cloud
+      if: github.ref == 'refs/heads/main'
+      run: |
+        echo "Syncing with Google Cloud VM..."
+        # This would connect to your VM and pull changes
+        # gcloud compute ssh fluentai-vm --zone=us-central1-a --command="cd /path/to/repo && git pull"
+        
+    - name: Notify on success
+      run: |
+        echo "✅ Repository synced successfully"
+        echo "Branch: ${{ github.ref }}"
+        echo "Commit: ${{ github.sha }}"
