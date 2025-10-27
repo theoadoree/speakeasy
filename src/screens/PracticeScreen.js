@@ -15,7 +15,7 @@ import * as Speech from 'expo-speech';
 import { useApp } from '../contexts/AppContext';
 import IntelligentLLMService from '../services/intelligentLLM';
 import StorageService from '../utils/storage';
-import VoiceButton from '../components/VoiceButton';
+import TeacherAnimation from '../components/TeacherAnimation';
 import WaveformVisualizer from '../components/WaveformVisualizer';
 import Card from '../components/Card';
 import { colors, typography, spacing, borderRadius, shadows } from '../theme';
@@ -463,7 +463,7 @@ export default function PracticeScreen() {
                 </View>
               ) : (
                 <View style={styles.voiceButtonContainer}>
-                  <VoiceButton
+                  <TeacherAnimation
                     isListening={isListening}
                     isSpeaking={isSpeaking}
                     isProcessing={isProcessing}
@@ -479,7 +479,7 @@ export default function PracticeScreen() {
                 style={styles.textToggle}
                 onPress={() => setShowTextInput(true)}
               >
-                <Text style={styles.textToggleText}>Or type instead ⌨️</Text>
+                  <Text style={styles.textToggleText}>Or type instead ⌨️</Text>
               </TouchableOpacity>
             </>
           ) : (

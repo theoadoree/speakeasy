@@ -14,7 +14,7 @@ import * as Speech from 'expo-speech';
 import { useApp } from '../contexts/AppContext';
 import IntelligentLLMService from '../services/intelligentLLM';
 import StorageService from '../utils/storage';
-import VoiceButton from '../components/VoiceButton';
+import TeacherAnimation from '../components/TeacherAnimation';
 import WaveformVisualizer from '../components/WaveformVisualizer';
 import Card from '../components/Card';
 import { colors, typography, spacing, borderRadius } from '../theme';
@@ -362,7 +362,7 @@ export default function VoiceOnboardingScreen({ navigation }) {
         <View>
           <Text style={styles.title}>Let's chat!</Text>
           <Text style={styles.subtitle}>
-            {autoMode ? '🎤 Auto mode - Just speak naturally' : 'Tap the mic when ready'}
+            {autoMode ? '🎤 Auto mode - Just speak naturally' : 'Tap the teacher when ready'}
           </Text>
         </View>
         <TouchableOpacity
@@ -402,10 +402,10 @@ export default function VoiceOnboardingScreen({ navigation }) {
         )}
       </ScrollView>
 
-      {/* Voice Button - Only show in manual mode or when not auto-listening */}
+      {/* Teacher Animation - Only show in manual mode or when not auto-listening */}
       {!autoMode && (
         <View style={styles.voiceButtonContainer}>
-          <VoiceButton
+          <TeacherAnimation
             isListening={isListening}
             isSpeaking={isSpeaking}
             isProcessing={isProcessing}
