@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const OpenAI = require('openai');
+const { OAuth2Client } = require('google-auth-library');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -16,6 +17,9 @@ if (!OPENAI_API_KEY) {
 const openai = new OpenAI({
   apiKey: OPENAI_API_KEY,
 });
+
+// Google OAuth client
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID || '823510409781-abc123def456.apps.googleusercontent.com');
 
 // Simple in-memory user store (in production, use a database)
 const users = new Map();
@@ -35,7 +39,109 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Authentication endpoints
+// Google OAuth endpoint
+app.post('/api/auth/google', async (req, res) => {
+  try {
+    const { idToken, name, email, imageUrl } = req.body;
+    
+    // Verify Google ID token
+    const ticket = await googleClient.verifyIdToken({
+      idToken: idToken,
+      audience: process.env.GOOGLE_CLIENT_ID || '823510409781-abc123def456.apps.googleusercontent.com'
+    });
+    
+    const payload = ticket.getPayload();
+    
+    if (!payload) {
+      return res.status(400).json({ error: 'Invalid Google token' });
+    }
+    
+    // Generate session ID
+    const sessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    
+    // Create or update user
+    const userId = `google_${payload.sub}`;
+    const user = {
+      id: userId,
+      provider: 'google',
+      name: payload.name || name,
+      email: payload.email || email,
+      imageUrl: payload.picture || imageUrl,
+      googleId: payload.sub,
+      createdAt: new Date().toISOString(),
+      lastLogin: new Date().toISOString()
+    };
+    
+    users.set(userId, user);
+    sessions.set(sessionId, {
+      userId,
+      createdAt: new Date().toISOString(),
+      lastActivity: new Date().toISOString()
+    });
+    
+    res.json({
+      success: true,
+      sessionId,
+      user: {
+        id: user.id,
+        name: user.name,
+        provider: user.provider,
+        imageUrl: user.imageUrl
+      }
+    });
+  } catch (error) {
+    console.error('Google auth error:', error.message);
+    res.status(500).json({ error: 'Google authentication failed' });
+  }
+});
+
+// Apple OAuth endpoint
+app.post('/api/auth/apple', async (req, res) => {
+  try {
+    const { idToken, authorizationCode, user, name, email } = req.body;
+    
+    // For Apple Sign In, we would normally verify the JWT token
+    // For now, we'll trust the client-side verification
+    // In production, verify the JWT signature with Apple's public keys
+    
+    // Generate session ID
+    const sessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    
+    // Create or update user
+    const userId = `apple_${user?.id || Date.now()}`;
+    const userData = {
+      id: userId,
+      provider: 'apple',
+      name: name || 'Apple User',
+      email: email || null,
+      appleId: user?.id,
+      createdAt: new Date().toISOString(),
+      lastLogin: new Date().toISOString()
+    };
+    
+    users.set(userId, userData);
+    sessions.set(sessionId, {
+      userId,
+      createdAt: new Date().toISOString(),
+      lastActivity: new Date().toISOString()
+    });
+    
+    res.json({
+      success: true,
+      sessionId,
+      user: {
+        id: userData.id,
+        name: userData.name,
+        provider: userData.provider
+      }
+    });
+  } catch (error) {
+    console.error('Apple auth error:', error.message);
+    res.status(500).json({ error: 'Apple authentication failed' });
+  }
+});
+
+// Guest login endpoint
 app.post('/api/auth/login', (req, res) => {
   try {
     const { provider, token, name, email } = req.body;

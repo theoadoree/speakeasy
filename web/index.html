@@ -919,28 +919,43 @@
 
         loadUser();
 
+        // Google OAuth Configuration
+        const GOOGLE_CLIENT_ID = '823510409781-abc123def456.apps.googleusercontent.com'; // Replace with actual client ID
+        
         // Auth Functions
         async function loginWithGoogle() {
             try {
-                // Simulate Google OAuth (in production, use Google OAuth)
-                const response = await fetch(`${API_URL}/api/auth/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        provider: 'google',
-                        name: 'Google User',
-                        email: 'user@gmail.com'
-                    })
-                });
+                // Load Google OAuth library
+                await loadGoogleAPI();
                 
-                const data = await response.json();
-                if (data.success) {
-                    user = data.user;
-                    sessionId = data.sessionId;
-                    localStorage.setItem('speakeasy_session', sessionId);
-                    nextStep('auth', 'profile');
-                } else {
-                    alert('Login failed. Please try again.');
+                const authInstance = gapi.auth2.getAuthInstance();
+                const authResult = await authInstance.signIn();
+                
+                if (authResult.isSignedIn()) {
+                    const profile = authResult.getBasicProfile();
+                    const idToken = authResult.getAuthResponse().id_token;
+                    
+                    // Send to backend for verification
+                    const response = await fetch(`${API_URL}/api/auth/google`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            idToken: idToken,
+                            name: profile.getName(),
+                            email: profile.getEmail(),
+                            imageUrl: profile.getImageUrl()
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        user = data.user;
+                        sessionId = data.sessionId;
+                        localStorage.setItem('speakeasy_session', sessionId);
+                        nextStep('auth', 'profile');
+                    } else {
+                        alert('Login failed. Please try again.');
+                    }
                 }
             } catch (error) {
                 console.error('Google login error:', error);
@@ -948,32 +963,94 @@
             }
         }
 
+        function loadGoogleAPI() {
+            return new Promise((resolve, reject) => {
+                if (window.gapi) {
+                    gapi.load('auth2', () => {
+                        gapi.auth2.init({
+                            client_id: GOOGLE_CLIENT_ID,
+                            scope: 'profile email'
+                        }).then(resolve).catch(reject);
+                    });
+                } else {
+                    const script = document.createElement('script');
+                    script.src = 'https://apis.google.com/js/api.js';
+                    script.onload = () => {
+                        gapi.load('auth2', () => {
+                            gapi.auth2.init({
+                                client_id: GOOGLE_CLIENT_ID,
+                                scope: 'profile email'
+                            }).then(resolve).catch(reject);
+                        });
+                    };
+                    script.onerror = reject;
+                    document.head.appendChild(script);
+                }
+            });
+        }
+
         async function loginWithApple() {
             try {
-                // Simulate Apple OAuth (in production, use Apple OAuth)
-                const response = await fetch(`${API_URL}/api/auth/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        provider: 'apple',
-                        name: 'Apple User',
-                        email: 'user@icloud.com'
-                    })
-                });
+                // Load Apple Sign In library
+                await loadAppleAPI();
                 
-                const data = await response.json();
-                if (data.success) {
-                    user = data.user;
-                    sessionId = data.sessionId;
-                    localStorage.setItem('speakeasy_session', sessionId);
-                    nextStep('auth', 'profile');
-                } else {
-                    alert('Login failed. Please try again.');
+                const data = {
+                    requestedScopes: ['name', 'email']
+                };
+                
+                const response = await AppleID.auth.signIn(data);
+                
+                if (response.authorization.id_token) {
+                    // Send to backend for verification
+                    const backendResponse = await fetch(`${API_URL}/api/auth/apple`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            idToken: response.authorization.id_token,
+                            authorizationCode: response.authorization.code,
+                            user: response.user,
+                            name: response.user?.name ? `${response.user.name.firstName} ${response.user.name.lastName}` : null,
+                            email: response.user?.email || null
+                        })
+                    });
+                    
+                    const backendData = await backendResponse.json();
+                    if (backendData.success) {
+                        user = backendData.user;
+                        sessionId = backendData.sessionId;
+                        localStorage.setItem('speakeasy_session', sessionId);
+                        nextStep('auth', 'profile');
+                    } else {
+                        alert('Login failed. Please try again.');
+                    }
                 }
             } catch (error) {
                 console.error('Apple login error:', error);
                 alert('Login failed. Please try again.');
             }
+        }
+
+        function loadAppleAPI() {
+            return new Promise((resolve, reject) => {
+                if (window.AppleID) {
+                    resolve();
+                } else {
+                    const script = document.createElement('script');
+                    script.src = 'https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js';
+                    script.onload = () => {
+                        AppleID.auth.init({
+                            clientId: 'com.speakeasy.app', // Replace with actual Apple client ID
+                            scope: 'name email',
+                            redirectURI: window.location.origin,
+                            state: 'state',
+                            usePopup: true
+                        });
+                        resolve();
+                    };
+                    script.onerror = reject;
+                    document.head.appendChild(script);
+                }
+            });
         }
 
         async function continueAsGuest() {
