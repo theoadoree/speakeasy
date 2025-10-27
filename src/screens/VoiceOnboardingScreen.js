@@ -195,8 +195,9 @@ export default function VoiceOnboardingScreen({ navigation }) {
     return new Promise((resolve) => {
       Speech.speak(text, {
         language: 'en-US',
-        pitch: 1.0,
-        rate: 0.9,
+        voice: getPreferredVoice('English'),
+        pitch: 1.05,
+        rate: 0.92,
         onDone: () => {
           setIsSpeaking(false);
           resolve();
@@ -207,6 +208,23 @@ export default function VoiceOnboardingScreen({ navigation }) {
         },
       });
     });
+  };
+
+  const getPreferredVoice = () => {
+    try {
+      const preferredNames = [
+        'Google US English',
+        'Google UK English Female',
+        'com.apple.ttsbundle.Samantha-compact',
+      ];
+      if (Speech.getAvailableVoicesAsync) {
+        Speech.getAvailableVoicesAsync().then((voices) => {
+          const named = voices?.find((v) => preferredNames.includes(v.name));
+          return named?.identifier;
+        }).catch(() => undefined);
+      }
+    } catch (_) {}
+    return undefined;
   };
 
   /**
