@@ -6,6 +6,7 @@
 
 import axios from 'axios';
 import { getCurrentConfig, TASK_ROUTING } from '../config/llm.config';
+import { generateResponse as backendGenerateResponse } from './api';
 import StorageService from '../utils/storage';
 
 class IntelligentLLMService {
@@ -32,7 +33,8 @@ class IntelligentLLMService {
       const response = await this.generateCompletion(
         modelConfig,
         prompt,
-        options
+        options,
+        { isQwen: useQwen }
       );
 
       // Store in conversation history
@@ -51,7 +53,7 @@ class IntelligentLLMService {
    * Generate completion using Ollama API
    * @private
    */
-  async generateCompletion(modelConfig, prompt, options = {}) {
+  async generateCompletion(modelConfig, prompt, options = {}, meta = { isQwen: false }) {
     const { baseURL, model, temperature, maxTokens } = modelConfig;
 
     // Include conversation history if requested
@@ -63,6 +65,18 @@ class IntelligentLLMService {
       fullPrompt = `${historyText}\n\nUser: ${prompt}`;
     }
 
+    // If configured to use backend, call backend API instead of Ollama directly
+    if (this.config.mode === 'backend') {
+      const backendResult = await backendGenerateResponse(fullPrompt, {
+        model: meta.isQwen ? 'qwen' : 'llama',
+        temperature: options.temperature || temperature,
+        maxTokens: options.maxTokens || maxTokens,
+      });
+      // backendResult typically has shape { response, model, done }
+      return backendResult?.response ?? backendResult;
+    }
+
+    // Direct mode: call Ollama server
     const response = await axios.post(
       `${baseURL}/api/generate`,
       {

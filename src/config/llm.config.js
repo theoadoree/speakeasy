@@ -3,7 +3,20 @@
  * Supports local development (Ollama) and cloud production (Google Cloud Run)
  */
 
+// Determine environment: default to development unless clearly in production
 let ENV = 'development'; // 'development' | 'production'
+try {
+  const isProdNodeEnv =
+    typeof process !== 'undefined' &&
+    process.env &&
+    process.env.NODE_ENV === 'production';
+  const isReactNativeProd = typeof __DEV__ !== 'undefined' && __DEV__ === false;
+  if (isProdNodeEnv || isReactNativeProd) {
+    ENV = 'production';
+  }
+} catch (_) {
+  // Ignore and keep default
+}
 
 const LLM_CONFIG = {
   // Development: Local Ollama on Mac M1 Max
@@ -27,8 +40,12 @@ const LLM_CONFIG = {
   // Production: Google Cloud Run backend
   production: {
     mode: 'backend', // Always use backend in production
-    backendURL: process.env.BACKEND_URL || 'https://speakeasy-backend-823510409781.us-central1.run.app',
-    apiKey: process.env.CLOUD_LLM_API_KEY, // Optional auth
+    backendURL:
+      (typeof process !== 'undefined' && process.env && (process.env.EXPO_PUBLIC_BACKEND_URL || process.env.BACKEND_URL)) ||
+      'https://speakeasy-backend-823510409781.us-central1.run.app',
+    apiKey:
+      (typeof process !== 'undefined' && process.env && (process.env.EXPO_PUBLIC_CLOUD_LLM_API_KEY || process.env.CLOUD_LLM_API_KEY)) ||
+      undefined, // Optional auth
     qwen: {
       model: 'qwen2.5:72b',
       temperature: 0.7,
