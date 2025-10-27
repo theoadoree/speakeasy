@@ -3,13 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SpeakEasy - Master Any Language Through Conversation</title>
-    <meta name="description" content="Learn languages naturally with AI-powered conversation. No apps to install. Start speaking confidently in minutes.">
-
+    <title>SpeakEasy - AI Voice Language Tutor</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗣️</text></svg>">
-
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
         * {
             margin: 0;
@@ -17,573 +14,784 @@
             box-sizing: border-box;
         }
 
-        :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --primary-light: #818cf8;
-            --accent: #ec4899;
-            --success: #10b981;
-            --dark: #0f172a;
-            --dark-secondary: #1e293b;
-            --gray: #64748b;
-            --light: #f8fafc;
-            --white: #ffffff;
-        }
-
-        html {
-            scroll-behavior: smooth;
-            font-size: 16px;
-        }
-
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            color: var(--dark);
-            background: var(--white);
-            line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
         }
 
-        /* Navigation */
-        nav {
+        .particles {
             position: fixed;
             top: 0;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-            z-index: 1000;
-        }
-
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 1.25rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2.5rem;
-            align-items: center;
-        }
-
-        .nav-links a {
-            color: var(--dark);
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 0.95rem;
-            transition: color 0.2s;
-        }
-
-        .nav-links a:hover {
-            color: var(--primary);
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.875rem 1.75rem;
-            border-radius: 100px;
-            font-weight: 600;
-            font-size: 0.95rem;
-            text-decoration: none;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: none;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
-        }
-
-        .btn-secondary {
-            background: var(--white);
-            color: var(--primary);
-            border: 2px solid var(--primary);
-        }
-
-        .btn-secondary:hover {
-            background: var(--primary);
-            color: white;
-        }
-
-        /* Hero Section */
-        .hero {
-            margin-top: 80px;
-            min-height: calc(100vh - 80px);
-            display: flex;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
-            background:
-                radial-gradient(circle at 20% 50%, rgba(236, 72, 153, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(99, 102, 241, 0.15) 0%, transparent 50%);
-            animation: gradientShift 20s ease infinite;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.3;
         }
 
-        @keyframes gradientShift {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.8; }
-        }
-
-        .hero-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 4rem 2rem;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4rem;
-            align-items: center;
+        .container {
+            max-width: 1000px;
+            width: 100%;
             position: relative;
             z-index: 1;
         }
 
-        .hero-content h1 {
-            font-size: 3.5rem;
-            font-weight: 800;
-            line-height: 1.1;
-            margin-bottom: 1.5rem;
-            color: white;
-            letter-spacing: -0.02em;
+        .main-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 40px;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.5);
         }
 
-        .hero-content .gradient-text {
-            background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.8) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .hero-content p {
-            font-size: 1.25rem;
-            color: rgba(255, 255, 255, 0.9);
-            margin-bottom: 2.5rem;
-            line-height: 1.7;
-        }
-
-        .hero-cta {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .hero-cta .btn-primary {
-            background: white;
-            color: var(--primary);
-            font-size: 1.1rem;
-            padding: 1.125rem 2.5rem;
-        }
-
-        .hero-cta .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid white;
-            color: white;
-            backdrop-filter: blur(10px);
-            font-size: 1.1rem;
-            padding: 1.125rem 2.5rem;
-        }
-
-        .hero-visual {
-            position: relative;
-            height: 500px;
-        }
-
-        .mockup-window {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
-            padding: 3rem 2.5rem;
-            position: relative;
-            animation: float 6s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-        }
-
-        .mockup-header {
-            font-size: 1.75rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            color: var(--dark);
-        }
-
-        .mockup-subtitle {
-            color: var(--gray);
-            margin-bottom: 2rem;
-        }
-
-        .chat-bubble {
-            background: var(--light);
-            padding: 1rem 1.25rem;
-            border-radius: 15px;
-            margin-bottom: 1rem;
-            animation: slideIn 0.5s ease;
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .chat-bubble.user {
-            background: var(--primary);
-            color: white;
-            margin-left: 3rem;
-        }
-
-        /* Features Section */
-        .features {
-            padding: 6rem 2rem;
-            background: var(--white);
-        }
-
-        .section-header {
+        .header {
             text-align: center;
-            max-width: 700px;
-            margin: 0 auto 4rem;
+            padding: 60px 40px 40px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            position: relative;
+            overflow: hidden;
         }
 
-        .section-header h2 {
-            font-size: 2.75rem;
-            font-weight: 800;
-            margin-bottom: 1rem;
-            color: var(--dark);
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: shimmer 8s infinite;
         }
 
-        .section-header p {
-            font-size: 1.2rem;
-            color: var(--gray);
+        @keyframes shimmer {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(20px, 20px); }
         }
 
-        .features-grid {
-            max-width: 1200px;
-            margin: 0 auto;
+        .header h1 {
+            color: white;
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-bottom: 10px;
+            position: relative;
+            letter-spacing: -1px;
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 1.3rem;
+            position: relative;
+            font-weight: 500;
+        }
+
+        .content {
+            padding: 50px;
+        }
+
+        .language-section {
+            margin-bottom: 50px;
+        }
+
+        .language-section h3 {
+            text-align: center;
+            font-size: 1.4rem;
+            color: #1e293b;
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+
+        .language-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            max-width: 700px;
+            margin: 0 auto;
         }
 
-        .feature-card {
-            padding: 2.5rem;
+        .language-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border: 3px solid transparent;
             border-radius: 20px;
-            background: white;
-            border: 1px solid rgba(0, 0, 0, 0.06);
-            transition: all 0.3s ease;
+            padding: 20px 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
         }
 
-        .feature-card:hover {
+        .language-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
-            border-color: var(--primary-light);
+            box-shadow: 0 15px 30px rgba(99, 102, 241, 0.2);
         }
 
-        .feature-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 15px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        .language-card.active {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-color: #4f46e5;
+            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.4);
+        }
+
+        .language-card .flag {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .language-card .name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .language-card.active .name {
+            color: white;
+        }
+
+        .voice-section {
+            text-align: center;
+            margin: 60px 0;
+        }
+
+        .mic-container {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 30px;
+        }
+
+        .mic-button {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            cursor: pointer;
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 20px 60px rgba(99, 102, 241, 0.4);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
-            margin-bottom: 1.5rem;
         }
 
-        .feature-card h3 {
+        .mic-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 25px 70px rgba(99, 102, 241, 0.5);
+        }
+
+        .mic-button:active {
+            transform: scale(0.98);
+        }
+
+        .mic-button.recording {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            animation: recordPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes recordPulse {
+            0%, 100% { box-shadow: 0 20px 60px rgba(239, 68, 68, 0.4); }
+            50% { box-shadow: 0 30px 80px rgba(239, 68, 68, 0.7), 0 0 0 30px rgba(239, 68, 68, 0.1); }
+        }
+
+        .mic-icon {
+            width: 70px;
+            height: 70px;
+            fill: white;
+        }
+
+        .status-indicator {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #64748b;
+            min-height: 40px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .status-indicator.active {
+            color: #6366f1;
+        }
+
+        .status-indicator.speaking {
+            color: #8b5cf6;
+        }
+
+        .hint {
+            color: #94a3b8;
+            font-size: 1.05rem;
+            font-weight: 500;
+        }
+
+        .chat-section {
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 30px;
+            background: linear-gradient(to bottom, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 30px;
+            margin-top: 40px;
+        }
+
+        .chat-section::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-section::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+        }
+
+        .chat-section::-webkit-scrollbar-thumb {
+            background: #6366f1;
+            border-radius: 10px;
+        }
+
+        .message {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 0.75rem;
-            color: var(--dark);
+            flex-shrink: 0;
         }
 
-        .feature-card p {
-            color: var(--gray);
-            line-height: 1.7;
+        .message.user .message-avatar {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
         }
 
-        /* CTA Section */
-        .cta-section {
-            padding: 6rem 2rem;
-            background: linear-gradient(135deg, var(--dark) 0%, var(--dark-secondary) 100%);
+        .message.assistant .message-avatar {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .message-bubble {
+            max-width: 70%;
+            padding: 18px 24px;
+            border-radius: 24px;
+            font-size: 1.05rem;
+            line-height: 1.6;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .message.user .message-bubble {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
             color: white;
+            border-bottom-right-radius: 6px;
+        }
+
+        .message.assistant .message-bubble {
+            background: white;
+            color: #1e293b;
+            border-bottom-left-radius: 6px;
+        }
+
+        .system-message {
             text-align: center;
+            color: #94a3b8;
+            font-size: 0.95rem;
+            margin: 25px 0;
+            padding: 12px;
+            background: rgba(148, 163, 184, 0.1);
+            border-radius: 12px;
+            font-weight: 500;
         }
 
-        .cta-content {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .cta-content h2 {
-            font-size: 3rem;
-            font-weight: 800;
-            margin-bottom: 1.5rem;
-        }
-
-        .cta-content p {
-            font-size: 1.3rem;
-            margin-bottom: 2.5rem;
-            color: rgba(255, 255, 255, 0.9);
-        }
-
-        .cta-buttons {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .cta-buttons .btn-primary {
-            font-size: 1.1rem;
-            padding: 1.125rem 2.5rem;
-        }
-
-        /* Footer */
-        footer {
-            background: var(--dark);
-            color: rgba(255, 255, 255, 0.7);
-            padding: 3rem 2rem;
+        .footer {
             text-align: center;
+            padding: 30px;
+            background: #f8fafc;
+            color: #64748b;
+            font-size: 0.95rem;
         }
 
-        .footer-links {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            margin: 1.5rem 0;
-            flex-wrap: wrap;
-        }
-
-        .footer-links a {
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-
-        .footer-links a:hover {
-            color: white;
-        }
-
-        /* Responsive */
-        @media (max-width: 968px) {
-            .hero-container {
-                grid-template-columns: 1fr;
-                gap: 3rem;
-            }
-
-            .hero-visual {
-                height: 400px;
-            }
-
-            .hero-content h1 {
+        @media (max-width: 768px) {
+            .header h1 {
                 font-size: 2.5rem;
             }
 
-            .features-grid {
-                grid-template-columns: 1fr;
-                gap: 2rem;
+            .content {
+                padding: 30px 25px;
             }
 
-            .nav-links a:not(.btn) {
-                display: none;
+            .language-grid {
+                grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+                gap: 10px;
             }
 
-            .section-header h2 {
-                font-size: 2rem;
+            .mic-button {
+                width: 140px;
+                height: 140px;
             }
 
-            .cta-content h2 {
-                font-size: 2rem;
-            }
-        }
-
-        @media (max-width: 640px) {
-            .hero-cta {
-                flex-direction: column;
-            }
-
-            .hero-cta .btn {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .hero-content h1 {
-                font-size: 2rem;
-            }
-
-            .hero-content p {
-                font-size: 1.1rem;
+            .mic-icon {
+                width: 60px;
+                height: 60px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav>
-        <div class="nav-container">
-            <div class="logo">
-                <span>🗣️</span> SpeakEasy
-            </div>
-            <div class="nav-links">
-                <a href="#features">Features</a>
-                <a href="#how-it-works">How It Works</a>
-                <a href="#pricing">Pricing</a>
-                <a href="/chat.html" class="btn btn-primary">
-                    Try Free Demo →
-                </a>
-            </div>
-        </div>
-    </nav>
+    <div class="particles" id="particles"></div>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-container">
-            <div class="hero-content">
-                <h1>
-                    <span class="gradient-text">Master Any Language</span><br>
-                    Through Real Conversation
-                </h1>
-                <p>
-                    Stop memorizing vocabulary lists. Start having real conversations with AI tutors who adapt to your level. Learn naturally, speak confidently.
-                </p>
-                <div class="hero-cta">
-                    <a href="/chat.html" class="btn btn-primary">
-                        Start Learning Free →
-                    </a>
-                    <a href="#features" class="btn btn-secondary">
-                        See How It Works
-                    </a>
-                </div>
+    <div class="container">
+        <div class="main-card">
+            <div class="header">
+                <h1>🗣️ SpeakEasy</h1>
+                <p>AI-Powered Voice Language Tutor</p>
             </div>
-            <div class="hero-visual">
-                <div class="mockup-window">
-                    <div class="mockup-header">Practice Spanish 🇪🇸</div>
-                    <div class="mockup-subtitle">Level A2 • Beginner</div>
-                    <div class="chat-bubble">
-                        ¿Cómo estuvo tu fin de semana?
-                    </div>
-                    <div class="chat-bubble user">
-                        Fue muy bueno! Fui al parque.
-                    </div>
-                    <div class="chat-bubble">
-                        ¡Excelente! "Fui" es perfecto. ¿Con quién fuiste?
+
+            <div class="content">
+                <div class="language-section">
+                    <h3>Choose Your Language</h3>
+                    <div class="language-grid" id="languageGrid">
+                        <div class="language-card active" data-lang="Spanish">
+                            <span class="flag">🇪🇸</span>
+                            <span class="name">Spanish</span>
+                        </div>
+                        <div class="language-card" data-lang="French">
+                            <span class="flag">🇫🇷</span>
+                            <span class="name">French</span>
+                        </div>
+                        <div class="language-card" data-lang="German">
+                            <span class="flag">🇩🇪</span>
+                            <span class="name">German</span>
+                        </div>
+                        <div class="language-card" data-lang="Italian">
+                            <span class="flag">🇮🇹</span>
+                            <span class="name">Italian</span>
+                        </div>
+                        <div class="language-card" data-lang="Portuguese">
+                            <span class="flag">🇵🇹</span>
+                            <span class="name">Portuguese</span>
+                        </div>
+                        <div class="language-card" data-lang="Japanese">
+                            <span class="flag">🇯🇵</span>
+                            <span class="name">Japanese</span>
+                        </div>
+                        <div class="language-card" data-lang="Korean">
+                            <span class="flag">🇰🇷</span>
+                            <span class="name">Korean</span>
+                        </div>
+                        <div class="language-card" data-lang="Chinese">
+                            <span class="flag">🇨🇳</span>
+                            <span class="name">Chinese</span>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- Features Section -->
-    <section id="features" class="features">
-        <div class="section-header">
-            <h2>Everything You Need to Become Fluent</h2>
-            <p>Powered by advanced AI. Designed for real humans.</p>
-        </div>
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon">💬</div>
-                <h3>Real Conversations</h3>
-                <p>Practice speaking with AI tutors that understand context, correct mistakes naturally, and adapt to your skill level.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🎯</div>
-                <h3>Personalized Learning</h3>
-                <p>AI creates custom lessons based on your interests, learning style, and goals. No generic content.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">📚</div>
-                <h3>Interactive Stories</h3>
-                <p>Learn through engaging stories written for your level. Tap any word for instant explanations.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🎤</div>
-                <h3>Voice Practice</h3>
-                <p>Speak naturally and get real-time pronunciation feedback. Build confidence through practice.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">⚡</div>
-                <h3>Instant Feedback</h3>
-                <p>Get corrections and explanations in real-time. Learn from every mistake immediately.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🌍</div>
-                <h3>15+ Languages</h3>
-                <p>Spanish, French, German, Italian, Japanese, Korean, Chinese, Portuguese, and more.</p>
-            </div>
-        </div>
-    </section>
+                <div class="voice-section">
+                    <div class="status-indicator" id="statusText">
+                        Ready to practice
+                    </div>
 
-    <!-- CTA Section -->
-    <section class="cta-section">
-        <div class="cta-content">
-            <h2>Ready to Speak with Confidence?</h2>
-            <p>
-                Join thousands of learners who've stopped studying and started speaking.
-                Your first lesson is completely free.
-            </p>
-            <div class="cta-buttons">
-                <a href="/chat.html" class="btn btn-primary">
-                    Start Your Free Lesson →
-                </a>
-            </div>
-            <p style="margin-top: 2rem; font-size: 0.95rem; opacity: 0.8;">
-                No credit card required • AI-powered • Works on all devices
-            </p>
-        </div>
-    </section>
+                    <div class="mic-container">
+                        <button class="mic-button" id="micButton">
+                            <svg class="mic-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 1C10.34 1 9 2.34 9 4V12C9 13.66 10.34 15 12 15C13.66 15 15 13.66 15 12V4C15 2.34 13.66 1 12 1Z" fill="white"/>
+                                <path d="M19 10V12C19 15.87 15.87 19 12 19C8.13 19 5 15.87 5 12V10H3V12C3 16.97 7.03 21 12 21C16.97 21 21 16.97 21 12V10H19Z" fill="white"/>
+                                <path d="M11 21V23H13V21H11Z" fill="white"/>
+                            </svg>
+                        </button>
+                    </div>
 
-    <!-- Footer -->
-    <footer>
-        <div style="max-width: 1200px; margin: 0 auto;">
-            <div class="logo" style="justify-content: center; margin-bottom: 1.5rem;">
-                <span>🗣️</span> SpeakEasy
+                    <p class="hint">Click to speak • AI responds with voice</p>
+                </div>
+
+                <div class="chat-section" id="chatMessages">
+                    <!-- Messages will appear here -->
+                </div>
             </div>
-            <div class="footer-links">
-                <a href="#features">Features</a>
-                <a href="https://github.com/theoadoree/speakeasy" target="_blank">GitHub</a>
-                <a href="https://speakeasy-backend-823510409781.us-central1.run.app/health" target="_blank">API Status</a>
-                <a href="mailto:support@speakeasy-ai.app">Support</a>
+
+            <div class="footer">
+                © 2025 SpeakEasy • Powered by AI
             </div>
-            <p style="margin-top: 1.5rem;">
-                &copy; 2025 SpeakEasy. Powered by advanced AI language models.
-            </p>
         </div>
-    </footer>
+    </div>
+
+    <script>
+        let isRecording = false;
+        let currentLanguage = 'Spanish';
+        let recognition = null;
+        let synthesis = window.speechSynthesis;
+        let conversationHistory = [];
+
+        const languageMap = {
+            'Spanish': 'es-ES',
+            'French': 'fr-FR',
+            'German': 'de-DE',
+            'Italian': 'it-IT',
+            'Portuguese': 'pt-PT',
+            'Japanese': 'ja-JP',
+            'Korean': 'ko-KR',
+            'Chinese': 'zh-CN'
+        };
+
+        // Initialize Speech Recognition
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = languageMap[currentLanguage];
+        }
+
+        // Language selection
+        document.getElementById('languageGrid').addEventListener('click', (e) => {
+            const card = e.target.closest('.language-card');
+            if (!card) return;
+
+            document.querySelectorAll('.language-card').forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+
+            currentLanguage = card.dataset.lang;
+            if (recognition) {
+                recognition.lang = languageMap[currentLanguage];
+            }
+
+            addSystemMessage(`Switched to ${currentLanguage}!`);
+        });
+
+        // Microphone button
+        document.getElementById('micButton').addEventListener('click', toggleRecording);
+
+        function toggleRecording() {
+            if (isRecording) {
+                stopRecording();
+            } else {
+                startRecording();
+            }
+        }
+
+        function startRecording() {
+            if (!recognition) {
+                alert('Speech recognition is not supported in your browser. Please use Chrome or Edge.');
+                return;
+            }
+
+            isRecording = true;
+            const micButton = document.getElementById('micButton');
+            const statusText = document.getElementById('statusText');
+
+            micButton.classList.add('recording');
+            statusText.textContent = '🎤 Listening...';
+            statusText.classList.add('active');
+
+            try {
+                recognition.start();
+            } catch (e) {
+                console.error('Recognition error:', e);
+                stopRecording();
+            }
+        }
+
+        function stopRecording() {
+            isRecording = false;
+            const micButton = document.getElementById('micButton');
+            const statusText = document.getElementById('statusText');
+
+            micButton.classList.remove('recording');
+            statusText.classList.remove('active');
+
+            if (recognition) {
+                try {
+                    recognition.stop();
+                } catch (e) {
+                    console.error('Stop error:', e);
+                }
+            }
+        }
+
+        async function processVoiceInput(transcript) {
+            addMessage('user', transcript);
+
+            const statusText = document.getElementById('statusText');
+            statusText.textContent = '💭 Thinking...';
+            statusText.classList.add('active');
+
+            const aiResponse = await getAIResponse(transcript);
+            addMessage('assistant', aiResponse);
+
+            speakText(aiResponse);
+        }
+
+        async function getAIResponse(userMessage) {
+            const greetingResponses = {
+                'Spanish': [
+                    '¡Hola! ¿Cómo estás? Me encanta hablar contigo.',
+                    '¡Buenos días! ¿Qué tal estás hoy?',
+                    '¡Hola! Es un placer practicar español contigo.'
+                ],
+                'French': [
+                    'Bonjour! Comment allez-vous? Je suis ravi de parler avec vous.',
+                    'Bonjour! Comment ça va aujourd\'hui?',
+                    'Salut! C\'est un plaisir de pratiquer le français avec vous.'
+                ],
+                'German': [
+                    'Hallo! Wie geht es Ihnen? Ich freue mich, mit Ihnen zu sprechen.',
+                    'Guten Tag! Wie geht es Ihnen heute?',
+                    'Hallo! Es ist mir eine Freude, Deutsch mit Ihnen zu üben.'
+                ],
+                'Italian': [
+                    'Ciao! Come stai? Sono felice di parlare con te.',
+                    'Buongiorno! Come va oggi?',
+                    'Ciao! È un piacere praticare l\'italiano con te.'
+                ],
+                'Portuguese': [
+                    'Olá! Como você está? Estou feliz em falar com você.',
+                    'Bom dia! Como vai hoje?',
+                    'Oi! É um prazer praticar português com você.'
+                ],
+                'Japanese': [
+                    'こんにちは！元気ですか？あなたと話せて嬉しいです。',
+                    'おはようございます！今日はどうですか？',
+                    'こんにちは！日本語を練習できて光栄です。'
+                ],
+                'Korean': [
+                    '안녕하세요! 어떻게 지내세요? 당신과 이야기할 수 있어서 기쁩니다.',
+                    '좋은 아침입니다! 오늘 어떻게 지내세요?',
+                    '안녕하세요! 한국어를 연습할 수 있어서 영광입니다.'
+                ],
+                'Chinese': [
+                    '你好！你好吗？很高兴和你聊天。',
+                    '早上好！你今天怎么样？',
+                    '你好！很荣幸能和你练习中文。'
+                ]
+            };
+
+            const generalResponses = {
+                'Spanish': [
+                    '¡Muy bien! Continúa practicando. ¿Qué más te gustaría decir?',
+                    'Excelente. Cuéntame más sobre eso.',
+                    'Perfecto. ¿Puedes explicar eso con más detalle?'
+                ],
+                'French': [
+                    'Très bien! Continuez. Que voulez-vous dire d\'autre?',
+                    'Excellent. Parlez-moi davantage de cela.',
+                    'Parfait. Pouvez-vous expliquer cela plus en détail?'
+                ],
+                'German': [
+                    'Sehr gut! Machen Sie weiter. Was möchten Sie noch sagen?',
+                    'Ausgezeichnet. Erzählen Sie mir mehr darüber.',
+                    'Perfekt. Können Sie das genauer erklären?'
+                ],
+                'Italian': [
+                    'Molto bene! Continua. Cosa vorresti dire ancora?',
+                    'Eccellente. Dimmi di più su questo.',
+                    'Perfetto. Puoi spiegarlo più in dettaglio?'
+                ],
+                'Portuguese': [
+                    'Muito bem! Continue. O que mais você gostaria de dizer?',
+                    'Excelente. Conte-me mais sobre isso.',
+                    'Perfeito. Você pode explicar isso com mais detalhes?'
+                ],
+                'Japanese': [
+                    'とても良いです！続けてください。他に何を言いたいですか？',
+                    '素晴らしい。それについてもっと教えてください。',
+                    '完璧です。もっと詳しく説明できますか？'
+                ],
+                'Korean': [
+                    '아주 좋습니다! 계속하세요. 또 무엇을 말하고 싶으세요?',
+                    '훌륭합니다. 그것에 대해 더 말해주세요.',
+                    '완벽합니다. 더 자세히 설명할 수 있나요?'
+                ],
+                'Chinese': [
+                    '很好！继续。你还想说什么？',
+                    '太好了。告诉我更多关于这个的事情。',
+                    '完美。你能解释得更详细一点吗？'
+                ]
+            };
+
+            const greetingWords = ['hello', 'hi', 'hey', 'hola', 'bonjour', 'salut', 'hallo', 'ciao', 'olá', 'oi', 'こんにちは', '안녕', '你好'];
+            const isGreeting = greetingWords.some(word => userMessage.toLowerCase().includes(word));
+
+            const responses = isGreeting ?
+                (greetingResponses[currentLanguage] || greetingResponses['Spanish']) :
+                (generalResponses[currentLanguage] || generalResponses['Spanish']);
+
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+
+        function speakText(text) {
+            const statusText = document.getElementById('statusText');
+
+            if (synthesis.speaking) {
+                synthesis.cancel();
+            }
+
+            setTimeout(() => {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = languageMap[currentLanguage];
+                utterance.rate = 0.9;
+                utterance.pitch = 1.0;
+                utterance.volume = 1.0;
+
+                utterance.onstart = () => {
+                    statusText.textContent = '🔊 AI is speaking...';
+                    statusText.classList.add('speaking');
+                };
+
+                utterance.onend = () => {
+                    statusText.textContent = 'Ready to practice';
+                    statusText.classList.remove('speaking', 'active');
+                };
+
+                utterance.onerror = (event) => {
+                    console.error('Speech error:', event);
+                    statusText.textContent = 'Ready to practice';
+                    statusText.classList.remove('speaking', 'active');
+                };
+
+                const voices = synthesis.getVoices();
+                const targetLang = languageMap[currentLanguage];
+                const voice = voices.find(v => v.lang.startsWith(targetLang.split('-')[0]));
+                if (voice) {
+                    utterance.voice = voice;
+                }
+
+                synthesis.speak(utterance);
+            }, 100);
+        }
+
+        function addMessage(role, content) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = role === 'user' ? '👤' : '🤖';
+
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+            bubble.textContent = content;
+
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(bubble);
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function addSystemMessage(text) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'system-message';
+            messageDiv.textContent = text;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Speech Recognition Event Handlers
+        if (recognition) {
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                processVoiceInput(transcript);
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Recognition error:', event.error);
+                const statusText = document.getElementById('statusText');
+
+                if (event.error === 'not-allowed') {
+                    alert('Microphone access denied. Please allow microphone access in your browser settings.');
+                } else if (event.error === 'no-speech') {
+                    statusText.textContent = 'No speech detected. Try again.';
+                } else {
+                    statusText.textContent = 'Ready to practice';
+                }
+                stopRecording();
+            };
+
+            recognition.onend = () => {
+                if (isRecording) {
+                    try {
+                        recognition.start();
+                    } catch (e) {
+                        stopRecording();
+                    }
+                }
+            };
+        }
+
+        // Load voices
+        function loadVoices() {
+            return new Promise((resolve) => {
+                const voices = synthesis.getVoices();
+                if (voices.length > 0) {
+                    resolve(voices);
+                } else {
+                    synthesis.onvoiceschanged = () => {
+                        resolve(synthesis.getVoices());
+                    };
+                }
+            });
+        }
+
+        // Initialize
+        window.addEventListener('load', async () => {
+            await loadVoices();
+            addSystemMessage('🎙️ Welcome! Select your language and click the microphone to start speaking.');
+        });
+
+        // Create floating particles
+        function createParticles() {
+            const particles = document.getElementById('particles');
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.style.cssText = `
+                    position: absolute;
+                    width: ${Math.random() * 4 + 2}px;
+                    height: ${Math.random() * 4 + 2}px;
+                    background: white;
+                    border-radius: 50%;
+                    left: ${Math.random() * 100}%;
+                    top: ${Math.random() * 100}%;
+                    animation: float ${Math.random() * 10 + 10}s infinite ease-in-out;
+                `;
+                particles.appendChild(particle);
+            }
+        }
+
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes float {
+                0%, 100% { transform: translate(0, 0); opacity: 0.3; }
+                50% { transform: translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px); opacity: 0.6; }
+            }
+        `;
+        document.head.appendChild(style);
+        createParticles();
+    </script>
 </body>
 </html>

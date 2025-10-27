@@ -1,0 +1,139 @@
+name: Sync from FIT repo
+
+on:
+  schedule:
+    - cron: '0 */6 * * *' # Every 6 hours
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'FIT repo branch or tag'
+        required: false
+        default: 'main'
+      dry_run:
+        description: 'Run without creating a PR'
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  FIT_REPO_URL: ${{ secrets.FIT_REPO_URL }}
+  FIT_PAT: ${{ secrets.FIT_PAT }}
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout target repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Validate configuration
+        shell: bash
+        run: |
+          if [[ -z "${FIT_REPO_URL}" ]]; then
+            echo "FIT_REPO_URL is not configured. Please add it as a repository secret."
+            echo "Example: https://github.com/your-org/fit-repo.git"
+            exit 1
+          fi
+
+      - name: Clone FIT repository
+        shell: bash
+        env:
+          INPUT_REF: ${{ github.event.inputs.ref }}
+        run: |
+          set -euo pipefail
+          REF="${INPUT_REF:-main}"
+          AUTH_URL="${FIT_REPO_URL}"
+          if [[ -n "${FIT_PAT}" ]] && [[ "${FIT_REPO_URL}" =~ ^https://[^@/]+\.github\.com/ ]] && [[ ! "${FIT_REPO_URL}" =~ @ ]]; then
+            AUTH_URL="${FIT_REPO_URL/https:\/\//https://x-access-token:${FIT_PAT}@}"
+          fi
+          echo "Cloning FIT repo ref '${REF}'..."
+          git clone --depth=1 --branch "${REF}" "${AUTH_URL}" fit-upstream
+          ls -la fit-upstream | head -n 50
+
+      - name: Sync selected paths from FIT repo
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s dotglob
+          declare -a PATHS=(
+            "App.js"
+            "index.js"
+            "app.json"
+            "package.json"
+            "src"
+            "backend"
+            "web"
+            "assets"
+          )
+
+          for p in "${PATHS[@]}"; do
+            if [[ -d "fit-upstream/$p" ]]; then
+              echo "Syncing directory: $p"
+              mkdir -p "$p"
+              rsync -a --delete --exclude ".git" "fit-upstream/$p/" "$p/"
+            elif [[ -f "fit-upstream/$p" ]]; then
+              echo "Syncing file: $p"
+              mkdir -p "$(dirname "$p")"
+              cp -f "fit-upstream/$p" "$p"
+            else
+              echo "Skipping missing path in FIT repo: $p"
+            fi
+          done
+
+          echo "Changes summary:"
+          git status --porcelain || true
+
+      - name: Create Pull Request with changes
+        id: cpr
+        if: ${{ !fromJSON(github.event.inputs.dry_run || 'false') }}
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: |
+            chore(sync): mirror updates from FIT repo
+
+            Automated sync from FIT upstream repository.
+          branch: sync/fit-${{ github.run_id }}
+          title: "Sync from FIT repo (${ { github.event.inputs.ref || 'main' } })"
+          body: |
+            This automated PR syncs selected paths from the FIT upstream repository.
+
+            Synced paths:
+            - App.js
+            - index.js
+            - app.json
+            - package.json
+            - src/**
+            - backend/**
+            - web/**
+            - assets/**
+
+            After merging, existing deployment workflows will build and deploy to Cloud Run.
+          labels: |
+            automation
+            sync
+          draft: false
+          delete-branch: true
+
+      - name: PR URL
+        if: steps.cpr.outputs.pull-request-url != ''
+        run: |
+          echo "Created PR: ${{ steps.cpr.outputs.pull-request-url }}"
+
+      - name: No changes to sync
+        if: ${{ steps.cpr.outputs.pull-request-url == '' }}
+        run: echo "No differences detected or dry run enabled."
+
+
