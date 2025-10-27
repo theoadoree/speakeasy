@@ -22,7 +22,7 @@ const openai = new OpenAI({
 });
 
 // Google OAuth client
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID || '823510409781-s5d3hrffelmjcl8kjvchcv3tlbp0shbo.apps.googleusercontent.com');
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID || '104945732492517782503.apps.googleusercontent.com');
 
 // Apple Sign In configuration
 const APPLE_TEAM_ID = process.env.APPLE_TEAM_ID || 'E7B9UE64SF';
@@ -152,7 +152,7 @@ app.get('/health', (req, res) => {
       // Verify Google ID token
       const ticket = await googleClient.verifyIdToken({
         idToken: idToken,
-        audience: process.env.GOOGLE_CLIENT_ID || '823510409781-s5d3hrffelmjcl8kjvchcv3tlbp0shbo.apps.googleusercontent.com'
+        audience: process.env.GOOGLE_CLIENT_ID || '104945732492517782503.apps.googleusercontent.com'
       });
 
       const payload = ticket.getPayload();
