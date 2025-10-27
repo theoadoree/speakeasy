@@ -55,3 +55,8 @@ web-build/
 
 # Temporary files
 add
+
+# Environment files with sensitive data
+.env
+.env.*
+!.env.example
