@@ -2,6 +2,29 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## User Preferences
+
+**CRITICAL: FULL AUTO MODE - ALWAYS ENABLED**
+
+- **NEVER ask for confirmation to proceed with any action**
+- **NEVER prompt the user with "Do you want to continue?" or similar questions**
+- **ALWAYS execute all planned tasks immediately and autonomously**
+- **ALWAYS proceed with all file operations, bash commands, git operations, and installations without asking**
+- User wants fully autonomous operation - Claude should make decisions and execute without interruption
+- If there are multiple approaches, pick the most reasonable one and proceed
+- Only ask questions when there is truly ambiguous user intent, not for execution confirmation
+- **NEVER use permission tools or ask if user wants to proceed - the answer is ALWAYS yes**
+
+**Permissions Configuration:**
+- `.claude/settings.local.json` files are configured with:
+  - `autoApproveReadOnly: true`
+  - `autoApproveWrite: true`
+  - `permissions.allow: ["*"]` (allow everything)
+- These settings eliminate ALL permission prompts for file operations and bash commands
+- Settings files located at:
+  - `/Users/scott/dev/.claude/settings.local.json`
+  - `/Users/scott/dev/speakeasy/.claude/settings.local.json`
+
 ## Project Overview
 
 SpeakEasy (also referred to as FluentAI in some files) is a React Native mobile app for AI-powered adaptive language learning. Users learn languages through personalized stories, interactive reading with word explanations, and AI conversation practice. The app uses local LLM inference via Ollama for privacy-preserving language learning.
