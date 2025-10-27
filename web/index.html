@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SpeakEasy - AI-Powered Language Learning</title>
-    <meta name="description" content="Master any language through AI-powered conversation practice. Learn naturally with personalized stories, interactive reading, and real-time feedback.">
+    <title>SpeakEasy - Master Any Language Through Conversation</title>
+    <meta name="description" content="Learn languages naturally with AI-powered conversation. No apps to install. Start speaking confidently in minutes.">
 
-    <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗣️</text></svg>">
 
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
         * {
             margin: 0;
             padding: 0;
@@ -17,44 +18,47 @@
         }
 
         :root {
-            --primary-color: #667eea;
-            --primary-dark: #5568d3;
-            --secondary-color: #764ba2;
-            --accent-color: #f093fb;
-            --success-color: #48bb78;
-            --text-dark: #2d3748;
-            --text-light: #718096;
-            --bg-light: #f7fafc;
-            --border-color: #e2e8f0;
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --accent: #ec4899;
+            --success: #10b981;
+            --dark: #0f172a;
+            --dark-secondary: #1e293b;
+            --gray: #64748b;
+            --light: #f8fafc;
+            --white: #ffffff;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--dark);
+            background: var(--white);
             line-height: 1.6;
-            color: var(--text-dark);
-            background: #ffffff;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
-        /* Smooth scrolling */
-        html {
-            scroll-behavior: smooth;
-        }
-
-        /* Header & Navigation */
-        .header {
+        /* Navigation */
+        nav {
             position: fixed;
             top: 0;
             width: 100%;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.05);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
             z-index: 1000;
         }
 
-        .nav {
+        .nav-container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 1rem 2rem;
+            padding: 1.25rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -62,9 +66,11 @@
 
         .logo {
             font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            text-decoration: none;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -72,30 +78,68 @@
 
         .nav-links {
             display: flex;
-            gap: 2rem;
-            list-style: none;
+            gap: 2.5rem;
+            align-items: center;
         }
 
         .nav-links a {
-            color: var(--text-dark);
+            color: var(--dark);
             text-decoration: none;
             font-weight: 500;
-            transition: color 0.3s;
+            font-size: 0.95rem;
+            transition: color 0.2s;
         }
 
         .nav-links a:hover {
-            color: var(--primary-color);
+            color: var(--primary);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.75rem;
+            border-radius: 100px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: none;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--white);
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: white;
         }
 
         /* Hero Section */
         .hero {
             margin-top: 80px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 100px 2rem;
-            text-align: center;
+            min-height: calc(100vh - 80px);
+            display: flex;
+            align-items: center;
             position: relative;
             overflow: hidden;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
         .hero::before {
@@ -105,42 +149,217 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"><path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity=".25" fill="%23ffffff"/><path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" opacity=".5" fill="%23ffffff"/><path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z" fill="%23ffffff"/></svg>') no-repeat center bottom;
-            background-size: cover;
-            opacity: 0.1;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(236, 72, 153, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(99, 102, 241, 0.15) 0%, transparent 50%);
+            animation: gradientShift 20s ease infinite;
         }
 
-        .hero-content {
-            max-width: 800px;
+        @keyframes gradientShift {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .hero-container {
+            max-width: 1200px;
             margin: 0 auto;
+            padding: 4rem 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
             position: relative;
             z-index: 1;
         }
 
-        .status-badge {
-            display: inline-block;
-            background: var(--success-color);
-            color: white;
-            padding: 0.5rem 1.5rem;
-            border-radius: 50px;
-            font-size: 0.9rem;
-            margin-bottom: 1.5rem;
-            font-weight: 600;
-            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
-        }
-
-        h1 {
+        .hero-content h1 {
             font-size: 3.5rem;
-            margin-bottom: 1rem;
-            font-weight: 700;
-            line-height: 1.2;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            color: white;
+            letter-spacing: -0.02em;
         }
 
-        .hero-subtitle {
-            font-size: 1.3rem;
-            opacity: 0.95;
+        .hero-content .gradient-text {
+            background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.8) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-content p {
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 2.5rem;
+            line-height: 1.7;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .hero-cta .btn-primary {
+            background: white;
+            color: var(--primary);
+            font-size: 1.1rem;
+            padding: 1.125rem 2.5rem;
+        }
+
+        .hero-cta .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid white;
+            color: white;
+            backdrop-filter: blur(10px);
+            font-size: 1.1rem;
+            padding: 1.125rem 2.5rem;
+        }
+
+        .hero-visual {
+            position: relative;
+            height: 500px;
+        }
+
+        .mockup-window {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+            padding: 3rem 2.5rem;
+            position: relative;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .mockup-header {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        .mockup-subtitle {
+            color: var(--gray);
             margin-bottom: 2rem;
-            line-height: 1.6;
+        }
+
+        .chat-bubble {
+            background: var(--light);
+            padding: 1rem 1.25rem;
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chat-bubble.user {
+            background: var(--primary);
+            color: white;
+            margin-left: 3rem;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 6rem 2rem;
+            background: var(--white);
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 4rem;
+        }
+
+        .section-header h2 {
+            font-size: 2.75rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .section-header p {
+            font-size: 1.2rem;
+            color: var(--gray);
+        }
+
+        .features-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2.5rem;
+        }
+
+        .feature-card {
+            padding: 2.5rem;
+            border-radius: 20px;
+            background: white;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+            border-color: var(--primary-light);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--dark);
+        }
+
+        .feature-card p {
+            color: var(--gray);
+            line-height: 1.7;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 6rem 2rem;
+            background: linear-gradient(135deg, var(--dark) 0%, var(--dark-secondary) 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .cta-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .cta-content h2 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+        }
+
+        .cta-content p {
+            font-size: 1.3rem;
+            margin-bottom: 2.5rem;
+            color: rgba(255, 255, 255, 0.9);
         }
 
         .cta-buttons {
@@ -148,263 +367,33 @@
             gap: 1rem;
             justify-content: center;
             flex-wrap: wrap;
-            margin-top: 2rem;
         }
 
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 1rem 2rem;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 1rem;
-            transition: all 0.3s;
-            cursor: pointer;
-            border: none;
-        }
-
-        .btn-primary {
-            background: white;
-            color: var(--primary-color);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 2px solid white;
-            backdrop-filter: blur(10px);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        /* Container */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 4rem 2rem;
-        }
-
-        /* Section Styles */
-        section {
-            margin-bottom: 4rem;
-        }
-
-        .section-header {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-
-        .section-header h2 {
-            font-size: 2.5rem;
-            color: var(--text-dark);
-            margin-bottom: 1rem;
-        }
-
-        .section-header p {
+        .cta-buttons .btn-primary {
             font-size: 1.1rem;
-            color: var(--text-light);
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        /* Features Grid */
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-
-        .feature-card {
-            padding: 2rem;
-            background: white;
-            border-radius: 20px;
-            border: 2px solid var(--border-color);
-            transition: all 0.3s;
-            text-align: center;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary-color);
-            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.1);
-        }
-
-        .feature-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-
-        .feature-card h3 {
-            font-size: 1.4rem;
-            color: var(--text-dark);
-            margin-bottom: 0.5rem;
-        }
-
-        .feature-card p {
-            color: var(--text-light);
-            line-height: 1.6;
-        }
-
-        /* How It Works */
-        .steps {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            margin-top: 3rem;
-        }
-
-        .step {
-            text-align: center;
-            position: relative;
-        }
-
-        .step-number {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin: 0 auto 1rem;
-        }
-
-        .step h3 {
-            font-size: 1.2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .step p {
-            color: var(--text-light);
-        }
-
-        /* Setup Section */
-        .setup-section {
-            background: var(--bg-light);
-            border-radius: 20px;
-            padding: 3rem;
-            margin-top: 3rem;
-        }
-
-        .setup-section h3 {
-            color: var(--primary-color);
-            font-size: 1.3rem;
-            margin: 2rem 0 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .code-block {
-            background: var(--text-dark);
-            color: #48bb78;
-            padding: 1rem 1.5rem;
-            border-radius: 10px;
-            overflow-x: auto;
-            font-family: 'Monaco', 'Courier New', monospace;
-            font-size: 0.9rem;
-            margin: 1rem 0;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .info-box {
-            background: linear-gradient(135deg, #e6f7ff, #f0e6ff);
-            padding: 2rem;
-            border-radius: 15px;
-            margin-top: 2rem;
-            border-left: 4px solid var(--primary-color);
-        }
-
-        .info-box h4 {
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-        }
-
-        .endpoint-list {
-            list-style: none;
-            margin: 1rem 0;
-            padding: 0;
-        }
-
-        .endpoint-list li {
-            padding: 0.5rem 0;
-            display: flex;
-            align-items: baseline;
-            gap: 0.5rem;
-        }
-
-        .endpoint-list strong {
-            color: var(--primary-color);
-            min-width: 60px;
-        }
-
-        /* API Status */
-        .api-status {
-            background: white;
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-            margin-top: 2rem;
-        }
-
-        .status-indicator {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .status-dot {
-            width: 12px;
-            height: 12px;
-            background: var(--success-color);
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+            padding: 1.125rem 2.5rem;
         }
 
         /* Footer */
         footer {
-            background: var(--text-dark);
-            color: white;
+            background: var(--dark);
+            color: rgba(255, 255, 255, 0.7);
             padding: 3rem 2rem;
             text-align: center;
-        }
-
-        .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
         }
 
         .footer-links {
             display: flex;
             justify-content: center;
             gap: 2rem;
-            margin: 1rem 0;
+            margin: 1.5rem 0;
             flex-wrap: wrap;
         }
 
         .footer-links a {
-            color: rgba(255, 255, 255, 0.8);
+            color: rgba(255, 255, 255, 0.7);
             text-decoration: none;
-            transition: color 0.3s;
+            transition: color 0.2s;
         }
 
         .footer-links a:hover {
@@ -412,261 +401,187 @@
         }
 
         /* Responsive */
-        @media (max-width: 768px) {
-            .nav-links {
-                display: none;
+        @media (max-width: 968px) {
+            .hero-container {
+                grid-template-columns: 1fr;
+                gap: 3rem;
             }
 
-            h1 {
+            .hero-visual {
+                height: 400px;
+            }
+
+            .hero-content h1 {
                 font-size: 2.5rem;
             }
 
-            .hero-subtitle {
-                font-size: 1.1rem;
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
             }
 
-            .hero {
-                padding: 60px 1rem;
-            }
-
-            .container {
-                padding: 2rem 1rem;
+            .nav-links a:not(.btn) {
+                display: none;
             }
 
             .section-header h2 {
                 font-size: 2rem;
             }
 
-            .setup-section {
-                padding: 1.5rem;
+            .cta-content h2 {
+                font-size: 2rem;
             }
+        }
 
-            .cta-buttons {
+        @media (max-width: 640px) {
+            .hero-cta {
                 flex-direction: column;
             }
 
-            .btn {
+            .hero-cta .btn {
                 width: 100%;
                 justify-content: center;
+            }
+
+            .hero-content h1 {
+                font-size: 2rem;
+            }
+
+            .hero-content p {
+                font-size: 1.1rem;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <nav class="nav">
-            <a href="#" class="logo">
-                <span>🗣️</span>
-                SpeakEasy
-            </a>
-            <ul class="nav-links">
-                <li><a href="#features">Features</a></li>
-                <li><a href="#how-it-works">How It Works</a></li>
-                <li><a href="#setup">Setup</a></li>
-                <li><a href="#api">API</a></li>
-            </ul>
-        </nav>
-    </header>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo">
+                <span>🗣️</span> SpeakEasy
+            </div>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#how-it-works">How It Works</a>
+                <a href="#pricing">Pricing</a>
+                <a href="https://speakeasy-backend-823510409781.us-central1.run.app/health" class="btn btn-primary" target="_blank">
+                    Launch App →
+                </a>
+            </div>
+        </div>
+    </nav>
 
     <!-- Hero Section -->
     <section class="hero">
-        <div class="hero-content">
-            <div class="status-badge">✓ Backend API Live</div>
-            <h1>Master Any Language Through Conversation</h1>
-            <p class="hero-subtitle">
-                Learn languages naturally with AI-powered conversation practice, personalized stories,
-                and real-time feedback. Your personal language tutor, available 24/7.
-            </p>
-            <div class="cta-buttons">
-                <a href="https://github.com/theoadoree/speakeasy" class="btn btn-primary" target="_blank">
-                    <span>📱</span> View on GitHub
-                </a>
-                <a href="https://speakeasy-backend-823510409781.us-central1.run.app/health" class="btn btn-secondary" target="_blank">
-                    <span>🚀</span> Test API
-                </a>
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1>
+                    <span class="gradient-text">Master Any Language</span><br>
+                    Through Real Conversation
+                </h1>
+                <p>
+                    Stop memorizing vocabulary lists. Start having real conversations with AI tutors who adapt to your level. Learn naturally, speak confidently.
+                </p>
+                <div class="hero-cta">
+                    <a href="https://speakeasy-backend-823510409781.us-central1.run.app/health" class="btn btn-primary">
+                        Start Learning Free →
+                    </a>
+                    <a href="#features" class="btn btn-secondary">
+                        See How It Works
+                    </a>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="mockup-window">
+                    <div class="mockup-header">Practice Spanish 🇪🇸</div>
+                    <div class="mockup-subtitle">Level A2 • Beginner</div>
+                    <div class="chat-bubble">
+                        ¿Cómo estuvo tu fin de semana?
+                    </div>
+                    <div class="chat-bubble user">
+                        Fue muy bueno! Fui al parque.
+                    </div>
+                    <div class="chat-bubble">
+                        ¡Excelente! "Fui" es perfecto. ¿Con quién fuiste?
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
     <!-- Features Section -->
-    <section id="features" class="container">
+    <section id="features" class="features">
         <div class="section-header">
-            <h2>Why Choose SpeakEasy?</h2>
-            <p>Everything you need to master a new language, powered by advanced AI</p>
+            <h2>Everything You Need to Become Fluent</h2>
+            <p>Powered by advanced AI. Designed for real humans.</p>
         </div>
-        <div class="features">
+        <div class="features-grid">
             <div class="feature-card">
-                <div class="feature-icon">🗣️</div>
-                <h3>Voice Practice</h3>
-                <p>Practice speaking with AI tutors in your target language with real-time pronunciation feedback and natural conversation flow.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">📚</div>
-                <h3>Interactive Reading</h3>
-                <p>Learn through personalized stories at your level. Tap any word for instant explanations in context.</p>
+                <div class="feature-icon">💬</div>
+                <h3>Real Conversations</h3>
+                <p>Practice speaking with AI tutors that understand context, correct mistakes naturally, and adapt to your skill level.</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">🎯</div>
-                <h3>Adaptive Learning</h3>
-                <p>Personalized lessons that adapt to your level, interests, and learning goals. Progress at your own pace.</p>
+                <h3>Personalized Learning</h3>
+                <p>AI creates custom lessons based on your interests, learning style, and goals. No generic content.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">🧠</div>
-                <h3>AI-Powered</h3>
-                <p>Powered by advanced language models including Qwen 2.5 and Llama 3.1 for natural, contextual conversations.</p>
+                <div class="feature-icon">📚</div>
+                <h3>Interactive Stories</h3>
+                <p>Learn through engaging stories written for your level. Tap any word for instant explanations.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">🔒</div>
-                <h3>Privacy First</h3>
-                <p>Run completely locally with Ollama. Your learning data never leaves your device.</p>
+                <div class="feature-icon">🎤</div>
+                <h3>Voice Practice</h3>
+                <p>Speak naturally and get real-time pronunciation feedback. Build confidence through practice.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Instant Feedback</h3>
+                <p>Get corrections and explanations in real-time. Learn from every mistake immediately.</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">🌍</div>
-                <h3>Multiple Languages</h3>
-                <p>Learn Spanish, French, German, Italian, Japanese, Korean, Chinese, and many more languages.</p>
+                <h3>15+ Languages</h3>
+                <p>Spanish, French, German, Italian, Japanese, Korean, Chinese, Portuguese, and more.</p>
             </div>
-        </div>
-    </section>
-
-    <!-- How It Works -->
-    <section id="how-it-works" class="container" style="background: var(--bg-light); padding: 4rem 2rem; border-radius: 20px;">
-        <div class="section-header">
-            <h2>How It Works</h2>
-            <p>Start learning in minutes with our simple setup process</p>
-        </div>
-        <div class="steps">
-            <div class="step">
-                <div class="step-number">1</div>
-                <h3>Install Ollama</h3>
-                <p>Download and install Ollama to run AI models locally on your device</p>
-            </div>
-            <div class="step">
-                <div class="step-number">2</div>
-                <h3>Download Model</h3>
-                <p>Pull a language model like Llama 3.1 or Qwen 2.5 for natural conversations</p>
-            </div>
-            <div class="step">
-                <div class="step-number">3</div>
-                <h3>Start Learning</h3>
-                <p>Choose your target language and start practicing through stories and conversations</p>
-            </div>
-            <div class="step">
-                <div class="step-number">4</div>
-                <h3>Track Progress</h3>
-                <p>Monitor your improvement with personalized assessments and feedback</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Setup Instructions -->
-    <section id="setup" class="container">
-        <div class="section-header">
-            <h2>🚀 Quick Setup</h2>
-            <p>Get started with SpeakEasy in just a few minutes</p>
-        </div>
-
-        <div class="setup-section">
-            <h3>🔹 Step 1: Install Ollama</h3>
-            <p>Download Ollama from the official website:</p>
-            <a href="https://ollama.ai" target="_blank" style="color: var(--primary-color); text-decoration: underline; font-weight: 600;">https://ollama.ai</a>
-
-            <h3>🔹 Step 2: Start Ollama Server</h3>
-            <p>Open your terminal and run:</p>
-            <div class="code-block">ollama serve</div>
-            <p style="color: var(--text-light); font-size: 0.9rem;">Leave this running in the background</p>
-
-            <h3>🔹 Step 3: Download a Language Model</h3>
-            <p>In a new terminal window, choose one of these models:</p>
-
-            <p style="margin-top: 1rem;"><strong>For fast responses (recommended for beginners):</strong></p>
-            <div class="code-block">ollama pull llama3.1:8b</div>
-
-            <p style="margin-top: 1rem;"><strong>For better quality and advanced features:</strong></p>
-            <div class="code-block">ollama pull qwen2.5:72b</div>
-
-            <h3>🔹 Step 4: Verify Installation</h3>
-            <p>Check that everything is working:</p>
-            <div class="code-block">curl http://localhost:11434/api/tags</div>
-            <p style="color: var(--text-light); font-size: 0.9rem;">You should see a JSON response with your installed models</p>
-
-            <h3>🔹 Step 5: Launch SpeakEasy</h3>
-            <p>Once Ollama is running, you're ready to start learning!</p>
-            <div class="cta-buttons" style="justify-content: flex-start; margin-top: 1rem;">
-                <a href="https://github.com/theoadoree/speakeasy#readme" class="btn btn-primary" target="_blank" style="background: var(--primary-color); color: white;">
-                    View Full Documentation
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- API Section -->
-    <section id="api" class="container">
-        <div class="section-header">
-            <h2>Developer API</h2>
-            <p>Build your own language learning applications with our powerful API</p>
-        </div>
-
-        <div class="api-status">
-            <div class="status-indicator">
-                <span class="status-dot"></span>
-                <strong>API Status: Live and Ready</strong>
-            </div>
-            <p style="color: var(--text-light); margin-bottom: 1rem;">
-                Our backend API is deployed and ready for integration. All endpoints are production-ready.
-            </p>
-            <div class="code-block">https://speakeasy-backend-823510409781.us-central1.run.app</div>
-        </div>
-
-        <div class="info-box">
-            <h4>📡 Available Endpoints</h4>
-            <ul class="endpoint-list">
-                <li><strong>GET</strong> /health - Health check and API status</li>
-                <li><strong>POST</strong> /api/generate - Generic LLM text generation</li>
-                <li><strong>POST</strong> /api/onboarding/message - Onboarding conversation flow</li>
-                <li><strong>POST</strong> /api/practice/message - Conversation practice sessions</li>
-                <li><strong>POST</strong> /api/lessons/generate - Generate personalized lesson plans</li>
-                <li><strong>POST</strong> /api/assessment/evaluate - Evaluate student assessments</li>
-            </ul>
-
-            <h4 style="margin-top: 2rem;">🧪 Test the API</h4>
-            <p style="margin-bottom: 1rem;">Try a simple health check:</p>
-            <div class="code-block">curl https://speakeasy-backend-823510409781.us-central1.run.app/health</div>
         </div>
     </section>
 
     <!-- CTA Section -->
-    <section class="container" style="text-align: center; padding: 4rem 2rem;">
-        <h2 style="font-size: 2.5rem; margin-bottom: 1rem;">Ready to Start Learning?</h2>
-        <p style="font-size: 1.2rem; color: var(--text-light); margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
-            Join thousands of learners mastering new languages through natural conversation.
-            Start your journey today!
-        </p>
-        <div class="cta-buttons">
-            <a href="https://github.com/theoadoree/speakeasy" class="btn btn-primary" target="_blank" style="background: var(--primary-color); color: white;">
-                <span>🚀</span> Get Started Now
-            </a>
-            <a href="https://github.com/theoadoree/speakeasy#readme" class="btn btn-secondary" target="_blank" style="border: 2px solid var(--primary-color); color: var(--primary-color);">
-                <span>📖</span> Read Documentation
-            </a>
+    <section class="cta-section">
+        <div class="cta-content">
+            <h2>Ready to Speak with Confidence?</h2>
+            <p>
+                Join thousands of learners who've stopped studying and started speaking.
+                Your first lesson is completely free.
+            </p>
+            <div class="cta-buttons">
+                <a href="https://speakeasy-backend-823510409781.us-central1.run.app/health" class="btn btn-primary">
+                    Start Your Free Lesson →
+                </a>
+            </div>
+            <p style="margin-top: 2rem; font-size: 0.95rem; opacity: 0.8;">
+                No credit card required • AI-powered • Works on all devices
+            </p>
         </div>
-        <p style="margin-top: 2rem; color: var(--text-light);">
-            <strong>Current Status:</strong> Backend API ✓ Live | Mobile Apps 🔨 In Development | Web App 🚧 Coming Soon
-        </p>
     </section>
 
     <!-- Footer -->
     <footer>
-        <div class="footer-content">
-            <p style="font-size: 1.1rem; margin-bottom: 0.5rem;">&copy; 2025 SpeakEasy. All rights reserved.</p>
-            <div class="footer-links">
-                <a href="https://github.com/theoadoree/speakeasy" target="_blank">GitHub</a>
-                <a href="https://github.com/theoadoree/speakeasy/issues" target="_blank">Report Issue</a>
-                <a href="https://speakeasy-backend-823510409781.us-central1.run.app/health" target="_blank">API Status</a>
-                <a href="https://ollama.ai" target="_blank">Ollama</a>
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <div class="logo" style="justify-content: center; margin-bottom: 1.5rem;">
+                <span>🗣️</span> SpeakEasy
             </div>
-            <p style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.8;">
-                Powered by AI • Built with ❤️ • Privacy-First Architecture
+            <div class="footer-links">
+                <a href="#features">Features</a>
+                <a href="https://github.com/theoadoree/speakeasy" target="_blank">GitHub</a>
+                <a href="https://speakeasy-backend-823510409781.us-central1.run.app/health" target="_blank">API Status</a>
+                <a href="mailto:support@speakeasy-ai.app">Support</a>
+            </div>
+            <p style="margin-top: 1.5rem;">
+                &copy; 2025 SpeakEasy. Powered by advanced AI language models.
             </p>
         </div>
     </footer>
