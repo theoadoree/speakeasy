@@ -97,14 +97,19 @@ Keep responses conversational, encouraging, and under 3 sentences.`;
 // Practice conversation endpoint
 app.post('/api/practice/message', async (req, res) => {
   try {
-    const { message, lesson, userProfile } = req.body;
+    const { message, lesson, userProfile, targetLanguage, userLevel, conversationHistory } = req.body;
 
-    const systemPrompt = `You are a ${userProfile.targetLanguage} language practice partner.
-The user is practicing: ${lesson.topic}
-Their level: ${userProfile.level}
+    // Support both mobile app format (userProfile) and web format (targetLanguage + userLevel)
+    const lang = userProfile?.targetLanguage || targetLanguage || 'Spanish';
+    const level = userProfile?.level || userLevel || 'beginner';
+    const topic = lesson?.topic || 'general conversation';
+
+    const systemPrompt = `You are a ${lang} language practice partner.
+The user is practicing: ${topic}
+Their level: ${level}
 Keep responses natural, correcting errors gently, and staying on topic.`;
 
-    const fullPrompt = `${systemPrompt}\n\nUser said: ${message}\n\nRespond naturally in ${userProfile.targetLanguage}:`;
+    const fullPrompt = `${systemPrompt}\n\nUser said: ${message}\n\nRespond naturally in ${lang}:`;
 
     const response = await axios.post(`${OLLAMA_BASE_URL}/api/generate`, {
       model: LLAMA_MODEL,
