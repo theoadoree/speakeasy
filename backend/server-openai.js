@@ -17,6 +17,10 @@ const openai = new OpenAI({
   apiKey: OPENAI_API_KEY,
 });
 
+// Simple in-memory user store (in production, use a database)
+const users = new Map();
+const sessions = new Map();
+
 app.use(cors());
 app.use(express.json());
 
@@ -29,6 +33,127 @@ app.get('/health', (req, res) => {
     model: MODEL,
     apiKeyConfigured: !!OPENAI_API_KEY
   });
+});
+
+// Authentication endpoints
+app.post('/api/auth/login', (req, res) => {
+  try {
+    const { provider, token, name, email } = req.body;
+    
+    // Generate session ID
+    const sessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    
+    // Create or update user
+    const userId = `${provider}_${email || Date.now()}`;
+    const user = {
+      id: userId,
+      provider,
+      name: name || 'User',
+      email: email || null,
+      createdAt: new Date().toISOString(),
+      lastLogin: new Date().toISOString()
+    };
+    
+    users.set(userId, user);
+    sessions.set(sessionId, {
+      userId,
+      createdAt: new Date().toISOString(),
+      lastActivity: new Date().toISOString()
+    });
+    
+    res.json({
+      success: true,
+      sessionId,
+      user: {
+        id: user.id,
+        name: user.name,
+        provider: user.provider
+      }
+    });
+  } catch (error) {
+    console.error('Login error:', error.message);
+    res.status(500).json({ error: 'Login failed' });
+  }
+});
+
+app.post('/api/auth/profile', (req, res) => {
+  try {
+    const { sessionId, profile } = req.body;
+    
+    if (!sessionId || !sessions.has(sessionId)) {
+      return res.status(401).json({ error: 'Invalid session' });
+    }
+    
+    const session = sessions.get(sessionId);
+    const user = users.get(session.userId);
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    // Update user profile
+    user.profile = {
+      ...profile,
+      updatedAt: new Date().toISOString()
+    };
+    
+    users.set(session.userId, user);
+    session.lastActivity = new Date().toISOString();
+    sessions.set(sessionId, session);
+    
+    res.json({ success: true, user });
+  } catch (error) {
+    console.error('Profile update error:', error.message);
+    res.status(500).json({ error: 'Profile update failed' });
+  }
+});
+
+app.get('/api/auth/session/:sessionId', (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    
+    if (!sessions.has(sessionId)) {
+      return res.status(401).json({ error: 'Invalid session' });
+    }
+    
+    const session = sessions.get(sessionId);
+    const user = users.get(session.userId);
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    session.lastActivity = new Date().toISOString();
+    sessions.set(sessionId, session);
+    
+    res.json({
+      success: true,
+      user: {
+        id: user.id,
+        name: user.name,
+        provider: user.provider,
+        profile: user.profile
+      }
+    });
+  } catch (error) {
+    console.error('Session check error:', error.message);
+    res.status(500).json({ error: 'Session check failed' });
+  }
+});
+
+app.post('/api/auth/logout', (req, res) => {
+  try {
+    const { sessionId } = req.body;
+    
+    if (sessionId && sessions.has(sessionId)) {
+      sessions.delete(sessionId);
+    }
+    
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Logout error:', error.message);
+    res.status(500).json({ error: 'Logout failed' });
+  }
 });
 
 // Generic LLM completion endpoint

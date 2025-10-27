@@ -498,7 +498,7 @@
             <div class="onboarding-step active" id="step-auth">
                 <div class="modal-header">
                     <h2>Welcome to SpeakEasy 🗣️</h2>
-                    <p>Sign in to save your progress</p>
+                    <p>Sign in to save your progress and continue learning</p>
                 </div>
                 <div class="auth-buttons">
                     <button class="auth-btn" onclick="loginWithGoogle()">
@@ -506,7 +506,7 @@
                         Continue with Google
                     </button>
                     <button class="auth-btn" onclick="loginWithApple()">
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M15.769 1.29c-1.217.04-2.669.833-3.529 1.846-.775.913-1.417 2.326-1.232 3.686 1.372.049 2.777-.742 3.589-1.767.774-.975 1.344-2.345 1.172-3.765zM17.5 6.685c-2.107-.12-3.906 1.199-4.91 1.199-1.006 0-2.557-1.136-4.207-1.104-2.166.032-4.162 1.26-5.277 3.202-2.249 3.897-.576 9.673 1.614 12.84 1.072 1.55 2.348 3.29 4.031 3.227 1.619-.064 2.233-1.047 4.191-1.047 1.957 0 2.506 1.047 4.207 1.015 1.748-.032 2.862-1.581 3.934-3.132 1.237-1.792 1.748-3.526 1.78-3.622-.039-.016-3.414-1.31-3.447-5.199-.032-3.258 2.666-4.821 2.792-4.917-1.52-2.23-3.89-2.475-4.708-2.522z"/></svg>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M15.769 1.29c-1.217.04-2.669.833-3.529 1.846-.775.913-1.417 2.326-1.232 3.686 1.372.049 2.777-.742 3.589-1.767.774-.975 1.344-2.345 1.172-3.765zM17.5 6.685c-2.107-.12-3.906 1.199-4.91 1.199-1.006 0-2.557-1.136-4.207-1.104-2.162.032-4.162 1.26-5.277 3.202-2.249 3.897-.576 9.673 1.614 12.84 1.072 1.55 2.348 3.29 4.031 3.227 1.619-.064 2.233-1.047 4.191-1.047 1.957 0 2.506 1.047 4.207 1.015 1.748-.032 2.862-1.581 3.934-3.132 1.237-1.792 1.748-3.526 1.78-3.622-.039-.016-3.414-1.31-3.447-5.199-.032-3.258 2.666-4.821 2.792-4.917-1.52-2.23-3.89-2.475-4.708-2.522z"/></svg>
                         Continue with Apple
                     </button>
                 </div>
@@ -655,48 +655,125 @@
         const API_URL = 'https://speakeasy-backend-823510409781.us-central1.run.app';
         let user = null;
         let profile = null;
+        let sessionId = null;
         let selectedTargetLang = null;
 
         // Load saved user
-        function loadUser() {
-            const saved = localStorage.getItem('speakeasy_user');
+        async function loadUser() {
+            const savedSession = localStorage.getItem('speakeasy_session');
+            const savedUser = localStorage.getItem('speakeasy_user');
             const savedProfile = localStorage.getItem('speakeasy_profile');
             
-            if (saved && savedProfile) {
-                user = JSON.parse(saved);
-                profile = JSON.parse(savedProfile);
-                showMainApp();
+            if (savedSession && savedUser && savedProfile) {
+                try {
+                    // Verify session with server
+                    const response = await fetch(`${API_URL}/api/auth/session/${savedSession}`);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        user = data.user;
+                        profile = data.user.profile || JSON.parse(savedProfile);
+                        sessionId = savedSession;
+                        showMainApp();
+                    } else {
+                        // Session expired, clear local storage
+                        localStorage.removeItem('speakeasy_session');
+                        localStorage.removeItem('speakeasy_user');
+                        localStorage.removeItem('speakeasy_profile');
+                    }
+                } catch (error) {
+                    console.error('Session verification failed:', error);
+                    // Fallback to local storage
+                    user = JSON.parse(savedUser);
+                    profile = JSON.parse(savedProfile);
+                    showMainApp();
+                }
             }
         }
 
         loadUser();
 
         // Auth Functions
-        function loginWithGoogle() {
-            user = {
-                id: 'google_' + Date.now(),
-                name: 'User',
-                provider: 'google'
-            };
-            nextStep('auth', 'profile');
+        async function loginWithGoogle() {
+            try {
+                // Simulate Google OAuth (in production, use Google OAuth)
+                const response = await fetch(`${API_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        provider: 'google',
+                        name: 'Google User',
+                        email: 'user@gmail.com'
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    user = data.user;
+                    sessionId = data.sessionId;
+                    localStorage.setItem('speakeasy_session', sessionId);
+                    nextStep('auth', 'profile');
+                } else {
+                    alert('Login failed. Please try again.');
+                }
+            } catch (error) {
+                console.error('Google login error:', error);
+                alert('Login failed. Please try again.');
+            }
         }
 
-        function loginWithApple() {
-            user = {
-                id: 'apple_' + Date.now(),
-                name: 'User',
-                provider: 'apple'
-            };
-            nextStep('auth', 'profile');
+        async function loginWithApple() {
+            try {
+                // Simulate Apple OAuth (in production, use Apple OAuth)
+                const response = await fetch(`${API_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        provider: 'apple',
+                        name: 'Apple User',
+                        email: 'user@icloud.com'
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    user = data.user;
+                    sessionId = data.sessionId;
+                    localStorage.setItem('speakeasy_session', sessionId);
+                    nextStep('auth', 'profile');
+                } else {
+                    alert('Login failed. Please try again.');
+                }
+            } catch (error) {
+                console.error('Apple login error:', error);
+                alert('Login failed. Please try again.');
+            }
         }
 
-        function continueAsGuest() {
-            user = {
-                id: 'guest_' + Date.now(),
-                name: 'Guest',
-                provider: 'guest'
-            };
-            nextStep('auth', 'profile');
+        async function continueAsGuest() {
+            try {
+                const response = await fetch(`${API_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        provider: 'guest',
+                        name: 'Guest User'
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    user = data.user;
+                    sessionId = data.sessionId;
+                    localStorage.setItem('speakeasy_session', sessionId);
+                    nextStep('auth', 'profile');
+                } else {
+                    alert('Guest login failed. Please try again.');
+                }
+            } catch (error) {
+                console.error('Guest login error:', error);
+                alert('Guest login failed. Please try again.');
+            }
         }
 
         function selectTargetLang(elem) {
@@ -716,7 +793,7 @@
             }
         });
 
-        function completeOnboarding() {
+        async function completeOnboarding() {
             const userName = document.getElementById('userName').value.trim();
             const nativeLang = document.getElementById('nativeLang').value.trim() || 'English';
             
@@ -730,10 +807,32 @@
                 createdAt: Date.now()
             };
 
-            localStorage.setItem('speakeasy_user', JSON.stringify(user));
-            localStorage.setItem('speakeasy_profile', JSON.stringify(profile));
-            
-            showMainApp();
+            try {
+                // Save profile to server
+                const response = await fetch(`${API_URL}/api/auth/profile`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sessionId: sessionId,
+                        profile: profile
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    // Update local storage
+                    localStorage.setItem('speakeasy_user', JSON.stringify(user));
+                    localStorage.setItem('speakeasy_profile', JSON.stringify(profile));
+                    localStorage.setItem('speakeasy_session', sessionId);
+                    
+                    showMainApp();
+                } else {
+                    alert('Failed to save profile. Please try again.');
+                }
+            } catch (error) {
+                console.error('Profile save error:', error);
+                alert('Failed to save profile. Please try again.');
+            }
         }
 
         function nextStep(current, next) {
@@ -762,8 +861,23 @@
             document.getElementById('messageInput').focus();
         }
 
-        function logout() {
+        async function logout() {
             if (confirm('Sign out? Your progress will be saved.')) {
+                try {
+                    if (sessionId) {
+                        await fetch(`${API_URL}/api/auth/logout`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ sessionId })
+                        });
+                    }
+                } catch (error) {
+                    console.error('Logout error:', error);
+                }
+                
+                localStorage.removeItem('speakeasy_session');
+                localStorage.removeItem('speakeasy_user');
+                localStorage.removeItem('speakeasy_profile');
                 location.reload();
             }
         }
@@ -836,52 +950,10 @@
             
             const btn = document.getElementById('sendBtn');
             btn.disabled = true;
-            
-            // Show streaming response
-            const transcript = document.getElementById('transcript');
-            const streamingDiv = document.createElement('div');
-            streamingDiv.id = 'streamingResponse';
-            streamingDiv.className = 'transcript-line teacher';
-            streamingDiv.innerHTML = `
-                <div class="speaker-label teacher">Teacher</div>
-                <div class="transcript-text" id="streamingText"></div>
-            `;
-            transcript.appendChild(streamingDiv);
-            transcript.scrollTop = transcript.scrollHeight;
+            showTyping();
             
             try {
-                // Use streaming for instant feedback
-                const response = await fetch(`${API_URL}/api/practice/stream`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        message,
-                        targetLanguage: profile.targetLanguage,
-                        userLevel: profile.level || 'beginner'
-                    })
-                });
-                
-                if (!response.ok) throw new Error('Stream failed');
-                
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder();
-                let fullResponse = '';
-                
-                // Stream the response
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-                    
-                    const chunk = decoder.decode(value);
-                    fullResponse += chunk;
-                    
-                    // Update UI with streaming text
-                    document.getElementById('streamingText').textContent = fullResponse;
-                    transcript.scrollTop = transcript.scrollHeight;
-                }
-                
-                // Now get audio for the complete response
-                const audioResponse = await fetch(`${API_URL}/api/practice/message`, {
+                const response = await fetch(`${API_URL}/api/practice/message`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -892,24 +964,29 @@
                     })
                 });
                 
-                const audioData = await audioResponse.json();
+                const data = await response.json();
+                hideTyping();
+                
+                const reply = data.response || 'I\'m sorry, I didn\'t catch that.';
+                addTranscriptLine('teacher', reply);
                 
                 // Play OpenAI TTS audio if available
-                if (audioData.audioBuffer) {
-                    await playOpenAIAudio(audioData.audioBuffer);
+                if (data.audioBuffer) {
+                    await playOpenAIAudio(data.audioBuffer);
                 } else {
                     // Fallback to browser TTS
-                    await speakWithMouth(fullResponse, profile.targetLanguage);
+                    await speakWithMouth(reply, profile.targetLanguage);
                 }
                 
                 // Save conversation
                 saveMessage('user', message);
-                saveMessage('assistant', fullResponse);
+                saveMessage('assistant', reply);
                 
             } catch (error) {
-                console.error(error);
-                document.getElementById('streamingText').textContent = '⚠️ Connection error. Please try again.';
+                hideTyping();
                 animateMouth(false);
+                console.error(error);
+                addTranscriptLine('teacher', '⚠️ Connection error. Please try again.');
             } finally {
                 btn.disabled = false;
                 input.focus();
