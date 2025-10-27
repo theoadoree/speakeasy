@@ -3,741 +3,840 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SpeakEasy - Master Any Language Through Conversation</title>
-    <meta name="description" content="Learn languages naturally with AI-powered conversation. No apps to install. Start speaking confidently in minutes.">
-
+    <title>SpeakEasy - AI Voice Language Tutor</title>
+    <meta name="description" content="Master any language through AI-powered voice conversations. Start speaking confidently in minutes.">
+    
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗣️</text></svg>">
-
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
         :root {
             --primary: #6366f1;
             --primary-dark: #4f46e5;
             --primary-light: #818cf8;
             --accent: #ec4899;
             --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
             --dark: #0f172a;
             --dark-secondary: #1e293b;
             --gray: #64748b;
             --light: #f8fafc;
             --white: #ffffff;
+            --glass: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
         }
-
-        html {
-            scroll-behavior: smooth;
-            font-size: 16px;
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-
+        
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            color: var(--dark);
-            background: var(--white);
-            line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-
-        /* Navigation */
-        nav {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-            z-index: 1000;
-        }
-
-        nav.scrolled {
-            background: rgba(255, 255, 255, 0.96);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
-            border-bottom-color: rgba(0,0,0,0.06);
-        }
-
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 1.25rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2.5rem;
-            align-items: center;
-        }
-
-        .nav-links a {
-            color: var(--dark);
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 0.95rem;
-            transition: color 0.2s;
-        }
-
-        .nav-links a:hover {
-            color: var(--primary);
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.875rem 1.75rem;
-            border-radius: 100px;
-            font-weight: 600;
-            font-size: 0.95rem;
-            text-decoration: none;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: none;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
-        }
-
-        .btn-secondary {
-            background: var(--white);
-            color: var(--primary);
-            border: 2px solid var(--primary);
-        }
-
-        .btn-secondary:hover {
-            background: var(--primary);
-            color: white;
-        }
-
-        /* Hero Section */
-        .hero {
-            margin-top: 80px;
-            min-height: calc(100vh - 80px);
-            display: flex;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--white);
+            overflow-x: hidden;
+            position: relative;
         }
-
-        .hero::before {
+        
+        body::before {
             content: '';
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background:
-                radial-gradient(circle at 20% 50%, rgba(236, 72, 153, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(99, 102, 241, 0.15) 0%, transparent 50%);
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(236, 72, 153, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(99, 102, 241, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 60%, rgba(16, 185, 129, 0.2) 0%, transparent 50%);
             animation: gradientShift 20s ease infinite;
+            z-index: -1;
         }
-
+        
         @keyframes gradientShift {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.8; }
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
         }
-
-        .hero-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 4rem 2rem;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4rem;
+        
+        .app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
+            padding: 2rem;
             position: relative;
             z-index: 1;
         }
-
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 0.75rem;
-            background: rgba(255, 255, 255, 0.12);
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            border-radius: 999px;
-            color: white;
-            font-weight: 600;
+        
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInUp 1s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .logo {
+            font-size: 3rem;
+            font-weight: 900;
             margin-bottom: 1rem;
-            backdrop-filter: blur(6px);
-        }
-
-        .hero-content h1 {
-            font-size: 3.5rem;
-            font-weight: 800;
-            line-height: 1.1;
-            margin-bottom: 1.5rem;
-            color: white;
-            letter-spacing: -0.02em;
-        }
-
-        .hero-content .gradient-text {
             background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.8) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-        }
-
-        .hero-content p {
-            font-size: 1.25rem;
-            color: rgba(255, 255, 255, 0.9);
-            margin-bottom: 2.5rem;
-            line-height: 1.7;
-        }
-
-        .hero-cta {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .hero-cta .btn-primary {
-            background: white;
-            color: var(--primary);
-            font-size: 1.1rem;
-            padding: 1.125rem 2.5rem;
-        }
-
-        .hero-cta .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid white;
-            color: white;
-            backdrop-filter: blur(10px);
-            font-size: 1.1rem;
-            padding: 1.125rem 2.5rem;
-        }
-
-        .hero-visual {
-            position: relative;
-            height: 500px;
-        }
-
-        .mockup-window {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
-            padding: 3rem 2.5rem;
-            position: relative;
-            animation: float 6s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-        }
-
-        .mockup-header {
-            font-size: 1.75rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            color: var(--dark);
-        }
-
-        .mockup-subtitle {
-            color: var(--gray);
-            margin-bottom: 2rem;
-        }
-
-        .chat-bubble {
-            background: var(--light);
-            padding: 1rem 1.25rem;
-            border-radius: 15px;
-            margin-bottom: 1rem;
-            animation: slideIn 0.5s ease;
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .chat-bubble.user {
-            background: var(--primary);
-            color: white;
-            margin-left: 3rem;
-        }
-
-        /* Features Section */
-        .features {
-            padding: 6rem 2rem;
-            background: var(--white);
-        }
-
-        .section-header {
-            text-align: center;
-            max-width: 700px;
-            margin: 0 auto 4rem;
-        }
-
-        .section-header h2 {
-            font-size: 2.75rem;
-            font-weight: 800;
-            margin-bottom: 1rem;
-            color: var(--dark);
-        }
-
-        .section-header p {
-            font-size: 1.2rem;
-            color: var(--gray);
-        }
-
-        .features-grid {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2.5rem;
-        }
-
-        .feature-card {
-            padding: 2.5rem;
-            border-radius: 20px;
-            background: white;
-            border: 1px solid rgba(0, 0, 0, 0.06);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
-            border-color: var(--primary-light);
-        }
-
-        .feature-card::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(800px circle at var(--x, 0) var(--y, 0), rgba(99, 102, 241, 0.08), transparent 40%);
-            transition: opacity 0.2s ease;
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .feature-card:hover::after { opacity: 1; }
-
-        .feature-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 15px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .feature-card h3 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 0.75rem;
-            color: var(--dark);
-        }
-
-        .feature-card p {
-            color: var(--gray);
-            line-height: 1.7;
-        }
-
-        /* CTA Section */
-        .cta-section {
-            padding: 6rem 2rem;
-            background: linear-gradient(135deg, var(--dark) 0%, var(--dark-secondary) 100%);
-            color: white;
-            text-align: center;
-        }
-
-        .cta-content {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .cta-content h2 {
-            font-size: 3rem;
-            font-weight: 800;
-            margin-bottom: 1.5rem;
-        }
-
-        .cta-content p {
-            font-size: 1.3rem;
-            margin-bottom: 2.5rem;
-            color: rgba(255, 255, 255, 0.9);
-        }
-
-        .cta-buttons {
-            display: flex;
             gap: 1rem;
-            justify-content: center;
-            flex-wrap: wrap;
         }
-
-        .cta-buttons .btn-primary {
+        
+        .tagline {
+            font-size: 1.5rem;
+            font-weight: 500;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
             font-size: 1.1rem;
-            padding: 1.125rem 2.5rem;
-        }
-
-        /* Footer */
-        footer {
-            background: var(--dark);
-            color: rgba(255, 255, 255, 0.7);
-            padding: 3rem 2rem;
-            text-align: center;
-        }
-
-        /* How It Works */
-        .how {
-            padding: 6rem 2rem;
-            background: linear-gradient(180deg, var(--light) 0%, #fff 100%);
-        }
-        .how-grid {
-            max-width: 1100px;
+            opacity: 0.7;
+            max-width: 600px;
             margin: 0 auto;
+        }
+        
+        .main-interface {
+            width: 100%;
+            max-width: 800px;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+            animation: slideInUp 1.2s ease-out;
+        }
+        
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .language-selector {
+            margin-bottom: 2rem;
+        }
+        
+        .language-selector label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+        
+        .language-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
         }
-        .step-card {
-            background: white;
-            border: 1px solid rgba(0,0,0,0.06);
+        
+        .language-option {
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .language-option:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .language-option.selected {
+            background: var(--primary);
+            border-color: var(--primary-light);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+        }
+        
+        .voice-interface {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .voice-button {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            font-size: 3rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 15px 35px rgba(99, 102, 241, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .voice-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 20px 45px rgba(99, 102, 241, 0.5);
+        }
+        
+        .voice-button:active {
+            transform: scale(0.95);
+        }
+        
+        .voice-button.listening {
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        .voice-button.processing {
+            background: linear-gradient(135deg, var(--warning) 0%, #d97706 100%);
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 15px 35px rgba(16, 185, 129, 0.4); }
+            50% { transform: scale(1.1); box-shadow: 0 20px 45px rgba(16, 185, 129, 0.6); }
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .voice-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.3s ease;
+        }
+        
+        .voice-button.listening::before {
+            width: 100%;
+            height: 100%;
+            animation: ripple 1.5s ease-out infinite;
+        }
+        
+        @keyframes ripple {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+        }
+        
+        .voice-status {
+            margin-top: 1rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+            opacity: 0.9;
+        }
+        
+        .conversation-area {
+            background: rgba(255, 255, 255, 0.05);
             border-radius: 16px;
-            padding: 1.75rem;
-            transition: transform .25s ease;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
         }
-        .step-card:hover { transform: translateY(-4px); }
-        .step-index { font-size: .9rem; color: var(--primary); font-weight: 700; }
-        .step-title { font-size: 1.25rem; font-weight: 700; margin: .25rem 0 .5rem; color: var(--dark); }
-        .step-desc { color: var(--gray); }
-
-        /* Pricing */
-        .pricing { padding: 6rem 2rem; background: var(--white); }
-        .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; max-width: 1100px; margin: 0 auto; }
-        .plan { background: white; border: 1px solid rgba(0,0,0,0.06); border-radius: 20px; padding: 2rem; }
-        .plan.popular { border-color: var(--primary); box-shadow: 0 20px 50px rgba(99,102,241,.15); }
-        .plan .label { display:inline-block; padding:.25rem .5rem; border-radius:999px; font-size:.75rem; font-weight:700; background: var(--light); color: var(--primary); margin-bottom: .75rem; }
-        .price { font-size: 2.25rem; font-weight: 800; color: var(--dark); margin: .5rem 0 1rem; }
-        .features-list { list-style: none; display: grid; gap: .5rem; margin: 1rem 0 1.5rem; color: var(--gray); }
-        .features-list li::before { content: '✓'; color: var(--success); margin-right: .5rem; }
-        .plan .btn { width: 100%; justify-content: center; }
-
-        .footer-links {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            margin: 1.5rem 0;
-            flex-wrap: wrap;
+        
+        .conversation-area::-webkit-scrollbar {
+            width: 6px;
         }
-
-        .footer-links a {
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: none;
-            transition: color 0.2s;
+        
+        .conversation-area::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
         }
-
-        .footer-links a:hover {
+        
+        .conversation-area::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+        
+        .message {
+            margin-bottom: 1rem;
+            animation: messageSlide 0.5s ease-out;
+        }
+        
+        @keyframes messageSlide {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .message.user {
+            text-align: right;
+        }
+        
+        .message-bubble {
+            display: inline-block;
+            padding: 1rem 1.5rem;
+            border-radius: 18px;
+            max-width: 80%;
+            word-wrap: break-word;
+            position: relative;
+        }
+        
+        .message.user .message-bubble {
+            background: var(--primary);
             color: white;
         }
-
-        /* Responsive */
-        @media (max-width: 968px) {
-            .hero-container {
-                grid-template-columns: 1fr;
-                gap: 3rem;
+        
+        .message.assistant .message-bubble {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+        
+        .message.system .message-bubble {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+            text-align: center;
+            max-width: 100%;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+        
+        .control-button {
+            padding: 0.75rem 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .control-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .control-button.active {
+            background: var(--primary);
+            border-color: var(--primary-light);
+        }
+        
+        .loading-dots {
+            display: inline-flex;
+            gap: 0.5rem;
+        }
+        
+        .loading-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: loadingBounce 1.4s ease-in-out infinite both;
+        }
+        
+        .loading-dot:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dot:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes loadingBounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+        
+        .permission-banner {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            animation: slideDown 0.5s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .permission-banner h3 {
+            color: #fca5a5;
+            margin-bottom: 0.5rem;
+        }
+        
+        .permission-banner p {
+            opacity: 0.8;
+            margin-bottom: 1rem;
+        }
+        
+        .permission-button {
+            background: var(--error);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .permission-button:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+        
+        .floating-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); opacity: 0.3; }
+            50% { transform: translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px); opacity: 0.6; }
+        }
+        
+        @media (max-width: 768px) {
+            .app-container {
+                padding: 1rem;
             }
-
-            .hero-visual {
-                height: 400px;
-            }
-
-            .hero-content h1 {
+            
+            .logo {
                 font-size: 2.5rem;
             }
-
-            .features-grid {
-                grid-template-columns: 1fr;
-                gap: 2rem;
+            
+            .tagline {
+                font-size: 1.3rem;
             }
-            .how-grid, .pricing-grid { grid-template-columns: 1fr; }
-
-            .nav-links a:not(.btn) {
-                display: none;
+            
+            .main-interface {
+                padding: 1.5rem;
             }
-
-            .section-header h2 {
-                font-size: 2rem;
+            
+            .voice-button {
+                width: 100px;
+                height: 100px;
+                font-size: 2.5rem;
             }
-
-            .cta-content h2 {
-                font-size: 2rem;
+            
+            .language-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
-        }
-
-        @media (max-width: 640px) {
-            .hero-cta {
+            
+            .controls {
                 flex-direction: column;
+                align-items: center;
             }
-
-            .hero-cta .btn {
+            
+            .control-button {
                 width: 100%;
-                justify-content: center;
-            }
-
-            .hero-content h1 {
-                font-size: 2rem;
-            }
-
-            .hero-content p {
-                font-size: 1.1rem;
+                max-width: 200px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav>
-        <div class="nav-container">
+    <div class="floating-particles" id="particles"></div>
+    
+    <div class="app-container">
+        <div class="header">
             <div class="logo">
-                <span>🗣️</span> SpeakEasy
+                <span>🗣️</span>
+                SpeakEasy
             </div>
-            <div class="nav-links">
-                <a href="#features">Features</a>
-                <a href="#how-it-works">How It Works</a>
-                <a href="#pricing">Pricing</a>
-                <a href="/chat.html" class="btn btn-primary">
-                    Try Free Demo →
-                </a>
-            </div>
+            <div class="tagline">Master Any Language Through AI Voice Conversations</div>
+            <div class="subtitle">Start speaking confidently in minutes. No apps to install.</div>
         </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-container">
-            <div class="hero-content">
-                <div class="hero-badge">✨ New: Real-time voice feedback</div>
-                <h1>
-                    <span class="gradient-text">Master Any Language</span><br>
-                    Through Real Conversation
-                </h1>
-                <p>
-                    Stop memorizing vocabulary lists. Start having real conversations with AI tutors who adapt to your level. Learn naturally, speak confidently.
-                </p>
-                <div class="hero-cta">
-                    <a href="/chat.html" class="btn btn-primary">
-                        Start Learning Free →
-                    </a>
-                    <a href="#features" class="btn btn-secondary">
-                        See How It Works
-                    </a>
-                </div>
+        
+        <div class="main-interface">
+            <div id="permissionBanner" class="permission-banner" style="display: none;">
+                <h3>🎤 Microphone Access Required</h3>
+                <p>SpeakEasy needs access to your microphone to provide voice-based language learning.</p>
+                <button class="permission-button" onclick="requestMicrophonePermission()">
+                    Allow Microphone Access
+                </button>
             </div>
-            <div class="hero-visual">
-                <div class="mockup-window">
-                    <div class="mockup-header">Practice Spanish 🇪🇸</div>
-                    <div class="mockup-subtitle">Level A2 • Beginner</div>
-                    <div class="chat-bubble">
-                        ¿Cómo estuvo tu fin de semana?
+            
+            <div class="language-selector">
+                <label>Choose Your Target Language:</label>
+                <div class="language-grid">
+                    <div class="language-option" data-lang="Spanish" onclick="selectLanguage('Spanish')">
+                        🇪🇸 Spanish
                     </div>
-                    <div class="chat-bubble user">
-                        Fue muy bueno! Fui al parque.
+                    <div class="language-option" data-lang="French" onclick="selectLanguage('French')">
+                        🇫🇷 French
                     </div>
-                    <div class="chat-bubble">
-                        ¡Excelente! "Fui" es perfecto. ¿Con quién fuiste?
+                    <div class="language-option" data-lang="German" onclick="selectLanguage('German')">
+                        🇩🇪 German
+                    </div>
+                    <div class="language-option" data-lang="Italian" onclick="selectLanguage('Italian')">
+                        🇮🇹 Italian
+                    </div>
+                    <div class="language-option" data-lang="Portuguese" onclick="selectLanguage('Portuguese')">
+                        🇵🇹 Portuguese
+                    </div>
+                    <div class="language-option" data-lang="Japanese" onclick="selectLanguage('Japanese')">
+                        🇯🇵 Japanese
+                    </div>
+                    <div class="language-option" data-lang="Korean" onclick="selectLanguage('Korean')">
+                        🇰🇷 Korean
+                    </div>
+                    <div class="language-option" data-lang="Chinese" onclick="selectLanguage('Chinese')">
+                        🇨🇳 Chinese
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
-
-    <!-- How It Works -->
-    <section id="how-it-works" class="how">
-        <div class="section-header">
-            <h2>How It Works</h2>
-            <p>Three simple steps to start speaking confidently.</p>
-        </div>
-        <div class="how-grid">
-            <div class="step-card">
-                <div class="step-index">01</div>
-                <div class="step-title">Tell us your goals</div>
-                <div class="step-desc">Pick your target language, level and interests. We personalize everything.</div>
+            
+            <div class="voice-interface">
+                <button class="voice-button" id="voiceButton" onclick="toggleVoiceRecording()">
+                    🎤
+                </button>
+                <div class="voice-status" id="voiceStatus">Click to start speaking</div>
             </div>
-            <div class="step-card">
-                <div class="step-index">02</div>
-                <div class="step-title">Practice real conversations</div>
-                <div class="step-desc">Chat by voice or text. Get gentle corrections and explanations instantly.</div>
+            
+            <div class="conversation-area" id="conversationArea">
+                <div class="message system">
+                    <div class="message-bubble">
+                        Welcome to SpeakEasy! Select a language above and click the microphone to start practicing. I'll help you learn through natural conversation.
+                    </div>
+                </div>
             </div>
-            <div class="step-card">
-                <div class="step-index">03</div>
-                <div class="step-title">Grow your fluency</div>
-                <div class="step-desc">Lessons adapt to you. Track progress and build confidence every day.</div>
+            
+            <div class="controls">
+                <button class="control-button" onclick="clearConversation()">🗑️ Clear Chat</button>
+                <button class="control-button" onclick="toggleAutoSpeak()" id="autoSpeakBtn">🔊 Auto-speak: ON</button>
+                <button class="control-button" onclick="showSettings()">⚙️ Settings</button>
             </div>
         </div>
-    </section>
-
-    <!-- Features Section -->
-    <section id="features" class="features">
-        <div class="section-header">
-            <h2>Everything You Need to Become Fluent</h2>
-            <p>Powered by advanced AI. Designed for real humans.</p>
-        </div>
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon">💬</div>
-                <h3>Real Conversations</h3>
-                <p>Practice speaking with AI tutors that understand context, correct mistakes naturally, and adapt to your skill level.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🎯</div>
-                <h3>Personalized Learning</h3>
-                <p>AI creates custom lessons based on your interests, learning style, and goals. No generic content.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">📚</div>
-                <h3>Interactive Stories</h3>
-                <p>Learn through engaging stories written for your level. Tap any word for instant explanations.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🎤</div>
-                <h3>Voice Practice</h3>
-                <p>Speak naturally and get real-time pronunciation feedback. Build confidence through practice.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">⚡</div>
-                <h3>Instant Feedback</h3>
-                <p>Get corrections and explanations in real-time. Learn from every mistake immediately.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🌍</div>
-                <h3>15+ Languages</h3>
-                <p>Spanish, French, German, Italian, Japanese, Korean, Chinese, Portuguese, and more.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Pricing -->
-    <section id="pricing" class="pricing">
-        <div class="section-header">
-            <h2>Simple, Transparent Pricing</h2>
-            <p>Start free. Upgrade anytime.</p>
-        </div>
-        <div class="pricing-grid">
-            <div class="plan">
-                <span class="label">Starter</span>
-                <div class="price">$0<span style="font-size: .9rem; color: var(--gray);">/mo</span></div>
-                <ul class="features-list">
-                    <li>AI chat practice (limited)</li>
-                    <li>Interactive stories</li>
-                    <li>Vocabulary explainers</li>
-                </ul>
-                <a href="/chat.html" class="btn btn-secondary">Try Free</a>
-            </div>
-            <div class="plan popular">
-                <span class="label">Most Popular</span>
-                <div class="price">$12<span style="font-size: .9rem; color: var(--gray);">/mo</span></div>
-                <ul class="features-list">
-                    <li>Unlimited AI conversations</li>
-                    <li>Pronunciation feedback</li>
-                    <li>Personalized lesson plans</li>
-                </ul>
-                <a href="/chat.html" class="btn btn-primary">Start Now</a>
-            </div>
-            <div class="plan">
-                <span class="label">Pro</span>
-                <div class="price">$29<span style="font-size: .9rem; color: var(--gray);">/mo</span></div>
-                <ul class="features-list">
-                    <li>Advanced analytics</li>
-                    <li>Import your own content</li>
-                    <li>Priority support</li>
-                </ul>
-                <a href="/chat.html" class="btn btn-secondary">Go Pro</a>
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA Section -->
-    <section class="cta-section">
-        <div class="cta-content">
-            <h2>Ready to Speak with Confidence?</h2>
-            <p>
-                Join thousands of learners who've stopped studying and started speaking.
-                Your first lesson is completely free.
-            </p>
-            <div class="cta-buttons">
-                <a href="/chat.html" class="btn btn-primary">
-                    Start Your Free Lesson →
-                </a>
-            </div>
-            <p style="margin-top: 2rem; font-size: 0.95rem; opacity: 0.8;">
-                No credit card required • AI-powered • Works on all devices
-            </p>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer>
-        <div style="max-width: 1200px; margin: 0 auto;">
-            <div class="logo" style="justify-content: center; margin-bottom: 1.5rem;">
-                <span>🗣️</span> SpeakEasy
-            </div>
-            <div class="footer-links">
-                <a href="#features">Features</a>
-                <a href="https://github.com/theoadoree/speakeasy" target="_blank">GitHub</a>
-                <a href="https://speakeasy-backend-823510409781.us-central1.run.app/health" target="_blank">API Status</a>
-                <a href="mailto:support@speakeasy-ai.app">Support</a>
-            </div>
-            <p style="margin-top: 1.5rem;">
-                &copy; 2025 SpeakEasy. Powered by advanced AI language models.
-            </p>
-        </div>
-    </footer>
+    </div>
+    
     <script>
-      // Nav shadow on scroll
-      const nav = document.querySelector('nav');
-      const featureCards = document.querySelectorAll('.feature-card');
-      window.addEventListener('scroll', () => {
-        if (window.scrollY > 10) nav.classList.add('scrolled'); else nav.classList.remove('scrolled');
-      });
-      // Feature card interactive glow
-      featureCards.forEach(card => {
-        card.addEventListener('mousemove', (e) => {
-          const rect = card.getBoundingClientRect();
-          card.style.setProperty('--x', `${e.clientX - rect.left}px`);
-          card.style.setProperty('--y', `${e.clientY - rect.top}px`);
+        const API_URL = 'https://speakeasy-backend-823510409781.us-central1.run.app';
+        
+        let selectedLanguage = 'Spanish';
+        let isRecording = false;
+        let isProcessing = false;
+        let conversationHistory = [];
+        let autoSpeak = true;
+        let recognition = null;
+        let speechSynthesis = window.speechSynthesis;
+        
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', () => {
+            createFloatingParticles();
+            selectLanguage('Spanish');
+            initializeSpeechRecognition();
+            requestMicrophonePermission();
         });
-      });
+        
+        // Create floating particles animation
+        function createFloatingParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 50;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        // Language selection
+        function selectLanguage(language) {
+            selectedLanguage = language;
+            document.querySelectorAll('.language-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            document.querySelector(`[data-lang="${language}"]`).classList.add('selected');
+            
+            addSystemMessage(`Language changed to ${language}. Ready to practice!`);
+        }
+        
+        // Initialize speech recognition
+        function initializeSpeechRecognition() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                showPermissionBanner('Speech recognition is not supported in this browser.');
+                return;
+            }
+            
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = getLanguageCode(selectedLanguage);
+            
+            recognition.onstart = () => {
+                isRecording = true;
+                updateVoiceButton('listening');
+                updateVoiceStatus('Listening... Speak now!');
+            };
+            
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                handleUserSpeech(transcript);
+            };
+            
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                isRecording = false;
+                updateVoiceButton('idle');
+                updateVoiceStatus('Error occurred. Click to try again.');
+            };
+            
+            recognition.onend = () => {
+                isRecording = false;
+                if (!isProcessing) {
+                    updateVoiceButton('idle');
+                    updateVoiceStatus('Click to start speaking');
+                }
+            };
+        }
+        
+        // Request microphone permission
+        function requestMicrophonePermission() {
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(() => {
+                        hidePermissionBanner();
+                        addSystemMessage('Microphone access granted! You can now start speaking.');
+                    })
+                    .catch((error) => {
+                        console.error('Microphone permission denied:', error);
+                        showPermissionBanner('Microphone access is required for voice learning.');
+                    });
+            } else {
+                showPermissionBanner('Microphone access is not supported in this browser.');
+            }
+        }
+        
+        // Show/hide permission banner
+        function showPermissionBanner(message) {
+            const banner = document.getElementById('permissionBanner');
+            banner.querySelector('p').textContent = message;
+            banner.style.display = 'block';
+        }
+        
+        function hidePermissionBanner() {
+            document.getElementById('permissionBanner').style.display = 'none';
+        }
+        
+        // Toggle voice recording
+        function toggleVoiceRecording() {
+            if (!recognition) {
+                showPermissionBanner('Speech recognition is not available.');
+                return;
+            }
+            
+            if (isRecording) {
+                recognition.stop();
+            } else if (!isProcessing) {
+                recognition.lang = getLanguageCode(selectedLanguage);
+                recognition.start();
+            }
+        }
+        
+        // Handle user speech
+        async function handleUserSpeech(transcript) {
+            isProcessing = true;
+            updateVoiceButton('processing');
+            updateVoiceStatus('Processing your speech...');
+            
+            addMessage('user', transcript);
+            conversationHistory.push({ role: 'user', content: transcript });
+            
+            try {
+                const response = await fetch(`${API_URL}/api/practice/message`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: transcript,
+                        conversationHistory: conversationHistory,
+                        targetLanguage: selectedLanguage,
+                        userLevel: 'beginner'
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const aiResponse = data.response || data.message || 'Sorry, I didn\'t understand that.';
+                
+                addMessage('assistant', aiResponse);
+                conversationHistory.push({ role: 'assistant', content: aiResponse });
+                
+                if (autoSpeak) {
+                    speakText(aiResponse, selectedLanguage);
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                addSystemMessage('Sorry, there was an error processing your request. Please try again.');
+            } finally {
+                isProcessing = false;
+                updateVoiceButton('idle');
+                updateVoiceStatus('Click to start speaking');
+            }
+        }
+        
+        // Add message to conversation
+        function addMessage(role, content) {
+            const conversationArea = document.getElementById('conversationArea');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.className = 'message-bubble';
+            bubbleDiv.textContent = content;
+            
+            messageDiv.appendChild(bubbleDiv);
+            conversationArea.appendChild(messageDiv);
+            conversationArea.scrollTop = conversationArea.scrollHeight;
+        }
+        
+        function addSystemMessage(content) {
+            addMessage('system', content);
+        }
+        
+        // Update voice button state
+        function updateVoiceButton(state) {
+            const button = document.getElementById('voiceButton');
+            button.className = `voice-button ${state}`;
+            
+            const icons = {
+                idle: '🎤',
+                listening: '🔴',
+                processing: '⏳'
+            };
+            
+            button.textContent = icons[state] || '🎤';
+        }
+        
+        // Update voice status
+        function updateVoiceStatus(status) {
+            document.getElementById('voiceStatus').textContent = status;
+        }
+        
+        // Speak text using speech synthesis
+        function speakText(text, language) {
+            if (!speechSynthesis) return;
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = getLanguageCode(language);
+            utterance.rate = 0.9;
+            utterance.pitch = 1.0;
+            utterance.volume = 0.8;
+            
+            // Try to find a good voice for the language
+            const voices = speechSynthesis.getVoices();
+            const langCode = getLanguageCode(language);
+            const matchingVoice = voices.find(voice => 
+                voice.lang.startsWith(langCode) && voice.name.includes('Google')
+            ) || voices.find(voice => voice.lang.startsWith(langCode));
+            
+            if (matchingVoice) {
+                utterance.voice = matchingVoice;
+            }
+            
+            speechSynthesis.speak(utterance);
+        }
+        
+        // Get language code for speech recognition/synthesis
+        function getLanguageCode(language) {
+            const langMap = {
+                'Spanish': 'es-ES',
+                'French': 'fr-FR',
+                'German': 'de-DE',
+                'Italian': 'it-IT',
+                'Portuguese': 'pt-PT',
+                'Japanese': 'ja-JP',
+                'Korean': 'ko-KR',
+                'Chinese': 'zh-CN'
+            };
+            return langMap[language] || 'en-US';
+        }
+        
+        // Control functions
+        function clearConversation() {
+            conversationHistory = [];
+            document.getElementById('conversationArea').innerHTML = `
+                <div class="message system">
+                    <div class="message-bubble">
+                        Conversation cleared. Ready to start fresh!
+                    </div>
+                </div>
+            `;
+        }
+        
+        function toggleAutoSpeak() {
+            autoSpeak = !autoSpeak;
+            const button = document.getElementById('autoSpeakBtn');
+            button.textContent = `🔊 Auto-speak: ${autoSpeak ? 'ON' : 'OFF'}`;
+            button.classList.toggle('active', autoSpeak);
+        }
+        
+        function showSettings() {
+            addSystemMessage('Settings: Auto-speak is ' + (autoSpeak ? 'enabled' : 'disabled') + '. Language: ' + selectedLanguage);
+        }
+        
+        // Handle page visibility change
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && isRecording) {
+                recognition.stop();
+            }
+        });
+        
+        // Handle beforeunload
+        window.addEventListener('beforeunload', () => {
+            if (isRecording) {
+                recognition.stop();
+            }
+        });
     </script>
-  </body>
+</body>
 </html>
-<!-- Test deployment Mon Oct 27 09:23:22 AST 2025 -->
 <!-- Updated Mon Oct 27 09:45:22 AST 2025 -->
+<!-- Voice-focused redesign Mon Oct 27 10:00:00 AST 2025 -->
