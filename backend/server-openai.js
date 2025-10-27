@@ -103,17 +103,19 @@ Keep responses conversational, encouraging, and under 3 sentences.`;
 // Practice conversation endpoint
 app.post('/api/practice/message', async (req, res) => {
   try {
-    const { message, lesson, userProfile, targetLanguage, userLevel, conversationHistory } = req.body;
+    const { message, lesson, userProfile, targetLanguage, userLevel, conversationHistory, useVoice } = req.body;
 
     // Support both mobile app format (userProfile) and web format (targetLanguage + userLevel)
     const lang = userProfile?.targetLanguage || targetLanguage || 'Spanish';
     const level = userProfile?.level || userLevel || 'beginner';
     const topic = lesson?.topic || 'general conversation';
 
-    const systemPrompt = `You are a ${lang} language practice partner.
+    const systemPrompt = `You are a friendly female ${lang} language tutor.
 The user is practicing: ${topic}
 Their level: ${level}
-Keep responses natural, correcting errors gently, and staying on topic.
+Keep responses natural, warm, encouraging, and conversational.
+Gently correct errors when needed.
+Keep responses concise (2-3 sentences) for natural conversation.
 Respond in ${lang}.`;
 
     const completion = await openai.chat.completions.create({
@@ -123,12 +125,33 @@ Respond in ${lang}.`;
         { role: 'user', content: message }
       ],
       temperature: 0.8,
-      max_tokens: 200,
+      max_tokens: 150,
     });
 
+    const responseText = completion.choices[0].message.content.trim();
+
+    // If voice is requested, generate audio using OpenAI TTS
+    let audioUrl = null;
+    if (useVoice) {
+      try {
+        const mp3 = await openai.audio.speech.create({
+          model: "tts-1",
+          voice: "nova", // Female voice - warm and natural
+          input: responseText,
+          speed: 0.95
+        });
+        
+        // For now, return without audio URL (would need storage solution)
+        // audioUrl = await uploadAudioToStorage(mp3);
+      } catch (audioError) {
+        console.error('TTS error:', audioError.message);
+      }
+    }
+
     res.json({
-      response: completion.choices[0].message.content.trim(),
-      model: MODEL
+      response: responseText,
+      model: MODEL,
+      audioUrl: audioUrl
     });
   } catch (error) {
     console.error('Practice error:', error.message);
