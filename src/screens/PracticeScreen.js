@@ -209,8 +209,9 @@ export default function PracticeScreen() {
     return new Promise((resolve) => {
       Speech.speak(text, {
         language: getLanguageCode(userProfile?.targetLanguage),
-        pitch: 1.0,
-        rate: 0.85,
+        voice: getPreferredVoice(userProfile?.targetLanguage),
+        pitch: 1.05,
+        rate: 0.92,
         onDone: () => {
           setIsSpeaking(false);
           resolve();
@@ -240,6 +241,34 @@ export default function PracticeScreen() {
       Arabic: 'ar-SA',
     };
     return languageCodes[language] || 'en-US';
+  };
+
+  /**
+   * Choose a more natural built-in voice when available
+   * Note: On iOS/Android the available voices vary by device
+   */
+  const getPreferredVoice = (language) => {
+    try {
+      const langCode = getLanguageCode(language);
+      // Prefer enhanced voices if available
+      const preferredNames = [
+        'Google US English',
+        'Google UK English Female',
+        'com.apple.ttsbundle.Samantha-compact',
+        'com.apple.ttsbundle.Karen-compact',
+      ];
+      // expo-speech exposes getAvailableVoicesAsync in newer SDKs
+      if (Speech.getAvailableVoicesAsync) {
+        Speech.getAvailableVoicesAsync().then((voices) => {
+          const byLang = voices?.filter((v) => v.language?.startsWith(langCode.slice(0, 2)));
+          const named = byLang?.find((v) => preferredNames.includes(v.name));
+          return named?.identifier || byLang?.[0]?.identifier;
+        }).catch(() => undefined);
+      }
+    } catch (_) {
+      // ignore and fallback to default
+    }
+    return undefined;
   };
 
   /**

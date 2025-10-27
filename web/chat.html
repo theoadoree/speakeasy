@@ -128,6 +128,12 @@
             gap: 10px;
         }
 
+        .controls { display: flex; align-items: center; gap: 10px; }
+        .pill { display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; border:1px solid #e2e8f0; background:#fff; color:#334155; font-size:.9rem; }
+        .pill select { border:none; background:transparent; outline:none; font-family:'Inter', sans-serif; color:#334155; }
+        .pill input[type="range"] { accent-color: #6366f1; }
+        .pill button { background:transparent; border:none; cursor:pointer; }
+
         #messageInput {
             flex: 1;
             padding: 15px 20px;
@@ -232,6 +238,19 @@
         </div>
 
         <div class="input-area">
+            <div class="controls">
+                <div class="pill">
+                    <span>Voice</span>
+                    <select id="voiceSelect" onchange="handleVoiceChange(event)"></select>
+                    <button title="Stop" onclick="stopSpeaking()">⏹️</button>
+                </div>
+                <div class="pill">
+                    <span>Rate</span>
+                    <input type="range" min="0.8" max="1.2" step="0.05" value="0.95" onchange="handleRateChange(event)" />
+                    <span>Pitch</span>
+                    <input type="range" min="0.8" max="1.3" step="0.05" value="1.05" onchange="handlePitchChange(event)" />
+                </div>
+            </div>
             <input
                 type="text"
                 id="messageInput"
@@ -245,6 +264,10 @@
     <script>
         const API_URL = 'https://speakeasy-backend-823510409781.us-central1.run.app';
         let conversationHistory = [];
+        let speaking = false;
+        let selectedVoice = null;
+        let speakingRate = 0.95;
+        let speakingPitch = 1.05;
 
         function addMessage(role, content) {
             const chatContainer = document.getElementById('chatContainer');
@@ -314,8 +337,12 @@
                 hideLoading();
 
                 // Add AI response
-                addMessage('assistant', data.response || data.message || 'Sorry, I didn\'t understand that.');
-                conversationHistory.push({ role: 'assistant', content: data.response || data.message });
+                const aiText = data.response || data.message || 'Sorry, I didn\'t understand that.';
+                addMessage('assistant', aiText);
+                conversationHistory.push({ role: 'assistant', content: aiText });
+                // Speak response
+                const language = document.getElementById('language').value;
+                speak(aiText, language);
 
             } catch (error) {
                 hideLoading();
@@ -327,8 +354,63 @@
             }
         }
 
-        // Auto-focus input on load
-        document.getElementById('messageInput').focus();
+        // --- Web Speech Synthesis controls ---
+        function populateVoices() {
+            if (!('speechSynthesis' in window)) return;
+            const voices = window.speechSynthesis.getVoices();
+            const voiceSelect = document.getElementById('voiceSelect');
+            if (!voiceSelect) return;
+            voiceSelect.innerHTML = '';
+            const preferred = ['Google', 'Microsoft', 'Apple'];
+            voices.sort((a,b)=>{
+                const ap = preferred.some(p=>a.name.includes(p));
+                const bp = preferred.some(p=>b.name.includes(p));
+                if (ap && !bp) return -1; if (!ap && bp) return 1; return a.name.localeCompare(b.name);
+            });
+            voices.forEach(v => {
+                const opt = document.createElement('option');
+                opt.value = v.name;
+                opt.textContent = `${v.name} (${v.lang})`;
+                voiceSelect.appendChild(opt);
+            });
+            // Default to a natural voice if available
+            const defaultVoice = voices.find(v => /Google.*(US|UK).*Female/i.test(v.name)) || voices[0];
+            if (defaultVoice) {
+                selectedVoice = defaultVoice;
+                voiceSelect.value = defaultVoice.name;
+            }
+        }
+
+        window.speechSynthesis && (window.speechSynthesis.onvoiceschanged = populateVoices);
+
+        function speak(text, targetLanguage) {
+            if (!('speechSynthesis' in window)) return;
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = speakingRate;
+            utterance.pitch = speakingPitch;
+            const voices = window.speechSynthesis.getVoices();
+            const langMap = { Spanish: 'es', French: 'fr', German: 'de', Italian: 'it', Portuguese: 'pt', Japanese: 'ja', Korean: 'ko', Chinese: 'zh' };
+            const langPrefix = langMap[targetLanguage] || 'en';
+            const matching = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith(langPrefix));
+            const named = selectedVoice && voices.find(v => v.name === selectedVoice.name);
+            utterance.voice = named || matching[0] || voices[0];
+            speaking = true;
+            utterance.onend = () => speaking = false;
+            utterance.onerror = () => speaking = false;
+            window.speechSynthesis.cancel();
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function stopSpeaking() { if ('speechSynthesis' in window) { window.speechSynthesis.cancel(); speaking = false; } }
+        function handleVoiceChange(e) { const name = e.target.value; const voices = window.speechSynthesis.getVoices(); selectedVoice = voices.find(v => v.name === name); }
+        function handleRateChange(e) { speakingRate = parseFloat(e.target.value); }
+        function handlePitchChange(e) { speakingPitch = parseFloat(e.target.value); }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            populateVoices();
+            document.getElementById('messageInput').focus();
+        });
     </script>
 </body>
 </html>

@@ -12,6 +12,7 @@ on:
       - 'app.json'
       - 'Dockerfile.web'
       - 'nginx.conf'
+      - 'web/**'
       - '.github/workflows/deploy-web.yml'
   workflow_dispatch:
 
