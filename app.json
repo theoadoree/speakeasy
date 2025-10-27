@@ -39,13 +39,8 @@
     },
     "web": {
       "favicon": "./assets/favicon.png",
-      "bundler": "metro",
-      "output": "static",
-      "publicPath": "/"
+      "bundler": "metro"
     },
-    "plugins": [
-      "expo-router"
-    ],
     "extra": {
       "eas": {
         "projectId": "speakeasy-production"

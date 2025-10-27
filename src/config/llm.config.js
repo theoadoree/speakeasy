@@ -27,7 +27,7 @@ const LLM_CONFIG = {
   // Production: Google Cloud Run backend
   production: {
     mode: 'backend', // Always use backend in production
-    backendURL: process.env.BACKEND_URL || 'https://speakeasy-api-xxxxx-uc.a.run.app',
+    backendURL: process.env.BACKEND_URL || 'https://speakeasy-backend-823510409781.us-central1.run.app',
     apiKey: process.env.CLOUD_LLM_API_KEY, // Optional auth
     qwen: {
       model: 'qwen2.5:72b',
