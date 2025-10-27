@@ -7,8 +7,8 @@ const PORT = process.env.PORT || 8080;
 
 // Ollama configuration
 const OLLAMA_BASE_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
-const QWEN_MODEL = 'qwen2.5:72b';
-const LLAMA_MODEL = 'llama3.1:8b';
+const QWEN_MODEL = process.env.QWEN_MODEL || 'llama2:latest';
+const LLAMA_MODEL = process.env.LLAMA_MODEL || 'llama2:latest';
 
 app.use(cors());
 app.use(express.json());
