@@ -58,7 +58,7 @@ images:
 
 # Substitutions for environment variables
 substitutions:
-  _OLLAMA_URL: 'http://ollama-service:11434'
+  _OLLAMA_URL: 'http://104.197.19.243:11434'
 
 # Options
 options:
