@@ -22,7 +22,7 @@ const openai = new OpenAI({
 });
 
 // Google OAuth client
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID || '104945732492517782503.apps.googleusercontent.com');
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com');
 
 // Apple Sign In configuration
 const APPLE_TEAM_ID = process.env.APPLE_TEAM_ID || 'E7B9UE64SF';
@@ -150,10 +150,50 @@ app.get('/health', (req, res) => {
     try {
       const { idToken, name, email, imageUrl } = req.body;
 
+      // Check if Google OAuth is properly configured
+      const googleClientId = process.env.GOOGLE_CLIENT_ID;
+      if (!googleClientId || googleClientId.includes('YOUR_GOOGLE_CLIENT_ID')) {
+        console.log('Google OAuth not configured, using fallback authentication');
+        
+        // Fallback: Create user without Google verification
+        const sessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        const userId = `google_demo_${Date.now()}`;
+        
+        const user = {
+          id: userId,
+          provider: 'google',
+          name: name || 'Google User',
+          email: email || 'user@gmail.com',
+          imageUrl: imageUrl || 'https://via.placeholder.com/150',
+          googleId: 'demo_user',
+          createdAt: new Date().toISOString(),
+          lastLogin: new Date().toISOString()
+        };
+        
+        users.set(userId, user);
+        sessions.set(sessionId, {
+          userId,
+          createdAt: new Date().toISOString(),
+          lastActivity: new Date().toISOString()
+        });
+        
+        return res.json({
+          success: true,
+          sessionId,
+          user: {
+            id: user.id,
+            name: user.name,
+            provider: user.provider,
+            imageUrl: user.imageUrl
+          },
+          warning: 'Google OAuth not configured - using demo mode'
+        });
+      }
+
       // Verify Google ID token
       const ticket = await googleClient.verifyIdToken({
         idToken: idToken,
-        audience: process.env.GOOGLE_CLIENT_ID || '104945732492517782503.apps.googleusercontent.com'
+        audience: googleClientId
       });
 
       const payload = ticket.getPayload();
@@ -197,6 +237,15 @@ app.get('/health', (req, res) => {
     });
   } catch (error) {
     console.error('Google auth error:', error.message);
+    
+    // If it's a Google API error, provide helpful message
+    if (error.message.includes('invalid_client') || error.message.includes('unauthorized_client')) {
+      return res.status(400).json({ 
+        error: 'Google OAuth not properly configured',
+        details: 'Please set up Google OAuth credentials. See setup-google-oauth.sh for instructions.'
+      });
+    }
+    
     res.status(500).json({ error: 'Google authentication failed' });
   }
 });

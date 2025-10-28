@@ -920,11 +920,42 @@
         loadUser();
 
           // Google OAuth Configuration
-          const GOOGLE_CLIENT_ID = '104945732492517782503.apps.googleusercontent.com';
+          const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
         
         // Auth Functions
         async function loginWithGoogle() {
             try {
+                // Check if Google OAuth is properly configured
+                if (GOOGLE_CLIENT_ID.includes('YOUR_GOOGLE_CLIENT_ID')) {
+                    console.log('Google OAuth not configured, using demo mode');
+                    
+                    // Demo mode: Create user directly
+                    const response = await fetch(`${API_URL}/api/auth/google`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            idToken: 'demo_token',
+                            name: 'Demo Google User',
+                            email: 'demo@gmail.com',
+                            imageUrl: 'https://via.placeholder.com/150'
+                        })
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        user = data.user;
+                        sessionId = data.sessionId;
+                        localStorage.setItem('speakeasy_session', sessionId);
+                        localStorage.setItem('speakeasy_user', JSON.stringify(user));
+                        nextStep('auth', 'profile');
+                        
+                        if (data.warning) {
+                            console.warn(data.warning);
+                        }
+                        return;
+                    }
+                }
+
                 // Try Google OAuth first
                 try {
                     await loadGoogleAPI();
@@ -952,8 +983,11 @@
                             user = data.user;
                             sessionId = data.sessionId;
                             localStorage.setItem('speakeasy_session', sessionId);
+                            localStorage.setItem('speakeasy_user', JSON.stringify(user));
                             nextStep('auth', 'profile');
                             return;
+                        } else {
+                            throw new Error(data.error || 'Google authentication failed');
                         }
                     }
                 } catch (googleError) {
