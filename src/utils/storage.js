@@ -18,7 +18,8 @@ const KEYS = {
   QUIZ_HISTORY: '@fluentai:quizHistory',
   REMINDER_PREFERENCES: '@fluentai:reminderPreferences',
   LAST_LOGIN: '@fluentai:lastLogin',
-  REVIEW_DATA: '@fluentai:reviewData'
+  REVIEW_DATA: '@fluentai:reviewData',
+  NOTIFICATION_ANALYTICS: '@fluentai:notificationAnalytics'
 };
 
 class StorageService {
@@ -728,6 +729,58 @@ class StorageService {
   async clearReviewData() {
     try {
       await AsyncStorage.removeItem(KEYS.REVIEW_DATA);
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Notification analytics methods
+  async saveNotificationAnalytics(analytics) {
+    try {
+      await AsyncStorage.setItem(KEYS.NOTIFICATION_ANALYTICS, JSON.stringify(analytics));
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getNotificationAnalytics() {
+    try {
+      const data = await AsyncStorage.getItem(KEYS.NOTIFICATION_ANALYTICS);
+      return data ? JSON.parse(data) : {
+        messages: {},
+        totals: {
+          sent: 0,
+          opened: 0,
+          engagementRate: 0
+        },
+        sessions: []
+      };
+    } catch (error) {
+      return {
+        messages: {},
+        totals: {
+          sent: 0,
+          opened: 0,
+          engagementRate: 0
+        },
+        sessions: []
+      };
+    }
+  }
+
+  async clearNotificationAnalytics() {
+    try {
+      await AsyncStorage.setItem(KEYS.NOTIFICATION_ANALYTICS, JSON.stringify({
+        messages: {},
+        totals: {
+          sent: 0,
+          opened: 0,
+          engagementRate: 0
+        },
+        sessions: []
+      }));
       return { success: true };
     } catch (error) {
       return { success: false, error: error.message };

@@ -6,6 +6,7 @@ const { OAuth2Client } = require('google-auth-library');
 const jwt = require('jsonwebtoken'); // Added for Apple JWT verification
 const crypto = require('crypto'); // Added for Apple JWT verification
 const https = require('https'); // Added for Apple public key fetching
+const authRoutes = require('./auth-routes'); // Firebase auth routes
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -40,6 +41,9 @@ const userProgress = new Map(); // Track user progress per session
 
 app.use(cors());
 app.use(express.json());
+
+// Mount Firebase auth routes
+app.use('/api/auth', authRoutes);
 
 // Apple Sign In JWT verification functions
 async function fetchApplePublicKeys() {

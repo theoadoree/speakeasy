@@ -11,6 +11,7 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import StorageService from '../utils/storage';
+import AnalyticsService from './analytics';
 
 // Configure notification behavior
 Notifications.setNotificationHandler({
@@ -126,7 +127,7 @@ class NotificationService {
 
   /**
    * Get a random reminder message (avoid repeating the last one)
-   * @returns {Object} Reminder message with title and body
+   * @returns {Object} Reminder message with title, body, and index
    */
   getRandomReminder() {
     let index;
@@ -135,7 +136,10 @@ class NotificationService {
     } while (index === this.lastMessageIndex && REMINDER_MESSAGES.length > 1);
 
     this.lastMessageIndex = index;
-    return REMINDER_MESSAGES[index];
+    return {
+      ...REMINDER_MESSAGES[index],
+      index
+    };
   }
 
   /**
@@ -181,10 +185,22 @@ class NotificationService {
           title: noonReminder.title,
           body: noonReminder.body,
           sound: 'default',
-          data: { type: 'daily-reminder', time: 'noon' },
+          data: {
+            type: 'daily-reminder',
+            time: 'noon',
+            messageIndex: noonReminder.index,
+            messageTitle: noonReminder.title
+          },
         },
         trigger: noonTrigger,
       });
+
+      // Track analytics for noon reminder
+      await AnalyticsService.trackNotificationSent(
+        noonReminder.index,
+        noonReminder.title,
+        'noon'
+      );
 
       // Schedule 6pm reminder (18:00)
       const eveningReminder = this.getRandomReminder();
@@ -200,10 +216,22 @@ class NotificationService {
           title: eveningReminder.title,
           body: eveningReminder.body,
           sound: 'default',
-          data: { type: 'daily-reminder', time: 'evening' },
+          data: {
+            type: 'daily-reminder',
+            time: 'evening',
+            messageIndex: eveningReminder.index,
+            messageTitle: eveningReminder.title
+          },
         },
         trigger: eveningTrigger,
       });
+
+      // Track analytics for evening reminder
+      await AnalyticsService.trackNotificationSent(
+        eveningReminder.index,
+        eveningReminder.title,
+        'evening'
+      );
 
       console.log('Daily reminders scheduled successfully');
 
@@ -264,10 +292,21 @@ class NotificationService {
           title: reminder.title,
           body: reminder.body,
           sound: 'default',
-          data: { type: 'test' },
+          data: {
+            type: 'test',
+            messageIndex: reminder.index,
+            messageTitle: reminder.title
+          },
         },
         trigger: null, // Send immediately
       });
+
+      // Track analytics for test notification
+      await AnalyticsService.trackNotificationSent(
+        reminder.index,
+        reminder.title,
+        'test'
+      );
 
       console.log('Test notification sent');
     } catch (error) {
@@ -293,8 +332,18 @@ class NotificationService {
 
     // Listener for when user taps on a notification
     this.responseListener = Notifications.addNotificationResponseReceivedListener(
-      (response) => {
+      async (response) => {
         console.log('Notification tapped:', response);
+
+        // Track analytics for notification tap
+        const data = response.notification.request.content.data;
+        if (data && data.messageIndex !== undefined) {
+          await AnalyticsService.trackNotificationOpened(
+            data.messageIndex,
+            data.messageTitle || 'Unknown'
+          );
+        }
+
         if (onNotificationTapped) {
           onNotificationTapped(response);
         }

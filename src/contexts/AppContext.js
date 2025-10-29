@@ -3,7 +3,10 @@ import StorageService from '../utils/storage';
 import LLMService from '../services/llm';
 import LessonService from '../services/lesson';
 import ReviewService from '../services/review';
+import XPService from '../services/xp';
+import LeagueService from '../services/league';
 import { useSubscription } from './SubscriptionContext';
+import { useAuth } from './AuthContext';
 
 const AppContext = createContext();
 
@@ -25,9 +28,12 @@ export const AppProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [llmConnected, setLLMConnected] = useState(false);
   const [reviewAnalysis, setReviewAnalysis] = useState(null);
+  const [userProgress, setUserProgress] = useState(null);
+  const [leagueData, setLeagueData] = useState(null);
 
-  // Get subscription context
+  // Get contexts
   const subscriptionContext = useSubscription();
+  const { user } = useAuth();
 
   // Set subscription context in LLMService
   useEffect(() => {
@@ -48,12 +54,14 @@ export const AppProvider = ({ children }) => {
       const customLessons = await StorageService.getCustomLessons();
       const progress = await StorageService.getLessonProgress();
       const reviewData = await StorageService.getReviewData();
+      const storedProgress = await StorageService.getUserProgress();
 
       setUserProfile(profile);
       setLLMConfig(config);
       setContentLibrary(library);
       setLessons(customLessons);
       setLessonProgress(progress);
+      setUserProgress(storedProgress);
 
       // Initialize LessonService with progress
       LessonService.initialize(progress);
@@ -70,6 +78,20 @@ export const AppProvider = ({ children }) => {
       // Get initial review analysis
       const analysis = ReviewService.analyzeStruggles();
       setReviewAnalysis(analysis);
+
+      // Initialize league data if user is authenticated
+      if (user && storedProgress) {
+        const leagueResult = await LeagueService.joinLeague({
+          userId: user.id || user.uid,
+          username: user.displayName || user.email,
+          totalXP: storedProgress.xp || 0,
+          avatar: user.photoURL || '👤'
+        });
+
+        if (leagueResult.success) {
+          setLeagueData(leagueResult.userData);
+        }
+      }
 
       if (config) {
         LLMService.setConfig(config.baseURL, config.model);
@@ -328,6 +350,151 @@ export const AppProvider = ({ children }) => {
     setReviewAnalysis(null);
   };
 
+  // XP and League methods
+  const awardXP = async (activityType, options = {}) => {
+    if (!user || !userProgress) return { success: false };
+
+    try {
+      // Calculate XP
+      const xpAmount = XPService.awardXP(activityType, options);
+
+      if (xpAmount === 0) return { success: false };
+
+      // Update local progress
+      const updatedProgress = {
+        ...userProgress,
+        xp: (userProgress.xp || 0) + xpAmount
+      };
+
+      await StorageService.saveUserProgress(updatedProgress);
+      setUserProgress(updatedProgress);
+
+      // Update backend league
+      const leagueResult = await LeagueService.updateXP(
+        user.id || user.uid,
+        xpAmount,
+        activityType
+      );
+
+      if (leagueResult.success) {
+        setLeagueData(leagueResult.userData);
+      }
+
+      return {
+        success: true,
+        xpAmount,
+        totalXP: updatedProgress.xp,
+        levelInfo: XPService.getLevelFromXP(updatedProgress.xp)
+      };
+    } catch (error) {
+      console.error('Award XP error:', error);
+      return { success: false, error: error.message };
+    }
+  };
+
+  const awardQuizXP = async (score, totalQuestions, correctAnswers) => {
+    const xpResult = XPService.calculateQuizXP(score, totalQuestions, correctAnswers);
+
+    if (!user || !userProgress) return { success: false };
+
+    try {
+      // Update local progress
+      const updatedProgress = {
+        ...userProgress,
+        xp: (userProgress.xp || 0) + xpResult.total
+      };
+
+      await StorageService.saveUserProgress(updatedProgress);
+      setUserProgress(updatedProgress);
+
+      // Update backend league
+      const leagueResult = await LeagueService.updateXP(
+        user.id || user.uid,
+        xpResult.total,
+        `Quiz: ${score}%`
+      );
+
+      if (leagueResult.success) {
+        setLeagueData(leagueResult.userData);
+      }
+
+      return {
+        success: true,
+        ...xpResult,
+        totalXP: updatedProgress.xp,
+        levelInfo: XPService.getLevelFromXP(updatedProgress.xp)
+      };
+    } catch (error) {
+      console.error('Award quiz XP error:', error);
+      return { success: false, error: error.message };
+    }
+  };
+
+  const awardLessonXP = async (timeSpent, quizScore = null, isFirstTime = false) => {
+    const xpResult = XPService.calculateLessonXP(timeSpent, quizScore, isFirstTime);
+
+    if (!user || !userProgress) return { success: false };
+
+    try {
+      // Update local progress
+      const updatedProgress = {
+        ...userProgress,
+        xp: (userProgress.xp || 0) + xpResult.total,
+        lessonsCompleted: (userProgress.lessonsCompleted || 0) + 1
+      };
+
+      await StorageService.saveUserProgress(updatedProgress);
+      setUserProgress(updatedProgress);
+
+      // Update backend league
+      const leagueResult = await LeagueService.updateXP(
+        user.id || user.uid,
+        xpResult.total,
+        'Lesson completed'
+      );
+
+      if (leagueResult.success) {
+        setLeagueData(leagueResult.userData);
+      }
+
+      return {
+        success: true,
+        ...xpResult,
+        totalXP: updatedProgress.xp,
+        levelInfo: XPService.getLevelFromXP(updatedProgress.xp)
+      };
+    } catch (error) {
+      console.error('Award lesson XP error:', error);
+      return { success: false, error: error.message };
+    }
+  };
+
+  const refreshLeagueData = async () => {
+    if (!user || !userProgress) return;
+
+    try {
+      const leagueResult = await LeagueService.getUserData(user.id || user.uid);
+
+      if (leagueResult.success) {
+        setLeagueData(leagueResult.userData);
+      }
+    } catch (error) {
+      console.error('Refresh league data error:', error);
+    }
+  };
+
+  const getLeagueRankings = async (forceRefresh = false) => {
+    if (!user) return { success: false };
+
+    try {
+      const result = await LeagueService.getRankings(user.id || user.uid, forceRefresh);
+      return result;
+    } catch (error) {
+      console.error('Get league rankings error:', error);
+      return { success: false, error: error.message };
+    }
+  };
+
   const value = {
     userProfile,
     setUserProfile: updateUserProfile,
@@ -365,6 +532,14 @@ export const AppProvider = ({ children }) => {
     refreshReviewAnalysis,
     getReviewLessons,
     clearReviewData,
+    // XP and League methods
+    userProgress,
+    leagueData,
+    awardXP,
+    awardQuizXP,
+    awardLessonXP,
+    refreshLeagueData,
+    getLeagueRankings,
     isLoading,
     llmConnected,
     setLLMConnected,

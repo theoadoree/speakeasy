@@ -8,11 +8,15 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
-  Platform
+  Platform,
+  Switch
 } from 'react-native';
 import { useApp } from '../contexts/AppContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import NotificationService from '../services/notifications';
+import AnalyticsService from '../services/analytics';
+import StorageService from '../utils/storage';
 
 export default function SettingsScreen() {
   const { userProfile, llmConfig, setLLMConfig, testLLMConnection, llmConnected } = useApp();
@@ -22,12 +26,47 @@ export default function SettingsScreen() {
   const [model, setModel] = useState('llama2');
   const [isTesting, setIsTesting] = useState(false);
 
+  // Notification state
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [isSendingTest, setIsSendingTest] = useState(false);
+  const [analyticsData, setAnalyticsData] = useState(null);
+  const [showAnalytics, setShowAnalytics] = useState(false);
+
   useEffect(() => {
     if (llmConfig) {
       setBaseURL(llmConfig.baseURL || 'http://localhost:11434');
       setModel(llmConfig.model || 'llama2');
     }
   }, [llmConfig]);
+
+  // Load notification preferences
+  useEffect(() => {
+    const loadNotificationPreferences = async () => {
+      try {
+        const prefs = await StorageService.getReminderPreferences();
+        setNotificationsEnabled(prefs.enabled || false);
+      } catch (error) {
+        console.error('Error loading notification preferences:', error);
+      }
+    };
+    loadNotificationPreferences();
+  }, []);
+
+  // Load analytics when showing analytics section
+  useEffect(() => {
+    const loadAnalytics = async () => {
+      if (showAnalytics) {
+        try {
+          const summary = await AnalyticsService.getAnalyticsSummary();
+          const best = await AnalyticsService.getBestMessages(3);
+          setAnalyticsData({ summary, bestMessages: best });
+        } catch (error) {
+          console.error('Error loading analytics:', error);
+        }
+      }
+    };
+    loadAnalytics();
+  }, [showAnalytics]);
 
   const handleTestConnection = async () => {
     setIsTesting(true);
@@ -82,6 +121,72 @@ export default function SettingsScreen() {
         }
       ]
     );
+  };
+
+  const handleToggleNotifications = async (value) => {
+    try {
+      setNotificationsEnabled(value);
+
+      if (value) {
+        // Enable notifications
+        const hasPermissions = await NotificationService.requestPermissions();
+        if (!hasPermissions) {
+          Alert.alert(
+            'Permission Required',
+            'Please enable notifications in your device settings to receive daily reminders.'
+          );
+          setNotificationsEnabled(false);
+          return;
+        }
+
+        await NotificationService.scheduleDailyReminders();
+        Alert.alert(
+          'Notifications Enabled ✅',
+          'You will receive daily reminders at noon (12:00 PM) and 6:00 PM to practice your language skills!'
+        );
+      } else {
+        // Disable notifications
+        await NotificationService.cancelReminders();
+        Alert.alert(
+          'Notifications Disabled',
+          'Daily reminders have been turned off.'
+        );
+      }
+    } catch (error) {
+      console.error('Error toggling notifications:', error);
+      Alert.alert('Error', 'Failed to update notification settings');
+      setNotificationsEnabled(!value);
+    }
+  };
+
+  const handleSendTestNotification = async () => {
+    setIsSendingTest(true);
+    try {
+      const hasPermissions = await NotificationService.requestPermissions();
+      if (!hasPermissions) {
+        Alert.alert(
+          'Permission Required',
+          'Please enable notifications in your device settings first.'
+        );
+        setIsSendingTest(false);
+        return;
+      }
+
+      await NotificationService.sendTestNotification();
+      Alert.alert(
+        'Test Sent! 🔔',
+        'Check your notifications - you should receive a test reminder shortly.'
+      );
+    } catch (error) {
+      console.error('Error sending test notification:', error);
+      Alert.alert('Error', 'Failed to send test notification');
+    } finally {
+      setIsSendingTest(false);
+    }
+  };
+
+  const handleViewAnalytics = () => {
+    setShowAnalytics(!showAnalytics);
   };
 
   return (
@@ -281,6 +386,134 @@ export default function SettingsScreen() {
             </View>
           </TouchableOpacity>
         </View>
+      </View>
+
+      {/* Notifications Section */}
+      <View style={styles.section}>
+        <Text style={[styles.sectionTitle, { color: theme.text }]}>Notifications 🔔</Text>
+
+        {/* Enable/Disable Toggle */}
+        <View style={[styles.profileCard, { backgroundColor: theme.card }]}>
+          <View style={styles.notificationRow}>
+            <View style={styles.notificationTextContainer}>
+              <Text style={[styles.notificationTitle, { color: theme.text }]}>
+                Daily Reminders
+              </Text>
+              <Text style={[styles.notificationSubtitle, { color: theme.textSecondary }]}>
+                Receive reminders at 12:00 PM and 6:00 PM
+              </Text>
+            </View>
+            <Switch
+              value={notificationsEnabled}
+              onValueChange={handleToggleNotifications}
+              trackColor={{ false: '#D1D1D6', true: '#34C759' }}
+              thumbColor={Platform.OS === 'ios' ? '#FFF' : notificationsEnabled ? '#34C759' : '#F4F3F4'}
+            />
+          </View>
+        </View>
+
+        {/* Test Notification Button */}
+        {notificationsEnabled && (
+          <TouchableOpacity
+            style={styles.testNotificationButton}
+            onPress={handleSendTestNotification}
+            disabled={isSendingTest}
+          >
+            {isSendingTest ? (
+              <ActivityIndicator color="#007AFF" />
+            ) : (
+              <Text style={styles.testNotificationButtonText}>
+                Send Test Notification
+              </Text>
+            )}
+          </TouchableOpacity>
+        )}
+
+        {/* Analytics Toggle */}
+        {notificationsEnabled && (
+          <TouchableOpacity
+            style={styles.analyticsToggle}
+            onPress={handleViewAnalytics}
+          >
+            <Text style={styles.analyticsToggleText}>
+              {showAnalytics ? '📊 Hide Analytics' : '📊 View Analytics'}
+            </Text>
+          </TouchableOpacity>
+        )}
+
+        {/* Analytics Display */}
+        {showAnalytics && analyticsData && (
+          <View style={[styles.analyticsCard, { backgroundColor: theme.card }]}>
+            <Text style={[styles.analyticsTitle, { color: theme.text }]}>
+              Engagement Statistics
+            </Text>
+
+            {/* Summary Stats */}
+            <View style={styles.statRow}>
+              <View style={styles.statItem}>
+                <Text style={[styles.statValue, { color: theme.text }]}>
+                  {analyticsData.summary.totalSent}
+                </Text>
+                <Text style={[styles.statLabel, { color: theme.textSecondary }]}>
+                  Sent
+                </Text>
+              </View>
+              <View style={styles.statItem}>
+                <Text style={[styles.statValue, { color: theme.text }]}>
+                  {analyticsData.summary.totalOpened}
+                </Text>
+                <Text style={[styles.statLabel, { color: theme.textSecondary }]}>
+                  Opened
+                </Text>
+              </View>
+              <View style={styles.statItem}>
+                <Text style={[styles.statValue, { color: '#34C759' }]}>
+                  {analyticsData.summary.engagementRate}%
+                </Text>
+                <Text style={[styles.statLabel, { color: theme.textSecondary }]}>
+                  Engagement
+                </Text>
+              </View>
+            </View>
+
+            {/* Best Performing Messages */}
+            {analyticsData.bestMessages.length > 0 && (
+              <View style={styles.bestMessagesContainer}>
+                <Text style={[styles.bestMessagesTitle, { color: theme.text }]}>
+                  Top Performing Messages
+                </Text>
+                {analyticsData.bestMessages.map((msg, index) => (
+                  <View key={index} style={styles.messageItem}>
+                    <Text style={[styles.messageTitle, { color: theme.text }]}>
+                      {index + 1}. {msg.title}
+                    </Text>
+                    <Text style={[styles.messageStats, { color: theme.textSecondary }]}>
+                      {msg.engagementRate.toFixed(1)}% engagement ({msg.sent} sent, {msg.opened} opened)
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            )}
+
+            {/* Best Time */}
+            <View style={styles.bestTimeContainer}>
+              <Text style={[styles.bestTimeLabel, { color: theme.textSecondary }]}>
+                Best Time:
+              </Text>
+              <Text style={[styles.bestTimeValue, { color: theme.text }]}>
+                {analyticsData.summary.bestTime === 'noon' ? ' 12:00 PM' : ' 6:00 PM'}
+              </Text>
+            </View>
+          </View>
+        )}
+
+        {showAnalytics && !analyticsData && (
+          <View style={[styles.analyticsCard, { backgroundColor: theme.card }]}>
+            <Text style={[styles.noDataText, { color: theme.textSecondary }]}>
+              No analytics data available yet. Keep notifications enabled to gather engagement insights!
+            </Text>
+          </View>
+        )}
       </View>
 
       {/* About Section */}
@@ -509,5 +742,136 @@ const styles = StyleSheet.create({
   divider: {
     height: 1,
     marginVertical: 4
+  },
+  notificationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12
+  },
+  notificationTextContainer: {
+    flex: 1,
+    marginRight: 12
+  },
+  notificationTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 4
+  },
+  notificationSubtitle: {
+    fontSize: 13,
+    color: '#999'
+  },
+  testNotificationButton: {
+    marginTop: 12,
+    padding: 14,
+    borderRadius: 12,
+    backgroundColor: '#FFF',
+    borderWidth: 1,
+    borderColor: '#007AFF',
+    alignItems: 'center'
+  },
+  testNotificationButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#007AFF'
+  },
+  analyticsToggle: {
+    marginTop: 12,
+    padding: 14,
+    borderRadius: 12,
+    backgroundColor: '#FFF',
+    borderWidth: 1,
+    borderColor: '#34C759',
+    alignItems: 'center'
+  },
+  analyticsToggleText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#34C759'
+  },
+  analyticsCard: {
+    marginTop: 12,
+    padding: 16,
+    borderRadius: 12,
+    backgroundColor: '#FFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2
+  },
+  analyticsTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    textAlign: 'center'
+  },
+  statRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 20
+  },
+  statItem: {
+    alignItems: 'center'
+  },
+  statValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 4
+  },
+  statLabel: {
+    fontSize: 12,
+    color: '#999',
+    textTransform: 'uppercase'
+  },
+  bestMessagesContainer: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#F0F0F0'
+  },
+  bestMessagesTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 12
+  },
+  messageItem: {
+    marginBottom: 12,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F5F5F5'
+  },
+  messageTitle: {
+    fontSize: 14,
+    fontWeight: '500',
+    marginBottom: 4
+  },
+  messageStats: {
+    fontSize: 12,
+    color: '#999'
+  },
+  bestTimeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#F0F0F0'
+  },
+  bestTimeLabel: {
+    fontSize: 14,
+    color: '#999'
+  },
+  bestTimeValue: {
+    fontSize: 16,
+    fontWeight: '600'
+  },
+  noDataText: {
+    fontSize: 14,
+    color: '#999',
+    textAlign: 'center',
+    lineHeight: 20
   }
 });
