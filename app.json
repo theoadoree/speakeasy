@@ -20,6 +20,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.speakeasy.app",
       "buildNumber": "1.0.0",
+      "usesAppleSignIn": true,
       "infoPlist": {
         "NSMicrophoneUsageDescription": "SpeakEasy needs access to your microphone for voice conversation practice.",
         "NSSpeechRecognitionUsageDescription": "SpeakEasy uses speech recognition to help you practice pronunciation."
