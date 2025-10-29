@@ -1,0 +1,61 @@
+# Google Cloud Build Configuration
+# Builds and deploys SpeakEasy LLM server to Cloud Run
+
+steps:
+  # Build the container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/speakeasy-llm:$COMMIT_SHA'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/speakeasy-llm:latest'
+      - '.'
+
+  # Push the container image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/speakeasy-llm:$COMMIT_SHA'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/speakeasy-llm:latest'
+
+  # Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'speakeasy-llm'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/speakeasy-llm:$COMMIT_SHA'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--memory'
+      - '64Gi'
+      - '--cpu'
+      - '8'
+      - '--timeout'
+      - '3600'
+      - '--concurrency'
+      - '10'
+      - '--min-instances'
+      - '1'
+      - '--max-instances'
+      - '3'
+
+images:
+  - 'gcr.io/$PROJECT_ID/speakeasy-llm:$COMMIT_SHA'
+  - 'gcr.io/$PROJECT_ID/speakeasy-llm:latest'
+
+options:
+  machineType: 'E2_HIGHCPU_32'
+  diskSizeGb: 200
+
+timeout: '3600s'

@@ -1,0 +1,64 @@
+# Node modules
+node_modules/
+npm-debug.log
+yarn-error.log
+.npm
+.yarn
+
+# Expo
+.expo/
+.expo-shared/
+dist/
+web-build/
+
+# React Native
+android/
+ios/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+coverage/
+.nyc_output/
+__tests__/
+*.test.js
+*.spec.js
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+
+# Backend
+backend/node_modules
+backend/npm-debug.log
+
+# Documentation
+*.md
+!README.md
+!DEPLOYMENT.md
+docs/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+cloudbuild*.yaml
+.gcloudignore
