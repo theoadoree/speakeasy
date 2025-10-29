@@ -2,9 +2,14 @@ const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 const authRoutes = require('./auth-routes');
+const leagueRoutes = require('./league-routes');
+const { loadSecrets } = require('./secret-manager');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
+
+// Store secrets globally (loaded on startup)
+global.secrets = {};
 
 // Ollama configuration
 const OLLAMA_BASE_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
@@ -16,6 +21,9 @@ app.use(express.json());
 
 // Mount auth routes
 app.use('/api/auth', authRoutes);
+
+// Mount league routes
+app.use('/api/leagues', leagueRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -239,8 +247,26 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`SpeakEasy backend running on port ${PORT}`);
-  console.log(`Ollama URL: ${OLLAMA_BASE_URL}`);
-  console.log(`Models: ${QWEN_MODEL}, ${LLAMA_MODEL}`);
-});
+// Start server with secret loading
+async function startServer() {
+  try {
+    console.log('🚀 Starting SpeakEasy backend...\n');
+
+    // Load secrets from Secret Manager
+    global.secrets = await loadSecrets();
+
+    // Start HTTP server
+    app.listen(PORT, () => {
+      console.log(`✅ SpeakEasy backend running on port ${PORT}`);
+      console.log(`   Ollama URL: ${OLLAMA_BASE_URL}`);
+      console.log(`   Models: ${QWEN_MODEL}, ${LLAMA_MODEL}`);
+      console.log(`\n📡 Server ready to accept requests\n`);
+    });
+  } catch (error) {
+    console.error('❌ Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+// Start the server
+startServer();

@@ -85,16 +85,20 @@ export const SubscriptionProvider = ({ children }) => {
 
   const initializePurchases = async () => {
     try {
+      // Using the provided RevenueCat API key
+      const revenueCatKey = 'AQ.Ab8RN6I14KkuQj4KEkJD249PaWSjIZYTvFuNSXqO8gDwq-PI0A';
+
       if (Platform.OS === 'ios') {
         await Purchases.configure({
-          apiKey: 'YOUR_REVENUECAT_IOS_API_KEY', // TODO: Replace with actual key
+          apiKey: revenueCatKey,
         });
       } else if (Platform.OS === 'android') {
         await Purchases.configure({
-          apiKey: 'YOUR_REVENUECAT_ANDROID_API_KEY', // TODO: Replace with actual key
+          apiKey: revenueCatKey,
         });
       }
       // For web, we'll use Stripe directly
+      console.log('RevenueCat initialized successfully');
     } catch (error) {
       console.error('Error initializing purchases:', error);
     }

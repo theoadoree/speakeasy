@@ -9,8 +9,7 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
 // Configure Google Sign In
 GoogleSignin.configure({
-  webClientId: 'YOUR_GOOGLE_WEB_CLIENT_ID', // TODO: Replace with your Google OAuth Web Client ID
-  iosClientId: 'YOUR_GOOGLE_IOS_CLIENT_ID', // TODO: Replace with your Google OAuth iOS Client ID (optional)
+  webClientId: '823510409781-s5d3hrffelmjcl8kjvchcv3tlbp0shbo.apps.googleusercontent.com',
   offlineAccess: true,
 });
 
