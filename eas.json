@@ -46,6 +46,15 @@
         "buildType": "aab",
         "resourceClass": "medium"
       }
+    },
+    "testflight": {
+      "extends": "production",
+      "distribution": "store",
+      "ios": {
+        "resourceClass": "m-medium",
+        "simulator": false,
+        "buildConfiguration": "Release"
+      }
     }
   },
   "submit": {

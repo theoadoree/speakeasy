@@ -1,0 +1,8 @@
+name: deploy-web-on-push
+description: Auto-deploy web app to Cloud Run on push to main branch
+github:
+  owner: theoadoree
+  name: speakeasy
+  push:
+    branch: ^main$
+filename: cloudbuild-web.yaml

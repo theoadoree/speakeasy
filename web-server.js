@@ -7,10 +7,10 @@ const PORT = process.env.PORT || 8080;
 app.use(express.static(path.join(__dirname, 'dist')));
 
 // SPA fallback - serve index.html for all routes
-app.get('*', (req, res) => {
+app.use('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`SpeakEasy web app running on port ${PORT}`);
 });
