@@ -30,7 +30,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-SpeakEasy (also referred to as FluentAI in some files) is a React Native mobile app for AI-powered adaptive language learning. Users learn languages through personalized stories, interactive reading with word explanations, and AI conversation practice. The app uses local LLM inference via Ollama for privacy-preserving language learning.
+SpeakEasy (also referred to as FluentAI in some files) is a React Native mobile app for AI-powered adaptive language learning. Users learn languages through personalized stories, interactive reading with word explanations, and AI conversation practice.
+
+**IMPORTANT: Production Deployment**
+- The app now uses a cloud-hosted backend - NO local Ollama installation required!
+- Production backend: `https://speakeasy-backend-823510409781.us-central1.run.app`
+- Uses OpenAI GPT-4o-mini for fast, high-quality responses
+- Works out of the box without any local AI setup
 
 ## Technology Stack
 
@@ -38,9 +44,10 @@ SpeakEasy (also referred to as FluentAI in some files) is a React Native mobile 
 - **Navigation**: React Navigation (Stack + Bottom Tabs)
 - **Storage**: AsyncStorage for local persistence
 - **State Management**: React Context API (AuthContext + AppContext)
-- **LLM Backend**: Ollama (local inference server)
+- **LLM Backend**: Cloud API (Google Cloud Run) with OpenAI GPT-4o-mini
 - **HTTP Client**: Axios with interceptors for auth
 - **Authentication**: JWT-based (currently mock implementation)
+- **Deployment**: Google Cloud Run with auto-scaling
 
 ## Common Commands
 
@@ -101,15 +108,19 @@ Two main contexts manage global state:
 - Expected backend endpoints: `/auth/register`, `/auth/login`, `/auth/validate`, `/auth/reset-password`
 
 **LLMService** (`src/services/llm.js`)
-- Singleton service for Ollama integration
-- Default config: `http://localhost:11434` with `llama2` model
+- Singleton service for LLM integration (cloud or local)
+- **Production mode** (default): Uses cloud backend at `https://speakeasy-backend-823510409781.us-central1.run.app`
+- **Development mode** (optional): Direct Ollama integration at `http://localhost:11434`
+- Configuration managed by `src/config/llm.config.js`
 - Key methods:
-  - `testConnection()` - Verify Ollama server is running
+  - `testConnection()` - Verify backend/Ollama connection
+  - `generate(prompt, options)` - Generic LLM generation (routes to backend or Ollama)
   - `generateStory(userProfile, targetLanguage)` - Create personalized learning content
   - `analyzeContent(content, targetLanguage, userLevel)` - Analyze imported content
   - `explainWord(word, context, targetLanguage, nativeLanguage)` - Interactive word definitions
   - `generateAdaptiveLayers(sentence, targetLanguage, userLevel)` - Create simplified/advanced versions
-  - `chat(message, conversationHistory, targetLanguage)` - Conversation practice
+  - `chat(message, conversationHistory, targetLanguage)` - Conversation practice (uses backend `/api/practice/message`)
+  - `generateLesson(userProfile, targetLanguage, lessonType)` - Generate lessons (uses backend `/api/lessons/generate`)
 
 **StorageService** (`src/utils/storage.js`)
 - AsyncStorage wrapper with typed methods
@@ -144,22 +155,39 @@ The authentication system is **fully implemented with mock data**. To integrate 
 
 See `AUTHENTICATION.md` for detailed authentication flow documentation.
 
-## LLM Setup Requirements
+## LLM Setup
 
-Users must have Ollama running locally for the app to function:
+**Production (Default):**
+The app automatically connects to the cloud backend - NO setup required!
 
 ```bash
-# Install Ollama (macOS/Linux)
-curl -fsSL https://ollama.ai/install.sh | sh
-
-# Start Ollama server
-ollama serve
-
-# Download a model
-ollama pull llama2  # or mistral, llama3
+# Test the backend connection
+npm test
+# or
+npm run test:connection
 ```
 
-The app will show "LLM Not Connected" if Ollama is not accessible at the configured base URL.
+**Development (Optional):**
+For local development with Ollama:
+
+1. Install Ollama:
+   ```bash
+   # macOS/Linux
+   curl -fsSL https://ollama.ai/install.sh | sh
+
+   # Windows: Download from https://ollama.ai
+   ```
+
+2. Start Ollama and download models:
+   ```bash
+   ollama serve
+   ollama pull llama2        # Fast (4GB)
+   ollama pull qwen2.5:72b   # Advanced (requires 40GB+ RAM)
+   ```
+
+3. Configure for local mode:
+   - Edit `src/config/llm.config.js` and set `mode: 'direct'` in development config
+   - Or set `NODE_ENV=development` in your environment
 
 ## Storage Keys
 
@@ -194,7 +222,9 @@ speakeasy/
 │   │   └── AppContext.js       # App state (profile, LLM, content)
 │   ├── services/
 │   │   ├── auth.js             # JWT authentication (mock)
-│   │   └── llm.js              # Ollama integration
+│   │   └── llm.js              # LLM integration (cloud/local)
+│   ├── config/
+│   │   └── llm.config.js       # LLM configuration (prod/dev)
 │   ├── utils/
 │   │   └── storage.js          # AsyncStorage wrapper
 │   └── screens/
@@ -205,7 +235,58 @@ speakeasy/
 │       ├── PracticeScreen.js   # Conversation practice
 │       ├── ReaderScreen.js     # Interactive reading
 │       └── SettingsScreen.js   # Configuration & logout
+├── backend/                    # Backend API (deployed to Cloud Run)
+│   ├── server.js               # Ollama backend
+│   ├── server-openai.js        # OpenAI backend (production)
+│   ├── auth-routes.js          # Firebase auth routes
+│   └── Dockerfile              # Container configuration
+├── scripts/
+│   └── test-backend-connection.js  # Backend connection test
 ├── assets/                     # Images and fonts
 ├── AUTHENTICATION.md           # Auth implementation details
 └── README.md                   # User-facing documentation
 ```
+
+## Backend Deployment
+
+The backend is deployed to Google Cloud Run:
+
+**Production Backend:**
+- URL: `https://speakeasy-backend-823510409781.us-central1.run.app`
+- Provider: OpenAI GPT-4o-mini
+- Deployed via: `npm run backend:deploy`
+
+**Test Backend Connection:**
+```bash
+npm test                    # Runs backend connection test
+npm run test:connection     # Same as above
+```
+
+**Deploy Backend:**
+```bash
+npm run backend:deploy
+```
+
+**Run Backend Locally:**
+```bash
+# OpenAI version (requires OPENAI_API_KEY)
+npm run backend:local
+
+# Ollama version (requires Ollama running)
+cd backend && node server.js
+```
+
+**Backend Endpoints:**
+- `GET /health` - Health check
+- `POST /api/generate` - Generic LLM generation
+- `POST /api/practice/message` - Conversation practice
+- `POST /api/lessons/generate` - Lesson generation
+- `POST /api/assessment/evaluate` - Assessment evaluation
+- `POST /api/onboarding/message` - Onboarding conversation
+- `POST /api/auth/*` - Firebase authentication routes
+
+**Environment Variables (Backend):**
+- `OPENAI_API_KEY` - OpenAI API key (stored in Secret Manager)
+- `PORT` - Server port (default: 8080)
+- `NODE_ENV` - Environment (production/development)
+- `OLLAMA_URL` - Ollama base URL for local development

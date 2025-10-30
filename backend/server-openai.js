@@ -159,6 +159,34 @@ function getUserProgress(sessionId) {
   return userProgress.get(sessionId) || null;
 }
 
+// Root endpoint - API welcome page
+app.get('/', (req, res) => {
+  res.json({
+    name: 'SpeakEasy Backend API',
+    version: '1.0.0',
+    status: 'running',
+    provider: 'openai',
+    model: MODEL,
+    endpoints: {
+      health: 'GET /health',
+      generate: 'POST /api/generate',
+      practice: 'POST /api/practice/message',
+      lessons: 'POST /api/lessons/generate',
+      assessment: 'POST /api/assessment/evaluate',
+      onboarding: 'POST /api/onboarding/message',
+      auth: {
+        google: 'POST /api/auth/google',
+        apple: 'POST /api/auth/apple',
+        login: 'POST /api/auth/login',
+        logout: 'POST /api/auth/logout',
+        profile: 'POST /api/auth/profile',
+        session: 'GET /api/auth/session/:sessionId'
+      }
+    },
+    documentation: 'https://github.com/yourusername/speakeasy'
+  });
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({

@@ -193,8 +193,9 @@ Unlike traditional language apps:
 - 🏆 **Gamified**: XP, leagues, and achievements keep you motivated
 - 🔔 **Smart Reminders**: Daily notifications with 14 unique messages
 - 📊 **Analytics**: Track what works best for your learning style
-- 🤖 **AI-Powered**: Local AI for privacy-preserving personalization
+- 🤖 **AI-Powered**: Cloud-hosted AI with no local setup required
 - 🎤 **Accent Training**: Practice pronunciation with AI feedback
+- ☁️ **No Setup Required**: Works out of the box without installing models or running local servers
 
 ## Project Structure
 

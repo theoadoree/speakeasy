@@ -25,6 +25,31 @@ app.use('/api/auth', authRoutes);
 // Mount league routes
 app.use('/api/leagues', leagueRoutes);
 
+// Root endpoint - API welcome page
+app.get('/', (req, res) => {
+  res.json({
+    name: 'SpeakEasy Backend API',
+    version: '1.0.0',
+    status: 'running',
+    provider: 'ollama',
+    models: {
+      qwen: QWEN_MODEL,
+      llama: LLAMA_MODEL
+    },
+    endpoints: {
+      health: 'GET /health',
+      generate: 'POST /api/generate',
+      practice: 'POST /api/practice/message',
+      lessons: 'POST /api/lessons/generate',
+      assessment: 'POST /api/assessment/evaluate',
+      onboarding: 'POST /api/onboarding/message',
+      auth: 'POST /api/auth/*',
+      leagues: 'GET /api/leagues/*'
+    },
+    documentation: 'https://github.com/yourusername/speakeasy'
+  });
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({
