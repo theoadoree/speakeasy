@@ -9,6 +9,7 @@ import {
   Alert,
   Platform,
   Image,
+  Linking,
 } from 'react-native';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { useAuth } from '../contexts/AuthContext';
@@ -104,8 +105,19 @@ const NewAuthScreen = ({ navigation }) => {
         <View style={styles.terms}>
           <Text style={styles.termsText}>
             By continuing, you agree to our{' '}
-            <Text style={styles.termsLink}>Terms of Service</Text> and{' '}
-            <Text style={styles.termsLink}>Privacy Policy</Text>
+            <Text
+              style={styles.termsLink}
+              onPress={() => Linking.openURL('https://speakeasy-ai.app/terms')}
+            >
+              Terms of Service
+            </Text>
+            {' '}and{' '}
+            <Text
+              style={styles.termsLink}
+              onPress={() => Linking.openURL('https://speakeasy-ai.app/privacy')}
+            >
+              Privacy Policy
+            </Text>
           </Text>
         </View>
       </View>

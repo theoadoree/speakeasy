@@ -20,9 +20,17 @@ app.get('/health', (req, res) => {
   res.json({ status: 'healthy', timestamp: new Date().toISOString() });
 });
 
-// SPA fallback - serve index.html for all non-static routes
+// SPA fallback - serve index.html for all non-static routes EXCEPT /terms and /privacy
 // Use middleware without path parameter to avoid path-to-regexp issues
 app.use((req, res) => {
+  // If requesting terms.html or privacy.html, serve them directly
+  if (req.path === '/terms' || req.path === '/terms.html') {
+    return res.sendFile(path.join(__dirname, 'terms.html'));
+  }
+  if (req.path === '/privacy' || req.path === '/privacy.html') {
+    return res.sendFile(path.join(__dirname, 'privacy.html'));
+  }
+  // Otherwise, serve the React app
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
