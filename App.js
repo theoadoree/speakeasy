@@ -14,19 +14,17 @@ import NotificationService from './src/services/notifications';
 import NewAuthScreen from './src/screens/NewAuthScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import SubscriptionScreen from './src/screens/SubscriptionScreen';
-import HomeScreen from './src/screens/HomeScreen';
-import PracticeScreen from './src/screens/PracticeScreen';
-import SettingsScreen from './src/screens/SettingsScreen';
-import ReaderScreen from './src/screens/ReaderScreen';
-import AccentTutorScreen from './src/screens/AccentTutorScreen';
+import LearnNavigatorScreen from './src/screens/LearnNavigatorScreen';
+import PracticeNavigatorScreen from './src/screens/PracticeNavigatorScreen';
 import LeaguesScreen from './src/screens/LeaguesScreen';
 import MusicScreen from './src/screens/MusicScreen';
-import LessonsScreen from './src/screens/LessonsScreen';
+import MoreScreen from './src/screens/MoreScreen';
+import SettingsScreen from './src/screens/SettingsScreen';
+import ReviewScreen from './src/screens/ReviewScreen';
+import ReaderScreen from './src/screens/ReaderScreen';
 import LyricsLessonScreen from './src/screens/LyricsLessonScreen';
-import CurriculumScreen from './src/screens/CurriculumScreen';
 import LessonDetailScreen from './src/screens/LessonDetailScreen';
 import QuizScreen from './src/screens/QuizScreen';
-import ReviewScreen from './src/screens/ReviewScreen';
 import DebugStorageScreen from './src/screens/DebugStorageScreen';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -56,8 +54,8 @@ function TabNavigator() {
       }}
     >
       <Tab.Screen
-        name="Home"
-        component={HomeScreen}
+        name="Learn"
+        component={LearnNavigatorScreen}
         options={{
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
@@ -70,31 +68,17 @@ function TabNavigator() {
         }}
       />
       <Tab.Screen
-        name="AccentTutor"
-        component={AccentTutorScreen}
+        name="Practice"
+        component={PracticeNavigatorScreen}
         options={{
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
-              name={focused ? 'mic' : 'mic-outline'}
+              name={focused ? 'chatbubbles' : 'chatbubbles-outline'}
               size={24}
               color={color}
             />
           ),
-          tabBarLabel: 'Accent'
-        }}
-      />
-      <Tab.Screen
-        name="Leagues"
-        component={LeaguesScreen}
-        options={{
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? 'trophy' : 'trophy-outline'}
-              size={24}
-              color={color}
-            />
-          ),
-          tabBarLabel: 'Leagues'
+          tabBarLabel: 'Practice'
         }}
       />
       <Tab.Screen
@@ -112,73 +96,31 @@ function TabNavigator() {
         }}
       />
       <Tab.Screen
-        name="Curriculum"
-        component={CurriculumScreen}
+        name="Leagues"
+        component={LeaguesScreen}
         options={{
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
-              name={focused ? 'school' : 'school-outline'}
+              name={focused ? 'trophy' : 'trophy-outline'}
               size={24}
               color={color}
             />
           ),
-          tabBarLabel: 'Curriculum'
+          tabBarLabel: 'Leagues'
         }}
       />
       <Tab.Screen
-        name="Lessons"
-        component={LessonsScreen}
+        name="More"
+        component={MoreScreen}
         options={{
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
-              name={focused ? 'create' : 'create-outline'}
+              name={focused ? 'ellipsis-horizontal-circle' : 'ellipsis-horizontal-circle-outline'}
               size={24}
               color={color}
             />
           ),
-          tabBarLabel: 'Custom'
-        }}
-      />
-      <Tab.Screen
-        name="Practice"
-        component={PracticeScreen}
-        options={{
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? 'chatbubbles' : 'chatbubbles-outline'}
-              size={24}
-              color={color}
-            />
-          ),
-          tabBarLabel: 'Practice'
-        }}
-      />
-      <Tab.Screen
-        name="Review"
-        component={ReviewScreen}
-        options={{
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? 'refresh-circle' : 'refresh-circle-outline'}
-              size={24}
-              color={color}
-            />
-          ),
-          tabBarLabel: 'Review'
-        }}
-      />
-      <Tab.Screen
-        name="Settings"
-        component={SettingsScreen}
-        options={{
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? 'settings' : 'settings-outline'}
-              size={24}
-              color={color}
-            />
-          ),
-          tabBarLabel: 'Settings'
+          tabBarLabel: 'More'
         }}
       />
     </Tab.Navigator>
@@ -283,6 +225,26 @@ function AppNavigator() {
               }}
             />
             <Stack.Screen
+              name="Settings"
+              component={SettingsScreen}
+              options={{
+                headerShown: true,
+                headerTitle: 'Settings',
+                headerBackTitle: 'Back',
+                headerTintColor: Platform.OS === 'ios' ? '#007AFF' : '#007AFF'
+              }}
+            />
+            <Stack.Screen
+              name="Review"
+              component={ReviewScreen}
+              options={{
+                headerShown: true,
+                headerTitle: 'Review',
+                headerBackTitle: 'Back',
+                headerTintColor: Platform.OS === 'ios' ? '#007AFF' : '#007AFF'
+              }}
+            />
+            <Stack.Screen
               name="LyricsLesson"
               component={LyricsLessonScreen}
               options={{
@@ -371,7 +333,7 @@ const styles = StyleSheet.create({
     marginTop: 8
   },
   tabBar: {
-    height: Platform.OS === 'ios' ? 75 : 65, // Taller tab bar to accommodate more tabs
+    height: Platform.OS === 'ios' ? 65 : 60,
     paddingBottom: Platform.OS === 'ios' ? 10 : 8,
     paddingTop: 8,
     borderTopWidth: 1,

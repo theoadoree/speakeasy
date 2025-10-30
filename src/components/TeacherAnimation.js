@@ -1,15 +1,55 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { TouchableOpacity, View, Text, StyleSheet, Animated, Image, Easing } from 'react-native';
+import { TouchableOpacity, View, Text, StyleSheet, Animated, Image, Easing, Platform } from 'react-native';
 import { colors, spacing, borderRadius, shadows } from '../theme';
 
-const teacherImages = {
-  neutral: require('../../assets/teacher/neutral.png'),
-  surprised: require('../../assets/teacher/surprised.png'),
-  smiling: require('../../assets/teacher/smiling.png'),
-  closedSmile: require('../../assets/teacher/closed_smile.png'),
+// Platform-specific image loading for web compatibility
+const getTeacherImages = () => {
+  // On native, use direct requires
+  if (Platform.OS !== 'web') {
+    return {
+      neutral: require('../../assets/teacher/neutral.png'),
+      surprised: require('../../assets/teacher/surprised.png'),
+      smiling: require('../../assets/teacher/smiling.png'),
+      closedSmile: require('../../assets/teacher/closed_smile.png'),
+    };
+  }
+
+  // On web, try to use the bundled assets
+  try {
+    return {
+      neutral: require('../../assets/teacher/neutral.png'),
+      surprised: require('../../assets/teacher/surprised.png'),
+      smiling: require('../../assets/teacher/smiling.png'),
+      closedSmile: require('../../assets/teacher/closed_smile.png'),
+    };
+  } catch (e) {
+    console.warn('Failed to load teacher images:', e);
+    // Fallback to placeholder if images can't load
+    return {
+      neutral: null,
+      surprised: null,
+      smiling: null,
+      closedSmile: null,
+    };
+  }
 };
 
-export default function TeacherAnimation({
+const teacherImages = getTeacherImages();
+
+// Preload images for smoother transitions
+if (Platform.OS !== 'web') {
+  const { Asset } = require('expo-asset');
+  Object.values(teacherImages).forEach(image => {
+    if (image) {
+      Asset.fromModule(image).downloadAsync().catch(e => {
+        console.warn('Failed to preload teacher image:', e);
+      });
+    }
+  });
+}
+
+// Memoized component for better performance
+const TeacherAnimation = React.memo(function TeacherAnimation({
   isListening = false,
   isSpeaking = false,
   isProcessing = false,
@@ -27,7 +67,7 @@ export default function TeacherAnimation({
   const scaleAnim = useRef(new Animated.Value(1)).current; // entrance animation
   const [currentImage, setCurrentImage] = useState(teacherImages.smiling);
 
-  // Entrance animation
+  // Entrance animation - optimized for mobile and web
   useEffect(() => {
     Animated.spring(scaleAnim, {
       toValue: 1,
@@ -39,22 +79,25 @@ export default function TeacherAnimation({
 
   useEffect(() => {
     // Gentle floating animation for the teacher - slower and more fluid
-    Animated.loop(
+    // Use requestAnimationFrame on web for better performance
+    const floatAnimation = Animated.loop(
       Animated.sequence([
         Animated.timing(floatAnim, {
           toValue: 1,
-          duration: 2000,
+          duration: Platform.OS === 'web' ? 2500 : 2000, // Slightly slower on web
           easing: Easing.inOut(Easing.ease),
           useNativeDriver: true
         }),
         Animated.timing(floatAnim, {
           toValue: -1,
-          duration: 2000,
+          duration: Platform.OS === 'web' ? 2500 : 2000,
           easing: Easing.inOut(Easing.ease),
           useNativeDriver: true
         }),
       ])
-    ).start();
+    );
+
+    floatAnimation.start();
 
     return () => {
       floatAnim.stopAnimation();
@@ -124,14 +167,37 @@ export default function TeacherAnimation({
   useEffect(() => {
     if (isSpeaking) {
       // Cycle through mouth frames while speaking - more natural timing
-      Animated.loop(
+      // Optimized durations for smoother animation
+      const mouthAnimation = Animated.loop(
         Animated.sequence([
-          Animated.timing(mouthAnim, { toValue: 0, duration: 180, useNativeDriver: false }),
-          Animated.timing(mouthAnim, { toValue: 1, duration: 140, useNativeDriver: false }),
-          Animated.timing(mouthAnim, { toValue: 2, duration: 160, useNativeDriver: false }),
-          Animated.timing(mouthAnim, { toValue: 1, duration: 140, useNativeDriver: false }),
+          Animated.timing(mouthAnim, {
+            toValue: 0,
+            duration: Platform.OS === 'web' ? 200 : 180,
+            easing: Easing.linear,
+            useNativeDriver: false
+          }),
+          Animated.timing(mouthAnim, {
+            toValue: 1,
+            duration: Platform.OS === 'web' ? 150 : 140,
+            easing: Easing.linear,
+            useNativeDriver: false
+          }),
+          Animated.timing(mouthAnim, {
+            toValue: 2,
+            duration: Platform.OS === 'web' ? 180 : 160,
+            easing: Easing.linear,
+            useNativeDriver: false
+          }),
+          Animated.timing(mouthAnim, {
+            toValue: 1,
+            duration: Platform.OS === 'web' ? 150 : 140,
+            easing: Easing.linear,
+            useNativeDriver: false
+          }),
         ])
-      ).start();
+      );
+
+      mouthAnimation.start();
     } else {
       mouthAnim.setValue(0);
     }
@@ -229,11 +295,45 @@ export default function TeacherAnimation({
               alignItems: 'center',
             }}
           >
-            <Image
-              source={currentImage}
-              style={[styles.teacherImage, { width: teacherSize, height: teacherSize }]}
-              resizeMode="contain"
-            />
+            {currentImage ? (
+              <Image
+                source={currentImage}
+                style={[
+                  styles.teacherImage,
+                  {
+                    width: teacherSize,
+                    height: teacherSize,
+                    // Add web-specific optimizations
+                    ...(Platform.OS === 'web' && {
+                      imageRendering: 'auto',
+                      WebkitUserSelect: 'none',
+                      userSelect: 'none',
+                    })
+                  }
+                ]}
+                resizeMode="contain"
+                // Performance optimization: don't fade on load
+                fadeDuration={0}
+                // Add error handling
+                onError={(e) => {
+                  console.warn('Image load error:', e.nativeEvent.error);
+                }}
+              />
+            ) : (
+              // Fallback if image doesn't load
+              <View
+                style={[
+                  styles.imageFallback,
+                  {
+                    width: teacherSize,
+                    height: teacherSize,
+                    backgroundColor: getAccentColor(),
+                  }
+                ]}
+              >
+                <Text style={styles.fallbackEmoji}>👩‍🏫</Text>
+              </View>
+            )}
           </Animated.View>
 
           {/* Base circle with glow effect */}
@@ -304,12 +404,19 @@ export default function TeacherAnimation({
       {showLabel && <Text style={styles.stateText}>{getStateText()}</Text>}
     </View>
   );
-}
+});
+
+export default TeacherAnimation;
 
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
+    // Optimize for mobile performance
+    ...(Platform.OS !== 'web' && {
+      shouldRasterizeIOS: true,
+      renderToHardwareTextureAndroid: true,
+    }),
   },
   stack: {
     alignItems: 'center',
@@ -317,6 +424,21 @@ const styles = StyleSheet.create({
   },
   teacherImage: {
     marginBottom: spacing.sm,
+    // Optimize image rendering
+    ...(Platform.OS !== 'web' && {
+      shouldRasterizeIOS: true,
+    }),
+  },
+  imageFallback: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: borderRadius.full,
+    marginBottom: spacing.sm,
+    opacity: 0.8,
+  },
+  fallbackEmoji: {
+    fontSize: 60,
+    textAlign: 'center',
   },
   base: {
     borderRadius: borderRadius.full,
@@ -338,5 +460,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: colors.text.secondary,
+    // Prevent text selection on web
+    ...(Platform.OS === 'web' && {
+      userSelect: 'none',
+      WebkitUserSelect: 'none',
+    }),
   },
 });

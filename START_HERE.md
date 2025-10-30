@@ -42,11 +42,15 @@ The app will open in your browser and you'll see:
    - Toggle between sign-in/sign-up modes
    - Notice: no separate screens to navigate!
 
-2. **Language Dropdowns**
-   - During onboarding, select native language
-   - Choose 17 options (English, Spanish, French, etc.)
-   - Select target language from 15 options
-   - One tap selection (no typos!)
+2. **Smart Language Selection** 🌍
+   - **Step 1**: Select your native language first (29 options)
+   - **Step 2**: Choose learning language - **automatically filtered!**
+     - ✅ Shows only OpenAI-supported languages (25 options)
+     - ✅ Excludes your native language
+     - ✅ Displays: "Powered by OpenAI • X languages available"
+   - Touch-friendly button selectors (not traditional dropdowns)
+   - Prevents selecting native language as learning language
+   - See [LANGUAGE_SELECTION.md](LANGUAGE_SELECTION.md) for details
 
 3. **Cloud Sync**
    - Complete a lesson
@@ -84,6 +88,7 @@ https://console.cloud.google.com/run?project=modular-analog-476221-h8
 
 Pick the guide you need:
 
+- **[LANGUAGE_SELECTION.md](LANGUAGE_SELECTION.md)** ← How language filtering works
 - **[README_EASY.md](README_EASY.md)** ← All commands in one place
 - **[QUICK_START.md](QUICK_START.md)** ← Step-by-step guide
 - **[DEPLOYMENT_COMPLETE.md](DEPLOYMENT_COMPLETE.md)** ← Full deployment details
@@ -93,13 +98,14 @@ Pick the guide you need:
 
 ## ✅ What's Done
 
-✅ Native language dropdown (17 options)
-✅ Target language dropdown (15 options)
+✅ Smart language selection (29 native, 25 learning languages)
+✅ OpenAI-based language filtering (excludes native language)
 ✅ Unified sign-in/sign-up screen
 ✅ Firebase/Firestore database
 ✅ Backend deployed to Cloud Run
 ✅ Frontend web app deployed to Cloud Run
 ✅ Custom domain mapped (https://speakeasy-ai.app)
+✅ All API secrets secured in Google Cloud Secret Manager
 ✅ Progress & XP tracking
 ✅ Leaderboards infrastructure
 ✅ Real-time sync across devices

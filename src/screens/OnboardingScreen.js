@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -12,16 +12,22 @@ import {
 import { useApp } from '../contexts/AppContext';
 import StorageService from '../utils/storage';
 
-const LANGUAGES_TO_LEARN = [
+// OpenAI GPT-4 supports these languages well for learning
+// Based on OpenAI's language model capabilities
+const OPENAI_SUPPORTED_LANGUAGES = [
   'Spanish', 'French', 'German', 'Italian', 'Portuguese',
-  'Japanese', 'Korean', 'Mandarin', 'Arabic', 'Russian',
-  'Hindi', 'Dutch', 'Swedish', 'Polish', 'Turkish'
+  'Japanese', 'Korean', 'Mandarin Chinese', 'Arabic', 'Russian',
+  'Hindi', 'Dutch', 'Swedish', 'Norwegian', 'Danish',
+  'Polish', 'Turkish', 'Greek', 'Hebrew', 'Vietnamese',
+  'Thai', 'Indonesian', 'Filipino', 'Swahili', 'Bengali'
 ];
 
 const NATIVE_LANGUAGES = [
   'English', 'Spanish', 'French', 'German', 'Italian', 'Portuguese',
-  'Japanese', 'Korean', 'Mandarin', 'Arabic', 'Russian', 'Hindi',
-  'Dutch', 'Swedish', 'Polish', 'Turkish', 'Other'
+  'Japanese', 'Korean', 'Mandarin Chinese', 'Arabic', 'Russian', 'Hindi',
+  'Dutch', 'Swedish', 'Norwegian', 'Danish', 'Polish', 'Turkish',
+  'Greek', 'Hebrew', 'Vietnamese', 'Thai', 'Indonesian', 'Filipino',
+  'Bengali', 'Urdu', 'Farsi', 'Swahili', 'Other'
 ];
 
 const LEVELS = [
@@ -45,9 +51,18 @@ export default function OnboardingScreen({ navigation }) {
   const [step, setStep] = useState(1);
   const [name, setName] = useState('');
   const [targetLanguage, setTargetLanguage] = useState('');
-  const [nativeLanguage, setNativeLanguage] = useState('English');
+  const [nativeLanguage, setNativeLanguage] = useState('');
   const [level, setLevel] = useState('');
   const [selectedInterests, setSelectedInterests] = useState([]);
+
+  // Filter available learning languages based on:
+  // 1. OpenAI support
+  // 2. Exclude native language
+  const availableLearningLanguages = useMemo(() => {
+    return OPENAI_SUPPORTED_LANGUAGES.filter(lang =>
+      lang !== nativeLanguage && lang !== 'Other'
+    );
+  }, [nativeLanguage]);
 
   const toggleInterest = (interest) => {
     if (selectedInterests.includes(interest)) {
@@ -77,10 +92,12 @@ export default function OnboardingScreen({ navigation }) {
       case 1:
         return name.trim().length > 0;
       case 2:
-        return targetLanguage.length > 0 && nativeLanguage.length > 0;
+        return nativeLanguage.length > 0;
       case 3:
-        return level.length > 0;
+        return targetLanguage.length > 0;
       case 4:
+        return level.length > 0;
+      case 5:
         return selectedInterests.length >= 3;
       default:
         return false;
@@ -103,7 +120,7 @@ export default function OnboardingScreen({ navigation }) {
 
         {/* Progress Indicator */}
         <View style={styles.progressContainer}>
-          {[1, 2, 3, 4].map((s) => (
+          {[1, 2, 3, 4, 5].map((s) => (
             <View
               key={s}
               style={[
@@ -130,33 +147,11 @@ export default function OnboardingScreen({ navigation }) {
           </View>
         )}
 
-        {/* Step 2: Languages */}
+        {/* Step 2: Native Language */}
         {step === 2 && (
           <View style={styles.stepContainer}>
-            <Text style={styles.title}>Which language do you want to learn?</Text>
-            <ScrollView style={styles.scrollableOptions} contentContainerStyle={styles.optionsGrid}>
-              {LANGUAGES_TO_LEARN.map((lang) => (
-                <TouchableOpacity
-                  key={lang}
-                  style={[
-                    styles.optionButton,
-                    targetLanguage === lang && styles.optionButtonSelected
-                  ]}
-                  onPress={() => setTargetLanguage(lang)}
-                >
-                  <Text
-                    style={[
-                      styles.optionText,
-                      targetLanguage === lang && styles.optionTextSelected
-                    ]}
-                  >
-                    {lang}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-
-            <Text style={styles.subtitle}>What's your native language?</Text>
+            <Text style={styles.title}>What's your native language? 🌍</Text>
+            <Text style={styles.subtitle}>This helps us tailor lessons to you</Text>
             <ScrollView style={styles.scrollableOptions} contentContainerStyle={styles.optionsGrid}>
               {NATIVE_LANGUAGES.map((lang) => (
                 <TouchableOpacity
@@ -181,10 +176,46 @@ export default function OnboardingScreen({ navigation }) {
           </View>
         )}
 
-        {/* Step 3: Level */}
+        {/* Step 3: Target Language (filtered by OpenAI availability) */}
         {step === 3 && (
           <View style={styles.stepContainer}>
-            <Text style={styles.title}>What's your current level?</Text>
+            <Text style={styles.title}>Which language do you want to learn? 📚</Text>
+            <Text style={styles.subtitle}>
+              Powered by OpenAI • {availableLearningLanguages.length} languages available
+            </Text>
+            <ScrollView style={styles.scrollableOptions} contentContainerStyle={styles.optionsGrid}>
+              {availableLearningLanguages.map((lang) => (
+                <TouchableOpacity
+                  key={lang}
+                  style={[
+                    styles.optionButton,
+                    targetLanguage === lang && styles.optionButtonSelected
+                  ]}
+                  onPress={() => setTargetLanguage(lang)}
+                >
+                  <Text
+                    style={[
+                      styles.optionText,
+                      targetLanguage === lang && styles.optionTextSelected
+                    ]}
+                  >
+                    {lang}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            {availableLearningLanguages.length === 0 && (
+              <Text style={styles.warningText}>
+                ⚠️ Please select a different native language to see available learning languages
+              </Text>
+            )}
+          </View>
+        )}
+
+        {/* Step 4: Level */}
+        {step === 4 && (
+          <View style={styles.stepContainer}>
+            <Text style={styles.title}>What's your current level in {targetLanguage}? 📊</Text>
             {LEVELS.map((lvl) => (
               <TouchableOpacity
                 key={lvl.code}
@@ -227,11 +258,11 @@ export default function OnboardingScreen({ navigation }) {
           </View>
         )}
 
-        {/* Step 4: Interests */}
-        {step === 4 && (
+        {/* Step 5: Interests */}
+        {step === 5 && (
           <View style={styles.stepContainer}>
-            <Text style={styles.title}>What are you interested in?</Text>
-            <Text style={styles.subtitle}>Select at least 3</Text>
+            <Text style={styles.title}>What are you interested in? 🎯</Text>
+            <Text style={styles.subtitle}>Select at least 3 topics you'd like to learn about</Text>
             <View style={styles.interestsGrid}>
               {INTERESTS.map((interest) => (
                 <TouchableOpacity
@@ -271,7 +302,7 @@ export default function OnboardingScreen({ navigation }) {
         <TouchableOpacity
           style={[styles.continueButton, !canContinue() && styles.continueButtonDisabled]}
           onPress={() => {
-            if (step < 4) {
+            if (step < 5) {
               setStep(step + 1);
             } else {
               handleComplete();
@@ -280,7 +311,7 @@ export default function OnboardingScreen({ navigation }) {
           disabled={!canContinue()}
         >
           <Text style={styles.continueButtonText}>
-            {step === 4 ? 'Get Started! 🎉' : 'Continue'}
+            {step === 5 ? 'Get Started! 🎉' : 'Continue'}
           </Text>
         </TouchableOpacity>
       </View>
@@ -490,5 +521,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#FFF'
+  },
+  warningText: {
+    fontSize: 14,
+    color: '#FF3B30',
+    textAlign: 'center',
+    marginTop: 20,
+    padding: 15,
+    backgroundColor: '#FFE5E5',
+    borderRadius: 8
   }
 });
