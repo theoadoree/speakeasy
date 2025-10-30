@@ -11,7 +11,7 @@ export const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://speakeasy-
 // Configure Google Sign In (only on native platforms)
 if (Platform.OS !== 'web') {
   GoogleSignin.configure({
-    webClientId: '823510409781-s5d3hrffelmjcl8kjvchcv3tlbp0shbo.apps.googleusercontent.com',
+    webClientId: '768424738821-gb3i7pl82qm5r70q73nh6gg33i1f3tv0.apps.googleusercontent.com',
     offlineAccess: true,
   });
 }
