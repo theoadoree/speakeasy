@@ -1,15 +1,35 @@
-# FluentAI - Adaptive Language Learning 🚀
+# SpeakEasy - AI Language Learning 🚀
 
-An AI-powered language learning app that adapts to your level and interests!
+An AI-powered language learning app with gamification, music lessons, and daily reminders!
 
 ## Features ✨
 
-- **Contextual Immersion Engine**: Learn through personalized, AI-generated stories
-- **Interactive Reading**: Tap any word for instant explanations
-- **Adaptive Layers**: Slide between difficulty levels in real-time
-- **Content Import**: Turn songs, articles, and texts into learning modules
-- **AI Conversation Practice**: Chat with an intelligent language tutor
-- **Smart Analysis**: Automatically analyze imported content for vocabulary, grammar, and culture
+### 📚 Learning Modes
+- **Personalized Stories**: AI-generated content based on your interests
+- **Structured Curriculum**: Progressive lessons with quizzes
+- **Custom Lessons**: Create your own vocabulary, grammar, and culture lessons
+- **Interactive Reading**: Tap any word for instant explanations with adaptive difficulty
+
+### 🎵 Music Lessons
+- **Search Songs**: Browse Spotify and Apple Music catalogs
+- **Learn Through Lyrics**: Turn your favorite songs into language lessons
+- **Interactive Exercises**: Vocabulary quizzes, fill-in-the-blanks, listening comprehension
+
+### 💬 Practice Tools
+- **AI Chat**: Converse with an intelligent language tutor
+- **Accent Tutor**: Practice pronunciation with AI feedback (0-10 scoring)
+
+### 🏆 Gamification
+- **XP System**: Earn points for all learning activities
+- **6 League Tiers**: Progress from Bronze to Legendary
+- **Leaderboard**: Compete with other learners
+- **Achievements**: Unlock badges for milestones
+
+### 🔔 Smart Reminders
+- **Daily Notifications**: Get reminded at noon and 6pm (customizable)
+- **14 Unique Messages**: Varied reminders to keep you engaged
+- **Analytics Dashboard**: Track which messages work best
+- **Smart Scheduling**: Only reminds you if you haven't practiced that day
 
 ## Quick Start
 
@@ -53,19 +73,29 @@ ollama pull mistral
 ollama pull llama3
 ```
 
-### 5. Start FluentAI
+### 5. iOS Setup (Optional but Recommended)
+
+For full notification support and native features:
+
+```bash
+# Install iOS pods
+cd ios && pod install && cd ..
+```
+
+**See `IOS_SETUP.md` for complete iOS setup instructions.**
+
+### 6. Start SpeakEasy
 
 ```bash
 npm start
 ```
 
-### 6. Open the App
+### 7. Open the App
 
-- **iOS**: Scan QR code with Camera app (requires Expo Go)
-- **Android**: Scan QR code with Expo Go app
-- **Web**: Press `w` in terminal
-- **iOS Simulator**: Press `i` in terminal
-- **Android Emulator**: Press `a` in terminal
+- **iOS Simulator**: `npx expo run:ios` (requires iOS simulator runtime)
+- **Android Emulator**: `npx expo run:android`
+- **Web Browser**: Press `w` in terminal or `npm run web`
+- **Physical Device**: Scan QR code with Expo Go app
 
 ## First Time Setup
 
@@ -73,36 +103,44 @@ npm start
 2. **Choose Language**: Select the language you want to learn
 3. **Select Level**: Choose your proficiency level (A1-C2)
 4. **Pick Interests**: Select at least 3 interests
-5. **Configure LLM**: 
-   - Go to Settings tab
+5. **Complete Subscription**: Choose your plan
+6. **Configure LLM**:
+   - Go to More → Settings
    - API URL: `http://localhost:11434`
    - Model: `llama2` (or whichever you downloaded)
    - Tap "Test Connection" ✅
    - Tap "Save Config"
+7. **Enable Notifications**:
+   - Go to More → Settings → Notifications
+   - Toggle Daily Reminders ON
+   - Tap "Send Test Notification" to verify
 
 ## Usage
 
-### Generate Stories
-- Tap "✨ Generate Story" on the Home screen
-- AI creates personalized content based on your interests and level
-- Tap any word for instant explanations
+### 📚 Learn Tab
+- **Stories**: Generate AI-powered stories based on your interests
+- **Curriculum**: Follow structured lessons with quizzes
+- **Custom**: Create personalized vocabulary and grammar lessons
 
-### Import Content
-- Tap "📄 Import Content"
-- Choose type: article, lyrics, or text
-- Paste your content
-- AI analyzes and creates a full learning module
+### 💬 Practice Tab
+- **AI Chat**: Converse with your AI tutor in the target language
+- **Accent Tutor**: Practice pronunciation with 4 focus areas (Vowels, Consonants, Intonation, Speed)
 
-### Practice Conversations
-- Go to Practice tab
-- Chat in your target language
-- Get natural responses and gentle corrections
+### 🎵 Music Tab
+- Search for songs on Spotify or Apple Music
+- View lyrics and translations
+- Complete interactive exercises
+- Save favorite songs to your library
 
-### Interactive Reading
-- Open any content from your library
-- Tap words for definitions and explanations
-- Use the difficulty slider to see the same text at different levels
-- Learn how natives express the same ideas
+### 🏆 Leagues Tab
+- View your current league (Bronze → Legendary)
+- Check leaderboard rankings
+- Browse unlocked achievements
+- Track learning statistics
+
+### ⋯ More Tab
+- **Review**: Practice words you've learned with spaced repetition
+- **Settings**: Configure app preferences, LLM, notifications, and theme
 
 ## Troubleshooting
 
@@ -136,33 +174,52 @@ npm start -- --clear
 ✅ Your conversations are private  
 ✅ No tracking or analytics  
 
-## What Makes FluentAI Special
+## What Makes SpeakEasy Special
 
-Unlike traditional language apps that teach rules first:
-- 🎯 **Immersion from Day 1**: Use the language immediately
-- 🧠 **Adaptive Learning**: Content adjusts to your exact level
-- 💡 **Comprehensible Input**: Always challenging but never overwhelming
-- 🎭 **Context-Rich**: Learn through stories, not flashcards
-- 🤖 **AI-Powered**: Every interaction is personalized
+Unlike traditional language apps:
+- 🎯 **Immersion First**: Use the language from day one through stories and conversations
+- 🧠 **Adaptive Content**: Every lesson adjusts to your exact level
+- 🎵 **Music Integration**: Learn through songs you actually want to listen to
+- 🏆 **Gamified**: XP, leagues, and achievements keep you motivated
+- 🔔 **Smart Reminders**: Daily notifications with 14 unique messages
+- 📊 **Analytics**: Track what works best for your learning style
+- 🤖 **AI-Powered**: Local AI for privacy-preserving personalization
+- 🎤 **Accent Training**: Practice pronunciation with AI feedback
 
 ## Project Structure
 
 ```
-FluentAI/
-├── App.js                      # Main app entry with navigation
+speakeasy/
+├── App.js                           # Main app entry with 5-tab navigation
+├── ios/                             # Native iOS project
 ├── src/
 │   ├── contexts/
-│   │   └── AppContext.js       # Global state management
+│   │   ├── AppContext.js            # App state management
+│   │   ├── AuthContext.js           # Authentication state
+│   │   ├── SubscriptionContext.js   # Subscription management
+│   │   └── ThemeContext.js          # Theme state
 │   ├── screens/
-│   │   ├── OnboardingScreen.js # First-time setup
-│   │   ├── HomeScreen.js       # Story generation & library
-│   │   ├── PracticeScreen.js   # AI conversation practice
-│   │   ├── SettingsScreen.js   # LLM configuration
-│   │   └── ReaderScreen.js     # Interactive reading
+│   │   ├── LearnNavigatorScreen.js  # Learn tab with sub-navigation
+│   │   ├── PracticeNavigatorScreen.js # Practice tab with sub-navigation
+│   │   ├── MusicScreen.js           # Music lessons
+│   │   ├── LeaguesScreen.js         # Gamification
+│   │   ├── MoreScreen.js            # More hub
+│   │   ├── SettingsScreen.js        # Settings & notifications
+│   │   ├── AccentTutorScreen.js     # Pronunciation practice
+│   │   └── LyricsLessonScreen.js    # Music-based learning
 │   ├── services/
-│   │   └── llm.js              # Ollama integration
-│   └── utils/
-│       └── storage.js          # Data persistence
+│   │   ├── llm.js                   # Ollama integration
+│   │   ├── notifications.js         # Push notification system
+│   │   ├── analytics.js             # Notification analytics
+│   │   └── music.js                 # Spotify/Apple Music API
+│   ├── utils/
+│   │   ├── storage.js               # AsyncStorage wrapper
+│   │   └── xp.js                    # XP calculation system
+│   └── components/
+│       └── XPReward.js              # XP animation component
+├── NOTIFICATIONS.md                  # Notification documentation
+├── IOS_SETUP.md                     # iOS setup guide
+└── PROJECT_COMPLETION_SUMMARY.md    # Feature summary
 ```
 
 ## Development

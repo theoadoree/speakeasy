@@ -8,7 +8,7 @@ yarn-error.log
 # Expo
 .expo/
 .expo-shared/
-dist/
+# dist/ - KEEP THIS FOR WEB DEPLOYMENT
 web-build/
 
 # React Native
