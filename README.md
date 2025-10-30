@@ -36,44 +36,11 @@ An AI-powered language learning app with gamification, music lessons, and daily 
 ### 1. Install Dependencies
 
 ```bash
-cd FluentAI
+cd speakeasy
 npm install
 ```
 
-### 2. Install Ollama (LLM Backend)
-
-**macOS/Linux:**
-```bash
-curl -fsSL https://ollama.ai/install.sh | sh
-```
-
-**Windows:**
-Download from https://ollama.ai
-
-### 3. Start Ollama Server
-
-Open a terminal and run:
-```bash
-ollama serve
-```
-
-Keep this terminal open!
-
-### 4. Download a Model
-
-In another terminal:
-```bash
-# Recommended: Llama 2 (~4GB)
-ollama pull llama2
-
-# Or: Mistral (faster, ~4GB)
-ollama pull mistral
-
-# Or: Llama 3 (better quality, ~4.7GB)
-ollama pull llama3
-```
-
-### 5. iOS Setup (Optional but Recommended)
+### 2. iOS Setup (Optional but Recommended)
 
 For full notification support and native features:
 
@@ -84,18 +51,60 @@ cd ios && pod install && cd ..
 
 **See `IOS_SETUP.md` for complete iOS setup instructions.**
 
-### 6. Start SpeakEasy
+### 3. Start SpeakEasy
 
 ```bash
 npm start
 ```
 
-### 7. Open the App
+### 4. Open the App
 
 - **iOS Simulator**: `npx expo run:ios` (requires iOS simulator runtime)
 - **Android Emulator**: `npx expo run:android`
 - **Web Browser**: Press `w` in terminal or `npm run web`
 - **Physical Device**: Scan QR code with Expo Go app
+
+## Production Setup (No Local LLM Required!)
+
+**Good news!** The app now uses a cloud-hosted backend - you don't need to run Ollama locally!
+
+The mobile app automatically connects to our production backend at:
+```
+https://speakeasy-backend-823510409781.us-central1.run.app
+```
+
+This means:
+- ✅ No need to install Ollama
+- ✅ No need to download 4GB+ models
+- ✅ Works on any device without local AI processing
+- ✅ Faster responses from cloud infrastructure
+
+### For Developers: Local Ollama (Optional)
+
+If you want to run Ollama locally for development:
+
+1. **Install Ollama**
+   ```bash
+   # macOS/Linux
+   curl -fsSL https://ollama.ai/install.sh | sh
+
+   # Windows: Download from https://ollama.ai
+   ```
+
+2. **Start Ollama**
+   ```bash
+   ollama serve
+   ```
+
+3. **Download Models**
+   ```bash
+   ollama pull llama2        # Recommended
+   ollama pull qwen2.5:72b   # Advanced (requires 40GB+ RAM)
+   ```
+
+4. **Configure for Local Development**
+
+   Edit `src/config/llm.config.js` and set `mode: 'direct'` in the development config, or set `NODE_ENV=development` in your environment.
 
 ## First Time Setup
 
@@ -104,16 +113,12 @@ npm start
 3. **Select Level**: Choose your proficiency level (A1-C2)
 4. **Pick Interests**: Select at least 3 interests
 5. **Complete Subscription**: Choose your plan
-6. **Configure LLM**:
-   - Go to More → Settings
-   - API URL: `http://localhost:11434`
-   - Model: `llama2` (or whichever you downloaded)
-   - Tap "Test Connection" ✅
-   - Tap "Save Config"
-7. **Enable Notifications**:
+6. **Enable Notifications** (Optional):
    - Go to More → Settings → Notifications
    - Toggle Daily Reminders ON
    - Tap "Send Test Notification" to verify
+
+The app automatically connects to our cloud backend - no LLM configuration needed!
 
 ## Usage
 
@@ -144,10 +149,11 @@ npm start
 
 ## Troubleshooting
 
-### "LLM Not Connected"
-- Make sure `ollama serve` is running in a terminal
-- Go to Settings → Test Connection
-- Verify model is downloaded: `ollama list`
+### "LLM Not Connected" or API Errors
+- The app uses our cloud backend by default
+- Check your internet connection
+- Verify the backend is running: https://speakeasy-backend-823510409781.us-central1.run.app/health
+- If you're developing locally with Ollama, make sure `ollama serve` is running
 
 ### App Won't Start
 ```bash
@@ -156,23 +162,27 @@ npm start -- --clear
 ```
 
 ### Slow Responses
-- Normal on first use (model needs to load)
-- Consider using `mistral` instead of `llama2` for faster responses
+- First response may be slower as the cloud model initializes
+- Subsequent responses should be faster
+- If using local Ollama: Normal on first use (model needs to load)
 
 ## Technology Stack
 
 - **Frontend**: React Native (Expo)
 - **Navigation**: React Navigation
 - **Storage**: AsyncStorage
-- **LLM Backend**: Ollama (local, private)
-- **AI Models**: Llama 2, Llama 3, Mistral (your choice)
+- **Backend**: Node.js/Express (Google Cloud Run)
+- **LLM**: OpenAI GPT-4o-mini (cloud) or Ollama (local development)
+- **Deployment**: Google Cloud Run with auto-scaling
 
 ## Privacy
 
-✅ All data stays on your device  
-✅ No cloud processing  
-✅ Your conversations are private  
-✅ No tracking or analytics  
+✅ Conversations processed through secure cloud backend
+✅ No long-term conversation storage
+✅ User data stored locally on device
+✅ No third-party tracking or analytics
+
+For maximum privacy, developers can run the backend locally with Ollama.  
 
 ## What Makes SpeakEasy Special
 

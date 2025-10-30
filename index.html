@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#007AFF" />
+    <meta name="description" content="SpeakEasy - Your AI Language Tutor" />
+    <title>SpeakEasy - AI Language Learning</title>
+
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/icon.png" />
+
+    <!-- Fonts and Icons -->
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html, body, #root {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+          'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+          sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      #root {
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Loading screen */
+      #loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        background: #FFF;
+      }
+
+      #loading h1 {
+        font-size: 32px;
+        font-weight: bold;
+        color: #007AFF;
+        margin-bottom: 8px;
+      }
+
+      #loading p {
+        font-size: 16px;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <div id="loading">
+        <h1>SpeakEasy 🚀</h1>
+        <p>Your AI Language Tutor</p>
+      </div>
+    </div>
+    <script type="module" src="/index.js"></script>
+  </body>
+</html>

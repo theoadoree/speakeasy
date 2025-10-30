@@ -16,8 +16,8 @@ app.get('/health', (req, res) => {
 });
 
 // SPA fallback - serve index.html for all non-static routes
-// This should come AFTER static middleware so assets are served first
-app.get('/*', (req, res) => {
+// Use middleware without path parameter to avoid path-to-regexp issues
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 

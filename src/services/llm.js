@@ -1,11 +1,21 @@
 import axios from 'axios';
+import { getCurrentConfig } from '../config/llm.config';
 
 class LLMService {
   constructor() {
-    this.baseURL = 'http://localhost:11434';
-    this.model = 'llama2';
+    // Get configuration based on environment
+    const config = getCurrentConfig();
+
+    // Use backend URL in production, direct Ollama in development
+    this.mode = config.mode || 'backend';
+    this.backendURL = config.backendURL || 'https://speakeasy-backend-823510409781.us-central1.run.app';
+    this.baseURL = config.llama?.baseURL || 'http://localhost:11434';
+    this.model = config.llama?.model || 'llama2';
     this.isConnected = false;
     this.subscriptionContext = null; // Will be set by the app
+
+    console.log(`🔧 LLM Service initialized in ${this.mode} mode`);
+    console.log(`📡 Backend URL: ${this.backendURL}`);
   }
 
   /**
@@ -32,16 +42,27 @@ class LLMService {
 
   async testConnection() {
     try {
-      const response = await axios.get(`${this.baseURL}/api/tags`, {
+      // Test backend API connection instead of direct Ollama
+      const url = this.mode === 'backend'
+        ? `${this.backendURL}/health`
+        : `${this.baseURL}/api/tags`;
+
+      const response = await axios.get(url, {
         timeout: 5000
       });
       this.isConnected = response.status === 200;
-      return { success: true, models: response.data.models || [] };
+      return {
+        success: true,
+        models: response.data.models || [],
+        mode: this.mode,
+        url: this.mode === 'backend' ? this.backendURL : this.baseURL
+      };
     } catch (error) {
       this.isConnected = false;
-      return { 
-        success: false, 
-        error: error.message || 'Failed to connect to Ollama' 
+      return {
+        success: false,
+        error: error.message || `Failed to connect to ${this.mode === 'backend' ? 'backend API' : 'Ollama'}`,
+        mode: this.mode
       };
     }
   }
@@ -61,30 +82,54 @@ class LLMService {
         }
       }
 
-      const response = await axios.post(
-        `${this.baseURL}/api/generate`,
-        {
-          model: this.model,
-          prompt: prompt,
-          stream: false,
-          ...options
-        },
-        {
-          timeout: 60000 // 60 second timeout
-        }
-      );
+      let responseData;
+
+      if (this.mode === 'backend') {
+        // Use backend API
+        const response = await axios.post(
+          `${this.backendURL}/api/generate`,
+          {
+            prompt: prompt,
+            model: options.model || 'llama',
+            temperature: options.temperature || 0.7,
+            maxTokens: options.maxTokens || options.num_predict || 2048
+          },
+          {
+            timeout: 60000 // 60 second timeout
+          }
+        );
+        responseData = response.data.response;
+      } else {
+        // Direct Ollama call (development mode)
+        const response = await axios.post(
+          `${this.baseURL}/api/generate`,
+          {
+            model: this.model,
+            prompt: prompt,
+            stream: false,
+            options: {
+              temperature: options.temperature,
+              num_predict: options.maxTokens || options.num_predict
+            }
+          },
+          {
+            timeout: 60000
+          }
+        );
+        responseData = response.data.response;
+      }
 
       // Track token usage
-      if (this.subscriptionContext && response.data.response) {
+      if (this.subscriptionContext && responseData) {
         const promptTokens = this.estimateTokens(prompt);
-        const responseTokens = this.estimateTokens(response.data.response);
+        const responseTokens = this.estimateTokens(responseData);
         const totalTokens = promptTokens + responseTokens;
 
         const usageResult = await this.subscriptionContext.addTokenUsage(totalTokens);
 
         return {
           success: true,
-          text: response.data.response,
+          text: responseData,
           tokensUsed: totalTokens,
           limitExceeded: usageResult.limitExceeded,
           usage: usageResult.usage,
@@ -93,7 +138,7 @@ class LLMService {
 
       return {
         success: true,
-        text: response.data.response
+        text: responseData
       };
     } catch (error) {
       return {
@@ -195,12 +240,34 @@ Respond ONLY with valid JSON.`;
     return await this.generate(prompt);
   }
 
-  async chat(message, conversationHistory, targetLanguage) {
-    const history = conversationHistory
-      .map(msg => `${msg.role}: ${msg.content}`)
-      .join('\n');
+  async chat(message, conversationHistory, targetLanguage, userLevel = 'beginner') {
+    try {
+      if (this.mode === 'backend') {
+        // Use backend's specialized practice endpoint
+        const response = await axios.post(
+          `${this.backendURL}/api/practice/message`,
+          {
+            message: message,
+            targetLanguage: targetLanguage,
+            userLevel: userLevel,
+            conversationHistory: conversationHistory
+          },
+          {
+            timeout: 30000
+          }
+        );
+        return {
+          success: true,
+          text: response.data.response
+        };
+      }
 
-    const prompt = `You are a friendly language tutor helping someone learn ${targetLanguage}.
+      // Fallback to direct Ollama (development mode)
+      const history = conversationHistory
+        .map(msg => `${msg.role}: ${msg.content}`)
+        .join('\n');
+
+      const prompt = `You are a friendly language tutor helping someone learn ${targetLanguage}.
 
 Conversation history:
 ${history}
@@ -211,7 +278,13 @@ Respond naturally in ${targetLanguage}. If the student makes mistakes, gently co
 
 Tutor:`;
 
-    return await this.generate(prompt);
+      return await this.generate(prompt);
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message || 'Failed to process chat'
+      };
+    }
   }
 
   async analyzeImportedContent(content, contentType, targetLanguage, userLevel) {
@@ -254,67 +327,94 @@ Respond ONLY with valid JSON.`;
   }
 
   async generateLesson(userProfile, targetLanguage, lessonType) {
-    const interests = userProfile.interests?.join(', ') || 'general topics';
+    try {
+      if (this.mode === 'backend') {
+        // Use backend's specialized lesson generation endpoint
+        const response = await axios.post(
+          `${this.backendURL}/api/lessons/generate`,
+          {
+            userProfile: {
+              ...userProfile,
+              targetLanguage: targetLanguage
+            },
+            count: 1
+          },
+          {
+            timeout: 60000
+          }
+        );
+        // Return first lesson from array
+        const lesson = response.data.lessons?.[0];
+        if (lesson) {
+          return {
+            success: true,
+            text: JSON.stringify(lesson)
+          };
+        }
+      }
 
-    let lessonInstructions = '';
+      // Fallback to direct generation
+      const interests = userProfile.interests?.join(', ') || 'general topics';
 
-    switch (lessonType) {
-      case 'vocabulary':
-        lessonInstructions = `Create a vocabulary lesson with:
+      let lessonInstructions = '';
+
+      switch (lessonType) {
+        case 'vocabulary':
+          lessonInstructions = `Create a vocabulary lesson with:
 - 10-15 thematic words/phrases related to ${interests}
 - Definitions in simple ${targetLanguage}
 - Example sentences for each word
 - Memory tips or mnemonics
 - Practice exercises (fill-in-the-blank, matching)`;
-        break;
+          break;
 
-      case 'grammar':
-        lessonInstructions = `Create a grammar lesson with:
+        case 'grammar':
+          lessonInstructions = `Create a grammar lesson with:
 - One key grammar concept appropriate for ${userProfile.level} level
 - Clear explanation with examples
 - Common mistakes to avoid
 - Practice exercises (transformation, correction)
 - Real-world usage examples`;
-        break;
+          break;
 
-      case 'listening':
-        lessonInstructions = `Create a listening comprehension lesson with:
+        case 'listening':
+          lessonInstructions = `Create a listening comprehension lesson with:
 - A short dialogue or monologue (150-200 words) about ${interests}
 - Comprehension questions
 - Vocabulary preview
 - Cultural notes
 - Follow-up discussion prompts`;
-        break;
+          break;
 
-      case 'speaking':
-        lessonInstructions = `Create a speaking practice lesson with:
+        case 'speaking':
+          lessonInstructions = `Create a speaking practice lesson with:
 - Pronunciation focus (specific sounds or patterns)
 - Useful phrases for conversation about ${interests}
 - Role-play scenarios
 - Speaking prompts
 - Common expressions and their usage`;
-        break;
+          break;
 
-      case 'reading':
-        lessonInstructions = `Create a reading comprehension lesson with:
+        case 'reading':
+          lessonInstructions = `Create a reading comprehension lesson with:
 - A short text (200-300 words) about ${interests}
 - Pre-reading vocabulary
 - Comprehension questions
 - Discussion questions
 - Cultural context`;
-        break;
+          break;
 
-      case 'writing':
-        lessonInstructions = `Create a writing practice lesson with:
+        case 'writing':
+          lessonInstructions = `Create a writing practice lesson with:
 - A writing prompt related to ${interests}
 - Key vocabulary and phrases to use
 - Structural guidelines
 - Example sentences
 - Self-check criteria`;
-        break;
-    }
+          break;
+      }
 
-    const prompt = `Generate a personalized ${lessonType} lesson in ${targetLanguage} for a ${userProfile.level} level learner.
+      const prompt = `Generate a personalized ${lessonType} lesson in ${targetLanguage} for a ${userProfile.level} level learner.
 
 Learner Profile:
 - Name: ${userProfile.name}
@@ -340,7 +440,13 @@ Provide response as JSON:
 Make the lesson engaging, practical, and tailored to the learner's interests.
 Respond ONLY with valid JSON.`;
 
-    return await this.generate(prompt);
+      return await this.generate(prompt, { model: 'qwen' });
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message || 'Failed to generate lesson'
+      };
+    }
   }
 
   async checkLessonAnswer(lesson, exercise, userAnswer, targetLanguage) {
