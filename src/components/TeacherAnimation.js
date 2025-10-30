@@ -63,9 +63,9 @@ const TeacherAnimation = React.memo(function TeacherAnimation({
   const pulseAnim = useRef(new Animated.Value(1)).current; // scale
   const glowAnim = useRef(new Animated.Value(0)).current; // glow intensity
   const rotateAnim = useRef(new Animated.Value(0)).current; // processing spinner
-  const mouthAnim = useRef(new Animated.Value(0)).current; // 0-3 for mouth frames
   const scaleAnim = useRef(new Animated.Value(1)).current; // entrance animation
   const [currentImage, setCurrentImage] = useState(teacherImages.smiling);
+  const [mouthFrame, setMouthFrame] = useState(0); // Track current mouth frame for speaking
 
   // Entrance animation - optimized for mobile and web
   useEffect(() => {
@@ -167,44 +167,18 @@ const TeacherAnimation = React.memo(function TeacherAnimation({
   useEffect(() => {
     if (isSpeaking) {
       // Cycle through mouth frames while speaking - more natural timing
-      // Optimized durations for smoother animation
-      const mouthAnimation = Animated.loop(
-        Animated.sequence([
-          Animated.timing(mouthAnim, {
-            toValue: 0,
-            duration: Platform.OS === 'web' ? 200 : 180,
-            easing: Easing.linear,
-            useNativeDriver: false
-          }),
-          Animated.timing(mouthAnim, {
-            toValue: 1,
-            duration: Platform.OS === 'web' ? 150 : 140,
-            easing: Easing.linear,
-            useNativeDriver: false
-          }),
-          Animated.timing(mouthAnim, {
-            toValue: 2,
-            duration: Platform.OS === 'web' ? 180 : 160,
-            easing: Easing.linear,
-            useNativeDriver: false
-          }),
-          Animated.timing(mouthAnim, {
-            toValue: 1,
-            duration: Platform.OS === 'web' ? 150 : 140,
-            easing: Easing.linear,
-            useNativeDriver: false
-          }),
-        ])
-      );
+      let frameIndex = 0;
+      const frames = [0, 1, 2, 1]; // neutral -> smiling -> closedSmile -> smiling
 
-      mouthAnimation.start();
+      const interval = setInterval(() => {
+        frameIndex = (frameIndex + 1) % frames.length;
+        setMouthFrame(frames[frameIndex]);
+      }, Platform.OS === 'web' ? 180 : 160);
+
+      return () => clearInterval(interval);
     } else {
-      mouthAnim.setValue(0);
+      setMouthFrame(0);
     }
-
-    return () => {
-      mouthAnim.stopAnimation();
-    };
   }, [isSpeaking]);
 
   // Update current image with smooth transitions
@@ -225,7 +199,7 @@ const TeacherAnimation = React.memo(function TeacherAnimation({
       ]).start();
       setCurrentImage(newImage);
     }
-  }, [isListening, isSpeaking, isProcessing, mouthAnim]);
+  }, [isListening, isSpeaking, isProcessing, mouthFrame]);
 
   const getButtonSize = () => {
     switch (size) {
@@ -269,8 +243,7 @@ const TeacherAnimation = React.memo(function TeacherAnimation({
     if (isListening) return teacherImages.surprised;
     if (isSpeaking) {
       // Alternate between smiling and closed smile for talking animation
-      const frame = Math.round(mouthAnim._value);
-      return frame === 0 ? teacherImages.neutral : frame === 1 ? teacherImages.smiling : teacherImages.closedSmile;
+      return mouthFrame === 0 ? teacherImages.neutral : mouthFrame === 1 ? teacherImages.smiling : teacherImages.closedSmile;
     }
     if (isProcessing) return teacherImages.neutral;
     return teacherImages.smiling;
