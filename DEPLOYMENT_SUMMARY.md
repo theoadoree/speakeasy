@@ -139,7 +139,7 @@ All scripts are executable (`chmod +x`)
 "build:ios": "eas build --platform ios --profile production"
 "build:android": "eas build --platform android --profile production"
 "build:all": "eas build --platform all --profile production"
-"deploy:web": "npm run build:web && gcloud run deploy speakeasy-web --source ."
+"deploy:web": "npm run build:web && gcloud run deploy speakeasy-web --source . --use-docker"
 "deploy:backend": "cd backend && gcloud run deploy speakeasy-backend --source ."
 "deploy:local": "./scripts/deploy-local.sh"
 "setup:gcloud": "./scripts/setup-gcloud.sh"

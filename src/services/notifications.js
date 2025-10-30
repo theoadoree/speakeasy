@@ -356,11 +356,15 @@ class NotificationService {
    */
   removeListeners() {
     if (this.notificationListener) {
-      Notifications.removeNotificationSubscription(this.notificationListener);
+      if (typeof this.notificationListener.remove === 'function') {
+        this.notificationListener.remove();
+      }
       this.notificationListener = null;
     }
     if (this.responseListener) {
-      Notifications.removeNotificationSubscription(this.responseListener);
+      if (typeof this.responseListener.remove === 'function') {
+        this.responseListener.remove();
+      }
       this.responseListener = null;
     }
   }

@@ -6,7 +6,17 @@ import StorageService from '../utils/storage';
 
 // Configure your API base URL here
 // Production Cloud Run URL
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://speakeasy-backend-823510409781.us-central1.run.app';
+const expoBackendUrl =
+  typeof process !== 'undefined' ? process.env?.EXPO_PUBLIC_BACKEND_URL : undefined;
+const reactAppBackendUrl =
+  typeof process !== 'undefined' ? process.env?.REACT_APP_API_URL : undefined;
+const viteBackendUrl = typeof process !== 'undefined' ? process.env?.VITE_BACKEND_URL : undefined;
+
+export const API_BASE_URL =
+  expoBackendUrl ||
+  reactAppBackendUrl ||
+  viteBackendUrl ||
+  'https://speakeasy-backend-823510409781.us-central1.run.app';
 
 // Configure Google Sign In
 GoogleSignin.configure({
