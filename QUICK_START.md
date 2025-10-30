@@ -1,65 +1,166 @@
-# SpeakEasy Quick Start Guide
+# SpeakEasy - Quick Start Guide ⚡
 
-## 🎉 Great News!
+Get up and running in 5 minutes!
 
-Your SpeakEasy app is **80% configured** and ready to test! Here's what's already set up:
+## Prerequisites
 
-- ✅ **Firebase**: Fully configured with your credentials  
-- ✅ **Google OAuth**: Ready to use
-- ✅ **RevenueCat**: SDK integrated with your API key
-- ✅ **JWT Authentication**: Secure token system ready
-- ✅ **Backend API**: Complete authentication server
-- ✅ **Subscription System**: Plans, pricing, token tracking all implemented
+- Node.js 16+ installed
+- macOS (for iOS development) or Windows/Linux (for Android)
+- 10GB free disk space (for dependencies and models)
 
-## 🚀 Start Testing in 5 Minutes
+---
 
-### Test with Google Sign In (Works Now!)
+## Step-by-Step Setup
+
+### 1️⃣ Install Dependencies (2 min)
 
 ```bash
-# Terminal 1: Start Backend API
-cd backend
-npm run dev
-
-# Terminal 2: Start Mobile App
-cd ..
-npm start
-# Then press 'i' for iOS or 'a' for Android
+cd /Users/scott/dev/speakeasy
+npm install
 ```
 
-That's it! The app will authenticate, show onboarding, subscription screen, and start your free trial.
+---
 
-## 📱 What You Can Test Right Now
+### 2️⃣ Install Ollama (3 min)
 
-- ✅ Google Sign In authentication
-- ✅ User onboarding flow
-- ✅ Subscription pricing UI
-- ✅ Free trial activation
-- ✅ Token tracking and limits
-- ✅ Upgrade prompts when limits hit
-- ✅ JWT token authentication
-- ✅ Firebase user storage
+**macOS:**
+```bash
+brew install ollama
+```
 
-## ⚠️ Apple Sign In (Optional)
+**Linux:**
+```bash
+curl -fsSL https://ollama.ai/install.sh | sh
+```
 
-To enable Apple Sign In, get keys from Apple Developer Portal and update backend/.env:
+**Windows:**
+Download from [https://ollama.ai](https://ollama.ai)
 
-See [CONFIGURATION_STATUS.md](CONFIGURATION_STATUS.md#how-to-get-apple-sign-in-keys) for detailed instructions.
+---
 
-## 📚 Documentation
+### 3️⃣ Start Ollama & Download Model (5 min)
 
-- **Quick Start**: This file
-- **Configuration Status**: [CONFIGURATION_STATUS.md](CONFIGURATION_STATUS.md)
-- **Complete Setup**: [COMPLETE_SETUP_GUIDE.md](COMPLETE_SETUP_GUIDE.md)  
-- **Backend API**: [backend/AUTH_API_README.md](backend/AUTH_API_README.md)
+```bash
+# Terminal 1: Start Ollama server
+ollama serve
 
-## 🎬 Test the Complete Flow
+# Terminal 2: Download a model
+ollama pull llama2
+```
 
-1. Launch app → See auth screen
-2. Tap "Continue with Google" → Authenticate
-3. Complete onboarding → Select language/level
-4. See subscription screen → Choose plan
-5. Start free trial → Access app
-6. Use features → Token tracking works
-7. Hit limit (Essential) → Upgrade modal appears
+Keep Terminal 1 open!
 
-Start testing now! 🚀
+---
+
+### 4️⃣ Start the App (30 seconds)
+
+```bash
+# In Terminal 2 (or new terminal)
+npm start
+```
+
+Then press:
+- **\`w\`** for Web Browser (fastest)
+- **\`i\`** for iOS Simulator (requires setup - see below)
+- **\`a\`** for Android Emulator
+
+---
+
+### 5️⃣ Complete Onboarding (2 min)
+
+1. Enter your name
+2. Choose your target language (Spanish, French, etc.)
+3. Select your level (Beginner → Advanced)
+4. Pick 3+ interests
+5. Choose subscription plan
+
+---
+
+### 6️⃣ Configure LLM (1 min)
+
+1. Tap **More** tab (bottom right)
+2. Tap **Settings**
+3. In the **LLM Configuration** section:
+   - API URL: \`http://localhost:11434\` (already filled)
+   - Model: \`llama2\` (or your downloaded model)
+4. Tap **Test Connection** ✅
+5. Tap **Save Configuration**
+
+---
+
+### 7️⃣ Enable Notifications (Optional, 30 seconds)
+
+1. Still in Settings, scroll to **Notifications 🔔**
+2. Toggle **Daily Reminders** ON
+3. Tap **Send Test Notification** to verify
+4. Check your notification center!
+
+---
+
+## You're Ready! 🎉
+
+### Try These Features:
+
+#### 📚 Learn Tab
+- **Stories**: Tap "Generate Story" for AI content
+- **Curriculum**: Follow structured lessons
+- **Custom**: Create your own lesson
+
+#### 💬 Practice Tab
+- **AI Chat**: Start a conversation in your target language
+- **Accent Tutor**: Practice pronunciation
+
+#### 🎵 Music Tab
+- Search for your favorite songs
+- Learn through lyrics
+
+#### 🏆 Leagues Tab
+- View your XP and league rank
+- Check achievements
+
+---
+
+## Quick Troubleshooting
+
+### "LLM Not Connected"
+```bash
+# Check if Ollama is running
+curl http://localhost:11434
+
+# If not running, start it:
+ollama serve
+```
+
+### "App Won't Start"
+```bash
+# Clear cache
+npm start -- --clear
+
+# Or reinstall
+rm -rf node_modules
+npm install
+```
+
+### Port 8081 Busy
+```bash
+# Kill the process
+lsof -ti:8081 | xargs kill -9
+
+# Or use different port
+npm start -- --port 8082
+```
+
+---
+
+## Documentation
+
+- **README.md** - Full feature documentation
+- **IOS_SETUP.md** - iOS deployment guide
+- **NOTIFICATIONS.md** - Notification system details
+- **PROJECT_COMPLETION_SUMMARY.md** - Complete feature overview
+
+---
+
+**🎉 Ready to learn!** The app will remind you twice daily to practice.
+
+**Time to complete:** ~14 minutes total
