@@ -1,29 +1,34 @@
-import { registerRootComponent } from 'expo';
 import { AppRegistry, Platform } from 'react-native';
+import { registerRootComponent } from 'expo';
 import App from './App';
 
-console.log('📱 Entry point loaded');
-console.log('📱 Platform.OS:', Platform.OS);
+// Register component for all platforms
+AppRegistry.registerComponent('main', () => App);
 
 if (Platform.OS === 'web') {
-  // For web, manually mount using AppRegistry
-  AppRegistry.registerComponent('SpeakEasy', () => App);
-
-  if (typeof document !== 'undefined') {
+  // For web, wait for DOM to be ready before mounting
+  const mountApp = () => {
     const rootTag = document.getElementById('root');
-    console.log('📱 Root element found:', !!rootTag);
-
     if (rootTag) {
-      AppRegistry.runApplication('SpeakEasy', {
+      console.log('✅ Mounting app to DOM');
+      AppRegistry.runApplication('main', {
         rootTag,
         initialProps: {},
       });
-      console.log('📱 App mounted to DOM');
     } else {
-      console.error('❌ Root element not found!');
+      console.error('❌ Root element not found');
     }
+  };
+
+  // If DOM is already ready, mount immediately
+  if (document.readyState === 'loading') {
+    // DOM not ready yet, wait for it
+    document.addEventListener('DOMContentLoaded', mountApp);
+  } else {
+    // DOM is ready, mount now
+    mountApp();
   }
 } else {
-  // For native, use registerRootComponent
+  // For iOS/Android, use Expo's registration
   registerRootComponent(App);
 }

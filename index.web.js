@@ -1,10 +1,21 @@
 import { AppRegistry } from 'react-native';
 import App from './App';
 
-// Register the app for web
-AppRegistry.registerComponent('main', () => App);
+console.log('📱 index.web.js executing');
+console.log('📱 App import:', App);
+console.log('📱 AppRegistry:', AppRegistry);
 
-// Run the app
-AppRegistry.runApplication('main', {
-  rootTag: document.getElementById('root'),
+// Register the app
+AppRegistry.registerComponent('SpeakEasy', () => App);
+
+console.log('📱 Component registered');
+
+// Run the application
+const rootElement = document.getElementById('root');
+console.log('📱 Root element:', rootElement);
+
+AppRegistry.runApplication('SpeakEasy', {
+  rootTag: rootElement,
 });
+
+console.log('📱 runApplication called');

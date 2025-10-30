@@ -6,7 +6,7 @@ import StorageService from '../utils/storage';
 
 // Configure your API base URL here
 // Production Cloud Run URL
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://speakeasy-backend-823510409781.us-central1.run.app';
+export const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://speakeasy-backend-823510409781.us-central1.run.app';
 
 // Configure Google Sign In (only on native platforms)
 if (Platform.OS !== 'web') {

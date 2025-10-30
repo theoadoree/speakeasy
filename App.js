@@ -302,19 +302,6 @@ function AppNavigator() {
 }
 
 export default function App() {
-  // Temporary: Test if React renders at all
-  console.log('🚀 App component rendering');
-
-  return (
-    <ErrorBoundary>
-      <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>SpeakEasy TEST</Text>
-        <Text style={styles.loadingSubtext}>React is working!</Text>
-      </View>
-    </ErrorBoundary>
-  );
-
-  /* Full app - temporarily disabled for debugging
   return (
     <ErrorBoundary>
       <ThemeProvider>
@@ -328,7 +315,6 @@ export default function App() {
       </ThemeProvider>
     </ErrorBoundary>
   );
-  */
 }
 
 const styles = StyleSheet.create({
