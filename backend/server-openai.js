@@ -238,20 +238,26 @@ app.get('/health', (req, res) => {
       createdAt: new Date().toISOString(),
       lastActivity: new Date().toISOString()
     });
-    
+
     res.json({
       success: true,
-      sessionId,
-      user: {
-        id: user.id,
-        name: user.name,
-        provider: user.provider,
-        imageUrl: user.imageUrl
+      data: {
+        token: sessionId,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          provider: user.provider,
+          imageUrl: user.imageUrl
+        }
       }
     });
   } catch (error) {
     console.error('Google auth error:', error.message);
-    res.status(500).json({ error: 'Google authentication failed' });
+    res.status(500).json({
+      success: false,
+      error: 'Google authentication failed'
+    });
   }
 });
 
@@ -296,19 +302,25 @@ app.get('/health', (req, res) => {
       createdAt: new Date().toISOString(),
       lastActivity: new Date().toISOString()
     });
-    
+
     res.json({
       success: true,
-      sessionId,
-      user: {
-        id: userData.id,
-        name: userData.name,
-        provider: userData.provider
+      data: {
+        token: sessionId,
+        user: {
+          id: userData.id,
+          name: userData.name,
+          email: userData.email,
+          provider: userData.provider
+        }
       }
     });
   } catch (error) {
     console.error('Apple auth error:', error.message);
-    res.status(500).json({ error: 'Apple authentication failed' });
+    res.status(500).json({
+      success: false,
+      error: 'Apple authentication failed'
+    });
   }
 });
 

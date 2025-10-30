@@ -8,11 +8,13 @@ import StorageService from '../utils/storage';
 // Production Cloud Run URL
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://speakeasy-backend-823510409781.us-central1.run.app';
 
-// Configure Google Sign In
-GoogleSignin.configure({
-  webClientId: '823510409781-s5d3hrffelmjcl8kjvchcv3tlbp0shbo.apps.googleusercontent.com',
-  offlineAccess: true,
-});
+// Configure Google Sign In (only on native platforms)
+if (Platform.OS !== 'web') {
+  GoogleSignin.configure({
+    webClientId: '823510409781-s5d3hrffelmjcl8kjvchcv3tlbp0shbo.apps.googleusercontent.com',
+    offlineAccess: true,
+  });
+}
 
 class AuthService {
   constructor() {

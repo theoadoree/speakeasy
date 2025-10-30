@@ -3,11 +3,16 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-// Serve static files from dist directory with proper caching
+// Serve static files from dist directory with no caching for development
 app.use(express.static(path.join(__dirname, 'dist'), {
-  maxAge: '1d',
-  etag: true,
-  lastModified: true
+  maxAge: 0,
+  etag: false,
+  lastModified: false,
+  setHeaders: (res) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+  }
 }));
 
 // Health check endpoint

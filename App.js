@@ -27,6 +27,7 @@ import LessonDetailScreen from './src/screens/LessonDetailScreen';
 import QuizScreen from './src/screens/QuizScreen';
 import DebugStorageScreen from './src/screens/DebugStorageScreen';
 import { Ionicons } from '@expo/vector-icons';
+import ErrorBoundary from './src/components/ErrorBoundary';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -302,15 +303,17 @@ function AppNavigator() {
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <SubscriptionProvider>
-          <AppProvider>
-            <AppNavigator />
-          </AppProvider>
-        </SubscriptionProvider>
-      </AuthProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <AuthProvider>
+          <SubscriptionProvider>
+            <AppProvider>
+              <AppNavigator />
+            </AppProvider>
+          </SubscriptionProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 

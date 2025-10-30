@@ -69,8 +69,6 @@ const NewAuthScreen = ({ navigation }) => {
             style={styles.logoImage}
             resizeMode="contain"
           />
-          <Text style={styles.brandName}>SpeakEasy</Text>
-          <Text style={styles.tagline}>AI-Powered Language Teacher</Text>
         </View>
 
         {/* Auth Buttons */}
@@ -127,23 +125,11 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    marginBottom: 80,
+    marginBottom: 60,
   },
   logoImage: {
-    width: 120,
-    height: 120,
-    marginBottom: 16,
-  },
-  brandName: {
-    fontSize: 42,
-    fontWeight: 'bold',
-    color: '#007AFF',
-    marginBottom: 8,
-  },
-  tagline: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
+    width: 280,
+    height: 280,
   },
   authButtons: {
     marginBottom: 40,
