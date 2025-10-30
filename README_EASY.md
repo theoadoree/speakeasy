@@ -139,8 +139,11 @@ Enable Firebase Auth: https://console.firebase.google.com/project/modular-analog
 
 ## 🎊 You're All Set!
 
+Live Web App: https://speakeasy-ai.app (SSL certificate provisioning)
 Backend: https://speakeasy-backend-823510409781.us-central1.run.app
 Status: ✅ Healthy
 Cost: FREE tier (1000+ users)
 
 **Just run**: `npm test` then `npm start`
+
+Or visit the live web app at **https://speakeasy-ai.app** (give it 5-15 minutes for SSL certificate to provision)

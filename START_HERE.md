@@ -58,6 +58,11 @@ The app will open in your browser and you'll see:
 
 ## 🔗 Your URLs
 
+**Live Web App**:
+```
+https://speakeasy-ai.app
+```
+
 **Backend API**:
 ```
 https://speakeasy-backend-823510409781.us-central1.run.app
@@ -93,6 +98,8 @@ Pick the guide you need:
 ✅ Unified sign-in/sign-up screen
 ✅ Firebase/Firestore database
 ✅ Backend deployed to Cloud Run
+✅ Frontend web app deployed to Cloud Run
+✅ Custom domain mapped (https://speakeasy-ai.app)
 ✅ Progress & XP tracking
 ✅ Leaderboards infrastructure
 ✅ Real-time sync across devices

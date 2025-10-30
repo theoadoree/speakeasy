@@ -5,7 +5,8 @@ import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import StorageService from '../utils/storage';
 
 // Configure your API base URL here
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://speakeasy-ai.app';
+// Production Cloud Run URL (domain mapping will propagate to https://speakeasy-ai.app soon)
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://speakeasy-auth-api-823510409781.us-central1.run.app';
 
 // Configure Google Sign In
 GoogleSignin.configure({

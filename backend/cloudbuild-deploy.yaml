@@ -29,10 +29,10 @@ steps:
       - '--allow-unauthenticated'
       # Public configuration (not secrets)
       - '--set-env-vars'
-      - 'GOOGLE_CLIENT_ID=823510409781-s5d3hrffelmjcl8kjvchcv3tlbp0shbo.apps.googleusercontent.com,APPLE_TEAM_ID=E7B9UE64SF,APPLE_CLIENT_ID=com.speakeasy.webapp,APPLE_KEY_ID=864SJW3HGZ,GCP_PROJECT_ID=modular-analog-476221-h8'
-      # Mount secrets from Secret Manager (run scripts/setup-secrets.sh first)
+      - 'NODE_ENV=production,APPLE_TEAM_ID=E7B9UE64SF,APPLE_CLIENT_ID=com.speakeasy.webapp,APPLE_KEY_ID=864SJW3HGZ,FIREBASE_PROJECT_ID=modular-analog-476221-h8'
+      # Mount secrets from Secret Manager
       - '--update-secrets'
-      - 'OPENAI_API_KEY=openai-api-key:latest,APPLE_PRIVATE_KEY_BASE64=apple-private-key:latest,STRIPE_SECRET_KEY=stripe-secret-key:latest,JWT_SECRET=jwt-secret:latest'
+      - 'OPENAI_API_KEY=openai-api-key:latest,APPLE_PRIVATE_KEY_BASE64=apple-private-key:latest,JWT_SECRET=jwt-secret:latest'
       - '--memory'
       - '2Gi'
       - '--cpu'

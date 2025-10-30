@@ -1,25 +1,9 @@
-const admin = require('firebase-admin');
 const bcrypt = require('bcrypt');
 const logger = require('../utils/logger');
+const { admin, db } = require('../firebase-config');
 
-// Initialize Firebase Admin
-if (!admin.apps.length) {
-  try {
-    admin.initializeApp({
-      credential: admin.credential.cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-      }),
-    });
-    logger.info('Firebase Admin initialized');
-  } catch (error) {
-    logger.error('Failed to initialize Firebase Admin', error);
-  }
-}
-
-const db = admin.firestore();
-const usersCollection = db.collection('users');
+// Get users collection from shared Firebase instance
+const usersCollection = db ? db.collection('users') : null;
 
 class UserService {
   /**

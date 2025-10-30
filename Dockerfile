@@ -1,28 +1,23 @@
-# SpeakEasy LLM Server - Docker Image
-# Production-ready Ollama server with Qwen2.5-72B + Llama 4-8B
+FROM node:18-slim
 
-FROM ollama/ollama:latest
+WORKDIR /app
 
-# Set environment variables
-ENV OLLAMA_HOST=0.0.0.0
-ENV OLLAMA_MODELS=/root/.ollama/models
+# Copy package files
+COPY package*.json ./
 
-# Create models directory
-RUN mkdir -p /root/.ollama/models
+# Install only production dependencies (express)
+RUN npm install express --production
 
-# Expose Ollama port
-EXPOSE 11434
+# Copy dist folder and server
+COPY dist ./dist
+COPY web-server.js ./
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5m --retries=3 \
-  CMD curl -f http://localhost:11434/api/tags || exit 1
+# Expose port
+EXPOSE 8080
 
-# Start Ollama server and pull models
-CMD ollama serve & \
-    sleep 10 && \
-    echo "Pulling Qwen2.5-72B model (this may take a while)..." && \
-    ollama pull qwen2.5:72b && \
-    echo "Pulling Llama 3.3-8B model..." && \
-    ollama pull llama3.3:8b && \
-    echo "Models ready!" && \
-    wait
+# Set environment
+ENV PORT=8080
+ENV NODE_ENV=production
+
+# Start server
+CMD ["node", "web-server.js"]

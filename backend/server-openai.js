@@ -7,31 +7,50 @@ const jwt = require('jsonwebtoken'); // Added for Apple JWT verification
 const crypto = require('crypto'); // Added for Apple JWT verification
 const https = require('https'); // Added for Apple public key fetching
 const authRoutes = require('./auth-routes'); // Firebase auth routes
+const { initializeSecrets, getSecrets } = require('./init-secrets'); // Secret Manager integration
 
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-// OpenAI configuration
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const MODEL = 'gpt-4o-mini'; // Fast, cheap, high quality
-
+// Global variables to hold secrets and clients
+let secrets = null;
 let openai = null;
-if (OPENAI_API_KEY) {
-  openai = new OpenAI({
-    apiKey: OPENAI_API_KEY,
-  });
-} else {
-  console.error('WARNING: OPENAI_API_KEY not set. AI endpoints will be disabled.');
+let googleClient = null;
+
+// Initialize secrets and services
+async function initializeApp() {
+  try {
+    console.log('🔐 Initializing secrets from Secret Manager...');
+    secrets = await initializeSecrets();
+
+    // Initialize OpenAI
+    if (secrets.openaiApiKey) {
+      openai = new OpenAI({
+        apiKey: secrets.openaiApiKey,
+      });
+      console.log('✅ OpenAI client initialized');
+    } else {
+      console.error('⚠️  WARNING: OPENAI_API_KEY not set. AI endpoints will be disabled.');
+    }
+
+    // Initialize Google OAuth client
+    googleClient = new OAuth2Client(secrets.googleClientId || '823510409781-s5d3hrffelmjcl8kjvchcv3tlbp0shbo.apps.googleusercontent.com');
+    console.log('✅ Google OAuth client initialized');
+
+    console.log('✅ App initialization complete');
+  } catch (error) {
+    console.error('❌ Failed to initialize app:', error);
+    process.exit(1);
+  }
 }
 
-// Google OAuth client
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID || '823510409781-s5d3hrffelmjcl8kjvchcv3tlbp0shbo.apps.googleusercontent.com');
+const MODEL = 'gpt-4o-mini'; // Fast, cheap, high quality
 
-// Apple Sign In configuration
+// Apple Sign In configuration (using legacy env vars for now)
 const APPLE_TEAM_ID = process.env.APPLE_TEAM_ID || 'E7B9UE64SF';
 const APPLE_KEY_ID = process.env.APPLE_KEY_ID || '864SJW3HGZ';
 const APPLE_CLIENT_ID = process.env.APPLE_CLIENT_ID || 'com.speakeasy.webapp';
-const APPLE_PRIVATE_KEY = process.env.APPLE_PRIVATE_KEY || 
+const APPLE_PRIVATE_KEY = process.env.APPLE_PRIVATE_KEY ||
   (process.env.APPLE_PRIVATE_KEY_BASE64 ? Buffer.from(process.env.APPLE_PRIVATE_KEY_BASE64, 'base64').toString() : null);
 
 // Simple in-memory user store (in production, use a database)
@@ -147,7 +166,8 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString(),
     provider: 'openai',
     model: MODEL,
-    apiKeyConfigured: !!OPENAI_API_KEY
+    apiKeyConfigured: !!openai,
+    secretsLoaded: !!secrets
   });
 });
 
@@ -159,7 +179,7 @@ app.get('/health', (req, res) => {
       // Verify Google ID token
       const ticket = await googleClient.verifyIdToken({
         idToken: idToken,
-        audience: process.env.GOOGLE_CLIENT_ID || '823510409781-s5d3hrffelmjcl8kjvchcv3tlbp0shbo.apps.googleusercontent.com'
+        audience: secrets?.googleClientId || '823510409781-s5d3hrffelmjcl8kjvchcv3tlbp0shbo.apps.googleusercontent.com'
       });
 
       const payload = ticket.getPayload();
@@ -765,10 +785,16 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`SpeakEasy backend running on port ${PORT}`);
-  console.log(`Provider: OpenAI`);
-  console.log(`Model: ${MODEL}`);
-  console.log(`API Key configured: ${!!OPENAI_API_KEY}`);
+// Initialize app and start server
+initializeApp().then(() => {
+  app.listen(PORT, () => {
+    console.log(`🚀 SpeakEasy backend running on port ${PORT}`);
+    console.log(`📦 Provider: OpenAI`);
+    console.log(`🤖 Model: ${MODEL}`);
+    console.log(`🔑 API Key configured: ${!!openai}`);
+  });
+}).catch(error => {
+  console.error('❌ Failed to start server:', error);
+  process.exit(1);
 });
 
