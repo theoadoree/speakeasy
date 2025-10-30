@@ -14,15 +14,8 @@ import {
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { useAuth } from '../contexts/AuthContext';
 
-export default function NewAuthScreen() {
-  const {
-    signInWithApple,
-    signInWithGoogle,
-    isAppleSignInAvailable,
-    error: authError,
-    clearError,
-  } = useAuth();
-
+const NewAuthScreen = ({ navigation }) => {
+  const { signInWithApple, signInWithGoogle, isAppleSignInAvailable, authError } = useAuth();
   const [loading, setLoading] = useState(false);
   const [appleAvailable, setAppleAvailable] = useState(false);
 
@@ -30,24 +23,18 @@ export default function NewAuthScreen() {
     checkAppleAvailability();
   }, []);
 
-  useEffect(() => {
-    if (authError) {
-      Alert.alert('Authentication Error', authError);
-      clearError();
-    }
-  }, [authError]);
-
   const checkAppleAvailability = async () => {
     const available = await isAppleSignInAvailable();
     setAppleAvailable(available);
-    console.log('🍎 Apple Sign In available:', available);
   };
 
   const handleAppleSignIn = async () => {
     setLoading(true);
     try {
       const result = await signInWithApple();
-      if (!result.success && result.error && result.error !== 'User cancelled') {
+      if (result.success) {
+        // Navigation will be handled automatically by the App.js navigation flow
+      } else if (result.error && result.error !== 'User cancelled') {
         Alert.alert('Sign In Failed', result.error);
       }
     } catch (error) {
@@ -61,7 +48,9 @@ export default function NewAuthScreen() {
     setLoading(true);
     try {
       const result = await signInWithGoogle();
-      if (!result.success && result.error && result.error !== 'User cancelled') {
+      if (result.success) {
+        // Navigation will be handled automatically by the App.js navigation flow
+      } else if (result.error && result.error !== 'User cancelled') {
         Alert.alert('Sign In Failed', result.error);
       }
     } catch (error) {
@@ -74,7 +63,7 @@ export default function NewAuthScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        {/* Logo */}
+        {/* Logo/Branding */}
         <View style={styles.header}>
           <Image
             source={require('../../assets/logo.png')}
@@ -83,10 +72,9 @@ export default function NewAuthScreen() {
           />
         </View>
 
-        {/* Sign In Buttons */}
+        {/* Auth Buttons */}
         <View style={styles.authButtons}>
-          {/* Apple Sign In (iOS only) */}
-          {appleAvailable && (
+          {appleAvailable && Platform.OS === 'ios' && (
             <AppleAuthentication.AppleAuthenticationButton
               buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
               buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
@@ -96,21 +84,21 @@ export default function NewAuthScreen() {
             />
           )}
 
-          {/* Google Sign In */}
           <TouchableOpacity
             style={styles.googleButton}
             onPress={handleGoogleSignIn}
             disabled={loading}
+            activeOpacity={0.8}
           >
-            {loading ? (
-              <ActivityIndicator color="#007AFF" />
-            ) : (
-              <>
-                <Text style={styles.googleButtonIcon}>G</Text>
-                <Text style={styles.googleButtonText}>Continue with Google</Text>
-              </>
-            )}
+            <Text style={styles.googleButtonIcon}>G</Text>
+            <Text style={styles.googleButtonText}>Continue with Google</Text>
           </TouchableOpacity>
+
+          {loading && (
+            <View style={styles.loadingOverlay}>
+              <ActivityIndicator size="large" color="#007AFF" />
+            </View>
+          )}
         </View>
 
         {/* Terms */}
@@ -135,7 +123,7 @@ export default function NewAuthScreen() {
       </View>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -190,6 +178,17 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#000',
   },
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 12,
+  },
   terms: {
     paddingHorizontal: 20,
   },
@@ -204,3 +203,5 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 });
+
+export default NewAuthScreen;

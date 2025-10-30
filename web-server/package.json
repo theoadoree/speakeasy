@@ -1,7 +1,7 @@
 {
   "name": "speakeasy-web",
-  "version": "1.0.0",
-  "description": "SpeakEasy Web Application",
+  "version": "2.0.0",
+  "description": "SpeakEasy Web Application - Rewritten",
   "main": "web-server.js",
   "scripts": {
     "start": "node web-server.js"

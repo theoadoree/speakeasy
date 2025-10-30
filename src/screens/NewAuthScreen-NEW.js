@@ -12,7 +12,7 @@ import {
   Linking,
 } from 'react-native';
 import * as AppleAuthentication from 'expo-apple-authentication';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext-NEW';
 
 export default function NewAuthScreen() {
   const {
