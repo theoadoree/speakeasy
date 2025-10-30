@@ -51,18 +51,25 @@ cd ios && pod install && cd ..
 
 **See `IOS_SETUP.md` for complete iOS setup instructions.**
 
-### 3. Start SpeakEasy
+### 3. Choose Your Runtime
 
-```bash
-npm start
-```
+| Target | Command | Notes |
+| ------ | ------- | ----- |
+| **iOS / Android (React Native CLI)** | `npm run native:start` | Starts Metro bundler without Expo tooling |
+| **iOS (React Native CLI)** | `npm run native:ios` | Builds and launches the Xcode project using the `SpeakEasy` scheme |
+| **Android (React Native CLI)** | `npm run native:android` | Runs the Android app (after generating the `android/` project once via `npx react-native` or `expo prebuild`) |
+| **Expo Dev Client** | `npm start` | Keeps Expo tooling available if you still need it |
+| **Web (Vite)** | `npm run web` | Uses the Vite dev server for the web bundle |
+
+> ⚠️ If you have not generated the native Android project yet, run `npx expo prebuild --platform android` or `npx react-native init android --directory . --skip-install` once to create `android/` before using `npm run native:android`.
 
 ### 4. Open the App
 
-- **iOS Simulator**: `npx expo run:ios` (requires iOS simulator runtime)
-- **Android Emulator**: `npx expo run:android`
-- **Web Browser**: Press `w` in terminal or `npm run web`
-- **Physical Device**: Scan QR code with Expo Go app
+- **iOS Simulator**: `npm run native:ios`
+- **Android Emulator**: `npm run native:android`
+- **Expo Dev Client**: `npm start` and choose the platform in the Expo UI
+- **Web Browser**: `npm run web`
+- **Physical Device (Dev Client)**: Build a custom dev client via Xcode/Gradle, then run `npm run native:start`
 
 ## Production Setup (No Local LLM Required!)
 
