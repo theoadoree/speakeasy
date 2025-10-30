@@ -1,4 +1,6 @@
 {
+  "name": "SpeakEasy",
+  "displayName": "SpeakEasy",
   "expo": {
     "name": "SpeakEasy",
     "slug": "speakeasy",
@@ -51,8 +53,7 @@
       "bundler": "metro"
     },
     "extra": {
-      "eas": {
-      }
+      "eas": {}
     },
     "runtimeVersion": {
       "policy": "sdkVersion"

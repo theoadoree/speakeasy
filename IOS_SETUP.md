@@ -6,7 +6,7 @@ This guide will help you complete the iOS setup and run SpeakEasy on your iPhone
 
 - ✅ macOS with Xcode 16+ installed
 - ✅ CocoaPods installed (`pod --version`)
-- ✅ Expo CLI installed (`npm install -g expo-cli`)
+- ✅ React Native CLI (via `npx react-native`) available in your PATH
 - ✅ iOS device or iOS Simulator
 
 ## Current Setup Status
@@ -58,15 +58,18 @@ Wait for the simulator to boot completely (you'll see the iOS home screen).
 # Navigate to project directory
 cd /Users/scott/dev/speakeasy
 
+# Start the Metro bundler (in a separate terminal)
+npm run native:start
+
 # Build and run on iOS simulator
-npx expo run:ios
+npm run native:ios
 ```
 
 This will:
-- Build the native iOS app
+- Build the native iOS app using Xcode
 - Install it on the simulator
 - Launch the app automatically
-- Start the Metro bundler for hot reloading
+- Reuse the Metro bundler started via `npm run native:start`
 
 ### Step 4: Test Notifications
 
@@ -96,8 +99,11 @@ Physical devices provide the most accurate testing environment for notifications
 ### Step 2: Build and Install
 
 ```bash
+# Start the Metro bundler (if not already running)
+npm run native:start
+
 # Build and run on connected device
-npx expo run:ios --device
+npm run native:ios -- --device
 ```
 
 Xcode will:
@@ -112,7 +118,7 @@ If you see an error about Developer Mode:
 1. On your iPhone: **Settings → Privacy & Security → Developer Mode**
 2. Toggle **Developer Mode** ON
 3. Restart your iPhone
-4. Reconnect and run `npx expo run:ios --device` again
+4. Reconnect and run `npm run native:ios -- --device` again
 
 ### Step 4: Test Real Notifications
 
@@ -207,7 +213,7 @@ xcodebuild clean -workspace SpeakEasy.xcworkspace -scheme SpeakEasy
 cd ..
 
 # Rebuild
-npx expo run:ios --no-build-cache
+npm run native:ios -- --no-build-cache
 ```
 
 ---
@@ -282,17 +288,17 @@ More (ellipsis icon)
 ## Useful Commands
 
 ```bash
-# Start development server
-npx expo start
+# Start development server (React Native CLI)
+npm run native:start
 
 # Run on iOS simulator
-npx expo run:ios
+npm run native:ios
 
 # Run on connected iPhone
-npx expo run:ios --device
+npm run native:ios -- --device
 
-# Clear cache and rebuild
-npx expo start --clear
+# Clear Metro cache and rebuild
+npm run native:start -- --reset-cache
 
 # List available simulators
 xcrun simctl list devices
@@ -303,8 +309,8 @@ pod --version
 # Update pods
 cd ios && pod update && cd ..
 
-# View app logs
-npx expo start --ios
+# View app logs in Xcode
+open ios/SpeakEasy.xcworkspace
 
 # Clean everything and start fresh
 rm -rf node_modules ios/Pods ios/Podfile.lock
@@ -322,7 +328,7 @@ cd ios && pod install && cd ..
 
 2. **Run the App**
    ```bash
-   npx expo run:ios
+   npm run native:ios
    ```
 
 3. **Test Notifications**

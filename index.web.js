@@ -1,10 +1,11 @@
 import { AppRegistry } from 'react-native';
 import App from './App';
+import appManifest from './app.json';
 
-// Register the app for web
-AppRegistry.registerComponent('main', () => App);
+const APP_NAME = (appManifest && appManifest.name) || 'SpeakEasy';
 
-// Run the app
-AppRegistry.runApplication('main', {
+AppRegistry.registerComponent(APP_NAME, () => App);
+
+AppRegistry.runApplication(APP_NAME, {
   rootTag: document.getElementById('root'),
 });

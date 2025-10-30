@@ -26,7 +26,10 @@
     "deploy:backend": "npm run backend:deploy",
     "deploy:local": "./scripts/deploy-local.sh",
     "setup:gcloud": "./scripts/setup-gcloud.sh",
-    "preview": "npx vite preview"
+    "preview": "npx vite preview",
+    "native:start": "react-native start",
+    "native:ios": "react-native run-ios --scheme SpeakEasy",
+    "native:android": "react-native run-android"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",
@@ -60,6 +63,7 @@
   "devDependencies": {
     "@vitejs/plugin-react": "^5.1.0",
     "vite": "^7.1.12",
-    "vite-plugin-react-native-web": "^2.4.1"
+    "vite-plugin-react-native-web": "^2.4.1",
+    "@react-native/metro-config": "^0.82.1"
   }
 }
