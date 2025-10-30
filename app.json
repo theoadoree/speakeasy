@@ -18,21 +18,12 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.speakeasy.app",
+      "bundleIdentifier": "com.scott.speakeasy",
       "buildNumber": "1.0.0",
-      "usesAppleSignIn": true,
       "infoPlist": {
         "NSMicrophoneUsageDescription": "SpeakEasy needs access to your microphone for voice conversation practice.",
-        "NSSpeechRecognitionUsageDescription": "SpeakEasy uses speech recognition to help you practice pronunciation.",
-        "UIBackgroundModes": [
-          "remote-notification"
-        ]
+        "NSSpeechRecognitionUsageDescription": "SpeakEasy uses speech recognition to help you practice pronunciation."
       }
-    },
-    "notification": {
-      "icon": "./assets/icon.png",
-      "color": "#007AFF",
-      "iosDisplayInForeground": true
     },
     "android": {
       "adaptiveIcon": {

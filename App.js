@@ -133,11 +133,27 @@ function AppNavigator() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { hasActiveSubscription, loading: subscriptionLoading } = useSubscription();
   const [onboardingComplete, setOnboardingComplete] = useState(null);
+  const [loadingTimeout, setLoadingTimeout] = useState(false);
+
+  // Add timeout for loading screen (max 5 seconds on web, 10 seconds on native)
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      console.log('⚠️ Loading timeout reached, forcing render');
+      setLoadingTimeout(true);
+    }, Platform.OS === 'web' ? 5000 : 10000);
+
+    return () => clearTimeout(timeout);
+  }, []);
 
   useEffect(() => {
     if (isAuthenticated) {
       checkOnboarding();
-      setupNotifications();
+      if (Platform.OS !== 'web') {
+        setupNotifications();
+      }
+    } else {
+      // Not authenticated, skip onboarding check
+      setOnboardingComplete(false);
     }
   }, [isAuthenticated]);
 
@@ -180,8 +196,10 @@ function AppNavigator() {
     }
   };
 
-  // Show loading screen while checking auth and app state
-  if (authLoading || appLoading || subscriptionLoading || (isAuthenticated && onboardingComplete === null)) {
+  // Show loading screen while checking auth and app state (with timeout)
+  const isLoading = !loadingTimeout && (authLoading || appLoading || subscriptionLoading || (isAuthenticated && onboardingComplete === null));
+
+  if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
         <Text style={styles.loadingText}>SpeakEasy 🚀</Text>
