@@ -9,7 +9,7 @@
     <script type="text/javascript" src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"></script>
     <meta name="appleid-signin-client-id" content="com.speakeasy.webapp">
     <meta name="appleid-signin-scope" content="name email">
-    <meta name="appleid-signin-redirect-uri" content="https://speakeasy-python-web-823510409781.us-central1.run.app/static/auth-unified.html">
+    <meta name="appleid-signin-redirect-uri" content="https://speakeasy-python-web-vlxo5frhwq-uc.a.run.app/static/auth-unified.html">
     <meta name="appleid-signin-state" content="signin">
     <meta name="appleid-signin-use-popup" content="true">
     <style>
@@ -242,10 +242,15 @@
         const GOOGLE_CLIENT_ID = '823510409781-aqd90aoj080374pnfjultufdkk027qsp.apps.googleusercontent.com';
 
         function signInWithGoogle() {
+            console.log('Google Sign In button clicked');
+
             if (!window.google) {
+                console.error('Google SDK not loaded');
                 alert('Google Sign-In is loading. Please wait a moment and try again.');
                 return;
             }
+
+            console.log('Initializing Google Sign-In with client ID:', GOOGLE_CLIENT_ID);
 
             // Initialize Google Sign-In
             google.accounts.id.initialize({
@@ -254,7 +259,18 @@
             });
 
             // Prompt the user to select an account
-            google.accounts.id.prompt();
+            console.log('Showing Google account selector');
+            google.accounts.id.prompt((notification) => {
+                console.log('Google prompt notification:', notification);
+                if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+                    console.log('Google prompt not displayed, showing One Tap');
+                    // If prompt doesn't show, try rendering a button
+                    google.accounts.id.renderButton(
+                        document.querySelector('.oauth-btn.google'),
+                        { theme: 'outline', size: 'large', width: 250 }
+                    );
+                }
+            });
         }
 
         async function handleGoogleCallback(response) {
@@ -289,29 +305,37 @@
         }
 
         async function signInWithApple() {
+            console.log('Apple Sign In button clicked');
+
             try {
                 // Initialize Apple Sign In
                 if (!window.AppleID) {
+                    console.error('AppleID SDK not loaded');
                     alert('Apple Sign In is loading. Please wait and try again.');
                     return;
                 }
 
+                console.log('Initializing Apple Sign In');
                 AppleID.auth.init({
                     clientId: 'com.speakeasy.webapp',
                     scope: 'name email',
-                    redirectURI: 'https://speakeasy-python-web-823510409781.us-central1.run.app/static/auth-unified.html',
+                    redirectURI: 'https://speakeasy-python-web-vlxo5frhwq-uc.a.run.app/static/auth-unified.html',
                     state: 'signin',
                     usePopup: true
                 });
 
+                console.log('Showing Apple Sign In popup');
                 const data = await AppleID.auth.signIn();
+                console.log('Apple Sign In response received:', data);
 
                 // Send to backend
                 await handleAppleCallback(data);
             } catch (error) {
                 console.error('Apple Sign In error:', error);
                 if (error.error !== 'popup_closed_by_user') {
-                    alert('Apple Sign In failed. Please try again.');
+                    const errorEl = document.getElementById('form-error');
+                    errorEl.textContent = 'Apple Sign In failed: ' + (error.error || error.message || 'Unknown error');
+                    errorEl.classList.add('show');
                 }
             }
         }
@@ -320,9 +344,14 @@
             const errorEl = document.getElementById('form-error');
 
             try {
+                console.log('Processing Apple callback');
+
                 // Extract data from Apple response
                 const authorization = response.authorization;
                 const user = response.user; // Only available on first signin
+
+                console.log('Apple authorization:', authorization);
+                console.log('Apple user data:', user);
 
                 const payload = {
                     identityToken: authorization.id_token,
@@ -331,6 +360,8 @@
                     fullName: user ? user.name : null
                 };
 
+                console.log('Sending payload to backend:', payload);
+
                 const res = await fetch('/api/auth/apple', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -338,19 +369,22 @@
                 });
 
                 const data = await res.json();
+                console.log('Backend response:', data);
 
                 if (res.ok && data.success) {
+                    console.log('Apple Sign In successful, redirecting...');
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('user', JSON.stringify(data.user));
                     window.location.href = '/';
                 } else {
+                    console.error('Apple Sign In failed:', data);
                     errorEl.textContent = data.detail || 'Apple sign-in failed';
                     errorEl.classList.add('show');
                 }
             } catch (error) {
-                errorEl.textContent = 'Connection error. Please try again.';
-                errorEl.classList.add('show');
                 console.error('Apple auth error:', error);
+                errorEl.textContent = 'Connection error: ' + error.message;
+                errorEl.classList.add('show');
             }
         }
     </script>

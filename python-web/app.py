@@ -687,37 +687,55 @@ async def apple_auth(request: Request):
         email = body.get("email")
         name = body.get("fullName", {})
 
-        if not id_token or not user_id:
-            raise HTTPException(status_code=400, detail="Missing Apple credentials")
+        print(f"Apple auth request: user_id={user_id}, email={email}, name={name}")
+
+        if not id_token:
+            raise HTTPException(status_code=400, detail="Missing Apple identity token")
+
+        if not user_id:
+            raise HTTPException(status_code=400, detail="Missing Apple user ID")
 
         # In production, verify the JWT token from Apple
         # For now, we'll create/login the user
 
-        # Generate username from name or email
-        if name:
-            given_name = name.get("givenName", "")
-            family_name = name.get("familyName", "")
-            base_username = f"{given_name}_{family_name}".lower().replace(" ", "_")
-        elif email:
-            base_username = email.split('@')[0]
-        else:
-            base_username = f"apple_user_{user_id[:8]}"
+        # Try to find existing user by Apple user_id
+        existing_user = None
+        for user_email, user_data in users.items():
+            if user_data.get('oauth_provider') == 'apple' and user_data.get('oauth_id') == user_id:
+                existing_user = user_email
+                break
 
-        # Ensure username is unique
-        username = base_username
-        counter = 1
-        while username in usernames:
-            username = f"{base_username}{counter}"
-            counter += 1
-
-        # Check if user exists
-        if email and email in users:
-            user_data = users[email].copy()
+        if existing_user:
+            # Returning user - load their data
+            print(f"Found existing Apple user: {existing_user}")
+            user_data = users[existing_user].copy()
         else:
+            # New user - create account
+            print(f"Creating new Apple user: user_id={user_id}")
+
+            # Generate username from name or email
+            if name and isinstance(name, dict):
+                given_name = name.get("givenName", "")
+                family_name = name.get("familyName", "")
+                base_username = f"{given_name}_{family_name}".lower().replace(" ", "_").strip("_")
+            elif email:
+                base_username = email.split('@')[0]
+            else:
+                base_username = f"apple_user_{user_id[:8]}"
+
+            # Ensure username is unique
+            username = base_username
+            counter = 1
+            while username in usernames:
+                username = f"{base_username}{counter}"
+                counter += 1
+
             # Create new user
             usernames.add(username)
+            user_email = email or f"{user_id}@privaterelay.appleid.com"
+
             user_data = {
-                'email': email or f"{user_id}@privaterelay.appleid.com",
+                'email': user_email,
                 'username': username,
                 'target_language': 'Spanish',
                 'native_language': 'English',
@@ -726,8 +744,10 @@ async def apple_auth(request: Request):
                 'oauth_provider': 'apple',
                 'oauth_id': user_id
             }
-            if email:
-                users[email] = user_data
+
+            # Store by email AND by Apple user_id for future lookups
+            users[user_email] = user_data
+            print(f"Created new user: {user_email} (username: {username})")
 
         # Remove sensitive data
         response_data = user_data.copy()
@@ -743,12 +763,17 @@ async def apple_auth(request: Request):
         }
         token = jwt.encode(token_payload, 'your-secret-key', algorithm='HS256')
 
+        print(f"Apple auth successful for: {user_data['email']}")
+
         return {
             "success": True,
             "token": token,
             "user": response_data
         }
+    except HTTPException:
+        raise
     except Exception as e:
+        print(f"Apple auth error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Apple auth error: {str(e)}")
 
 # ==================== LEAGUE ENDPOINTS ====================

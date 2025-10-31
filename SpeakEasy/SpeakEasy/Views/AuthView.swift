@@ -25,13 +25,23 @@ struct AuthView: View {
 
                     // Logo and Title
                     VStack(spacing: 16) {
-                        // App Icon
-                        Image("AppIcon")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 120, height: 120)
-                            .cornerRadius(24)
-                            .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
+                        // Logo - Speech bubble icon with gradient effect
+                        ZStack {
+                            Circle()
+                                .fill(
+                                    LinearGradient(
+                                        colors: [Color.blue, Color.blue.opacity(0.7)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .frame(width: 120, height: 120)
+                                .shadow(color: .blue.opacity(0.3), radius: 15, x: 0, y: 8)
+
+                            Image(systemName: "message.fill")
+                                .font(.system(size: 60))
+                                .foregroundColor(.white)
+                        }
 
                         Text("SpeakEasy")
                             .font(.system(size: 42, weight: .bold))
