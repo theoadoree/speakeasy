@@ -234,6 +234,19 @@
             </button>
         </div>
 
+        <!-- Temporary Demo Access -->
+        <div style="margin-top: 30px; padding-top: 30px; border-top: 1px solid rgba(255,255,255,0.2); text-align: center;">
+            <p style="color: rgba(255,255,255,0.7); font-size: 14px; margin-bottom: 15px;">
+                ⚠️ OAuth Configuration Required
+            </p>
+            <button class="oauth-btn" onclick="demoSignIn()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3);">
+                <span>🚀</span> Continue with Demo Access
+            </button>
+            <p style="color: rgba(255,255,255,0.5); font-size: 12px; margin-top: 10px;">
+                Temporary access while OAuth is being configured
+            </p>
+        </div>
+
         <div class="error-message" id="form-error" style="margin-top: 20px;"></div>
     </div>
 
@@ -404,6 +417,42 @@
             } catch (error) {
                 console.error('Apple auth error:', error);
                 errorEl.textContent = 'Connection error: ' + error.message;
+                errorEl.classList.add('show');
+            }
+        }
+
+        // Temporary demo sign in function
+        async function demoSignIn() {
+            console.log('Demo sign in clicked');
+            const errorEl = document.getElementById('form-error');
+
+            try {
+                // Create demo user
+                const demoEmail = `demo_${Date.now()}@speakeasy.demo`;
+                const demoUser = {
+                    email: demoEmail,
+                    name: 'Demo User',
+                    username: `demo_user_${Date.now()}`,
+                    target_language: 'Spanish',
+                    native_language: 'English',
+                    level: 'beginner',
+                    interests: []
+                };
+
+                // Create mock token
+                const token = `demo_token_${Date.now()}`;
+
+                // Store in localStorage
+                localStorage.setItem('token', token);
+                localStorage.setItem('user', JSON.stringify(demoUser));
+
+                console.log('Demo user created:', demoUser);
+
+                // Redirect to main app
+                window.location.href = '/';
+            } catch (error) {
+                console.error('Demo sign in error:', error);
+                errorEl.textContent = 'Demo sign in failed: ' + error.message;
                 errorEl.classList.add('show');
             }
         }
