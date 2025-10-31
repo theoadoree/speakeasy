@@ -262,8 +262,8 @@ async def google_auth(request: GoogleAuthRequest):
         # If credential JWT is provided, verify and decode it
         if request.credential and GOOGLE_AUTH_AVAILABLE:
             try:
-                # Get Google Client ID from environment or use placeholder
-                GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID', '823510409781-YOUR_CLIENT_ID.apps.googleusercontent.com')
+                # Get Google Client ID from environment or use the OAuth 2 Web App client
+                GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID', '823510409781-7am96n366leset271qt9c8djo265u24n.apps.googleusercontent.com')
 
                 # Verify the token
                 idinfo = id_token.verify_oauth2_token(
