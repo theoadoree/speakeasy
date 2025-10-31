@@ -238,8 +238,19 @@
     </div>
 
     <script>
-        // Google OAuth Configuration
+        // Configuration
         const GOOGLE_CLIENT_ID = '823510409781-7am96n366leset271qt9c8djo265u24n.apps.googleusercontent.com';
+        const ENABLE_APPLE_SIGNIN = false; // Set to true when Apple Sign In is configured
+
+        // Hide Apple button if not enabled
+        if (!ENABLE_APPLE_SIGNIN) {
+            document.addEventListener('DOMContentLoaded', function() {
+                const appleBtn = document.querySelector('.oauth-btn.apple');
+                if (appleBtn) {
+                    appleBtn.style.display = 'none';
+                }
+            });
+        }
 
         function signInWithGoogle() {
             console.log('Google Sign In button clicked');
@@ -307,6 +318,15 @@
         async function signInWithApple() {
             console.log('Apple Sign In button clicked');
 
+            // Check if Apple Sign In is enabled
+            if (!ENABLE_APPLE_SIGNIN) {
+                const errorEl = document.getElementById('form-error');
+                errorEl.textContent = 'Apple Sign In is temporarily disabled. Please use Google Sign In or contact support.';
+                errorEl.classList.add('show');
+                console.warn('Apple Sign In is disabled - set ENABLE_APPLE_SIGNIN=true to enable');
+                return;
+            }
+
             try {
                 // Initialize Apple Sign In
                 if (!window.AppleID) {
@@ -334,7 +354,7 @@
                 console.error('Apple Sign In error:', error);
                 if (error.error !== 'popup_closed_by_user') {
                     const errorEl = document.getElementById('form-error');
-                    errorEl.textContent = 'Apple Sign In failed: ' + (error.error || error.message || 'Unknown error');
+                    errorEl.textContent = 'Apple Sign In configuration error. Please see APPLE_SIGNIN_WEB_SETUP.md for setup instructions.';
                     errorEl.classList.add('show');
                 }
             }

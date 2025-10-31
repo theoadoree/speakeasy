@@ -152,11 +152,7 @@ struct AuthView: View {
                 debugMessage = "Got Apple credentials, calling backend..."
 
                 Task {
-                    await authManager.signInWithApple(
-                        userId: appleIDCredential.user,
-                        email: appleIDCredential.email,
-                        fullName: appleIDCredential.fullName
-                    )
+                    await authManager.signInWithApple(credential: appleIDCredential)
 
                     await MainActor.run {
                         if let error = authManager.errorMessage {

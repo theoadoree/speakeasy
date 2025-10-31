@@ -94,16 +94,12 @@ class AuthenticationManager: ObservableObject {
     }
 
     // MARK: - Social Authentication
-    func signInWithApple(userId: String, email: String?, fullName: PersonNameComponents?) async {
+    func signInWithApple(credential: ASAuthorizationAppleIDCredential) async {
         isLoading = true
         errorMessage = nil
 
         do {
-            let response = try await apiService.signInWithApple(
-                userId: userId,
-                email: email,
-                fullName: fullName
-            )
+            let response = try await apiService.signInWithApple(credential: credential)
             user = response.data.user
             isAuthenticated = true
         } catch {

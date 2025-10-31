@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import AuthenticationServices
 
 class APIService {
     static let shared = APIService()
@@ -117,20 +118,44 @@ class APIService {
         return response.data
     }
 
-    func signInWithApple(userId: String, email: String?, fullName: PersonNameComponents?) async throws -> AuthResponse {
-        var body: [String: Any] = ["userId": userId]
-        if let email = email {
+    func signInWithApple(credential: ASAuthorizationAppleIDCredential) async throws -> AuthResponse {
+        var body: [String: Any] = [:]
+
+        // Extract identity token (JWT) - required by backend
+        if let identityToken = credential.identityToken,
+           let tokenString = String(data: identityToken, encoding: .utf8) {
+            body["idToken"] = tokenString
+        }
+
+        // Extract authorization code
+        if let authorizationCode = credential.authorizationCode,
+           let codeString = String(data: authorizationCode, encoding: .utf8) {
+            body["authorizationCode"] = codeString
+        }
+
+        // User ID
+        body["user"] = credential.user
+
+        // Email (only provided on first sign-in)
+        if let email = credential.email {
             body["email"] = email
         }
-        if let fullName = fullName {
-            var nameDict: [String: String] = [:]
+
+        // Full name (only provided on first sign-in)
+        if let fullName = credential.fullName {
+            var nameString = ""
             if let givenName = fullName.givenName {
-                nameDict["givenName"] = givenName
+                nameString = givenName
             }
             if let familyName = fullName.familyName {
-                nameDict["familyName"] = familyName
+                if !nameString.isEmpty {
+                    nameString += " "
+                }
+                nameString += familyName
             }
-            body["fullName"] = nameDict
+            if !nameString.isEmpty {
+                body["name"] = nameString
+            }
         }
 
         let response: AuthResponse = try await request(
