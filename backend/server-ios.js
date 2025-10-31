@@ -219,18 +219,14 @@ app.get('/health', (req, res) => {
       }
 
       // Verify Google ID token
-      // Accept tokens from both web and iOS clients
-      const validAudiences = [
-        '823510409781-7am96n366leset271qt9c8djo265u24n.apps.googleusercontent.com', // Web client
-        '823510409781-aqd90aoj080374pnfjultufdkk027qsp.apps.googleusercontent.com', // iOS client
-        secrets?.googleClientId || '823510409781-s5d3hrffelmjcl8kjvchcv3tlbp0shbo.apps.googleusercontent.com' // Fallback
-      ].filter(Boolean);
+      // iOS backend - ONLY accept iOS client tokens
+      const iosClientId = '823510409781-aqd90aoj080374pnfjultufdkk027qsp.apps.googleusercontent.com';
 
       let payload;
       try {
         const ticket = await googleClient.verifyIdToken({
           idToken: idToken,
-          audience: validAudiences
+          audience: iosClientId
         });
         payload = ticket.getPayload();
         console.log('✅ Google token verified:', payload.sub);

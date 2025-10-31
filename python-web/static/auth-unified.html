@@ -302,10 +302,10 @@
 
             try {
                 // Send Google JWT token to our backend
-                const res = await fetch('/api/auth/google', {
+                const res = await fetch('https://speakeasy-backend-823510409781.us-central1.run.app/api/auth/google', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ credential: response.credential })
+                    body: JSON.stringify({ idToken: response.credential })
                 });
 
                 const data = await res.json();
@@ -387,15 +387,15 @@
                 console.log('Apple user data:', user);
 
                 const payload = {
-                    identityToken: authorization.id_token,
+                    idToken: authorization.id_token,
                     user: authorization.user || (user ? user.sub : null),
                     email: user ? user.email : null,
-                    fullName: user ? user.name : null
+                    name: user ? user.name : null
                 };
 
                 console.log('Sending payload to backend:', payload);
 
-                const res = await fetch('/api/auth/apple', {
+                const res = await fetch('https://speakeasy-backend-823510409781.us-central1.run.app/api/auth/apple', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)

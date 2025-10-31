@@ -1,0 +1,11 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+  - 'build'
+  - '-f'
+  - 'Dockerfile.ios'
+  - '-t'
+  - 'gcr.io/modular-analog-476221-h8/speakeasy-ios-backend'
+  - '.'
+images:
+- 'gcr.io/modular-analog-476221-h8/speakeasy-ios-backend'
