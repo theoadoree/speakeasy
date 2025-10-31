@@ -94,30 +94,26 @@ Added endpoints for:
 - Dependencies: AppAuth, GTMAppAuth, GTMSessionFetcher
 - Workspace now uses `SpeakEasy.xcworkspace`
 
-## ⚠️ Known Issues
+## ✅ RESOLVED: CocoaPods Removed
 
-### CocoaPods Sandbox Error
-**Status**: Blocking build completion
+### Switched to Swift Package Manager (SPM)
 
-**Error**:
-```
-Sandbox: rsync deny(1) file-write-create AppAuth.framework/AppAuthCore_Privacy.bundle
-```
+**Status**: ✅ CocoaPods completely removed, ready for SPM setup in Xcode
 
-**Cause**: Xcode sandbox restrictions preventing CocoaPods from copying privacy manifests
+**What was done**:
+- Removed all CocoaPods files (Pods/, Podfile, Podfile.lock, .xcworkspace)
+- Commented out GoogleSignIn import and implementation
+- App now uses only `.xcodeproj` file
+- Created comprehensive SPM setup guide
 
-**Solutions**:
-1. **Switch to Swift Package Manager** (recommended)
-   - Remove CocoaPods
-   - Add GoogleSignIn via SPM in Xcode
-   - Cleaner, no sandbox issues
+**Next Steps** (requires Xcode GUI):
+1. Open `SpeakEasy.xcodeproj` in Xcode
+2. Add GoogleSignIn via Swift Package Manager
+3. Add "Sign in with Apple" capability
+4. Configure Google URL scheme
+5. Uncomment Google Sign-In code
 
-2. **Manual Framework Copy**
-   - Build Pods target separately
-   - Manually copy frameworks to app bundle
-
-3. **Disable Sandbox** (not recommended)
-   - Requires Xcode project file modification
+**See**: `SPM_SETUP_GUIDE.md` for complete step-by-step instructions (5-10 minutes)
 
 ## 📋 TODO: Backend Implementation
 
