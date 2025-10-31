@@ -9,6 +9,7 @@ All secrets have been stored in Google Cloud Secret Manager and are ready for us
 | Secret Name | Status | Version | Created |
 |-------------|--------|---------|---------|
 | `openai-api-key` | ✅ Active | 1 | 2025-10-29 |
+| `google-client-id` | ✅ Active | 1 | 2025-10-31 |
 | `apple-private-key` | ✅ Active | 2 | 2025-10-29 |
 | `jwt-secret` | ✅ Active | 1 | 2025-10-29 |
 | `stripe-secret-key` | ⚠️  Placeholder | 1 | 2025-10-29 |
@@ -21,26 +22,33 @@ Location: /Users/scott/Desktop/dev/AuthKey_864SJW3HGZ.p8
 Converted to Base64 and stored in Secret Manager
 ```
 
-### 2. Stored OpenAI API Key
+### 2. Stored Google OAuth Client ID
+```
+Secret Name: google-client-id
+Value: 768424738821-gb3i7pl82qm5r70q73nh6gg33i1f3tv0.apps.googleusercontent.com
+Usage: Google Sign-In (Web SDK) verification
+```
+
+### 3. Stored OpenAI API Key
 ```
 Key: sk-proj-[REDACTED]
 Status: Stored in Secret Manager
 ⚠️  NEEDS ROTATION (was exposed in chat)
 ```
 
-### 3. Generated JWT Secret
+### 4. Generated JWT Secret
 ```
 Randomly generated 32-byte secret
 Stored in Secret Manager
 ```
 
-### 4. Created Stripe Secret Placeholder
+### 5. Created Stripe Secret Placeholder
 ```
 Placeholder value stored
 Update when you have your Stripe key
 ```
 
-### 5. Configured Permissions
+### 6. Configured Permissions
 ```
 Service Account: modular-analog-476221-h8-compute@developer.gserviceaccount.com
 Granted secretmanager.secretAccessor role to all secrets
@@ -182,9 +190,9 @@ gcloud secrets versions disable VERSION --secret=SECRET_NAME
 ## 💰 Cost
 
 Current usage:
-- 4 secrets × $0.06/month = **$0.24/month**
+- 5 secrets × $0.06/month = **$0.30/month**
 - Access operations: ~$0.30/month
-- **Total: ~$0.54/month**
+- **Total: ~$0.60/month**
 
 Free tier: 6 secrets, 1M operations/month (covers most usage)
 

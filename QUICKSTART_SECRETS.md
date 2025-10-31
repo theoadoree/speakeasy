@@ -19,6 +19,7 @@ Done! ✅
 
 | Secret | Where to Get | Example |
 |--------|--------------|---------|
+| **Google Client ID (Web SDK)** | Google Cloud Console → APIs & Services → Credentials | `768424738821-gb3i7pl82qm5r70q73nh6gg33i1f3tv0.apps.googleusercontent.com` |
 | **OpenAI API Key** | https://platform.openai.com/api-keys | `sk-proj-...` |
 | **Apple Private Key** | Apple Developer → Keys → Download .p8 | Base64 of .p8 file |
 | **Stripe Secret Key** | https://dashboard.stripe.com/apikeys | `sk_live_...` or `sk_test_...` |
@@ -36,6 +37,9 @@ Done! ✅
 ```bash
 # Update OpenAI key
 echo -n 'sk-proj-NEW_KEY' | gcloud secrets versions add openai-api-key --data-file=-
+
+# Update Google client ID
+echo -n 'your-client-id.apps.googleusercontent.com' | gcloud secrets versions add google-client-id --data-file=-
 
 # Update Apple key (convert .p8 first)
 base64 -i AuthKey_XXX.p8 | tr -d '\n' | gcloud secrets versions add apple-private-key --data-file=-

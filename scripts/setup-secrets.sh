@@ -105,32 +105,39 @@ echo ""
 echo -e "${BLUE}🔐 Setting up secrets...${NC}"
 echo ""
 echo "This script will help you set up the following secrets:"
-echo "  1. OpenAI API Key"
-echo "  2. Apple Private Key (Base64)"
-echo "  3. Stripe Secret Key"
-echo "  4. JWT Secret"
+echo "  1. Google OAuth Client ID (Web SDK)"
+echo "  2. OpenAI API Key"
+echo "  3. Apple Private Key (Base64)"
+echo "  4. Stripe Secret Key"
+echo "  5. JWT Secret"
 echo ""
 read -p "Press Enter to continue or Ctrl+C to cancel..."
 
-# 1. OpenAI API Key
+# 1. Google OAuth Client ID (Web SDK)
+create_or_update_secret \
+    "google-client-id" \
+    "Google OAuth client ID used by the web SDK" \
+    "Get this from Google Cloud Console → APIs & Services → Credentials"
+
+# 2. OpenAI API Key
 create_or_update_secret \
     "openai-api-key" \
     "OpenAI API key for AI language features" \
     "Get this from: https://platform.openai.com/api-keys"
 
-# 2. Apple Private Key
+# 3. Apple Private Key
 create_or_update_secret \
     "apple-private-key" \
     "Apple Sign In private key (Base64 encoded)" \
     "Convert your .p8 file: base64 -i AuthKey_XXX.p8 | tr -d '\n'"
 
-# 3. Stripe Secret Key
+# 4. Stripe Secret Key
 create_or_update_secret \
     "stripe-secret-key" \
     "Stripe secret key for subscription payments" \
     "Get this from: https://dashboard.stripe.com/apikeys"
 
-# 4. JWT Secret
+# 5. JWT Secret
 create_or_update_secret \
     "jwt-secret" \
     "Secret key for JWT token signing" \
@@ -147,7 +154,7 @@ echo -e "${BLUE}🔑 Granting Cloud Run access to secrets...${NC}"
 
 SERVICE_ACCOUNT="${PROJECT_ID}-compute@developer.gserviceaccount.com"
 
-for SECRET_NAME in "openai-api-key" "apple-private-key" "stripe-secret-key" "jwt-secret"; do
+for SECRET_NAME in "google-client-id" "openai-api-key" "apple-private-key" "stripe-secret-key" "jwt-secret"; do
     echo "  - Granting access to $SECRET_NAME..."
     gcloud secrets add-iam-policy-binding "$SECRET_NAME" \
         --member="serviceAccount:$SERVICE_ACCOUNT" \

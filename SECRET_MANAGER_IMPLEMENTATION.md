@@ -186,6 +186,7 @@ These are stored securely in Secret Manager:
 
 ```
 OPENAI_API_KEY (from Secret Manager)
+GOOGLE_CLIENT_ID (from Secret Manager)
 APPLE_PRIVATE_KEY_BASE64 (from Secret Manager)
 STRIPE_SECRET_KEY (from Secret Manager)
 JWT_SECRET (from Secret Manager)
@@ -204,10 +205,10 @@ Secret Manager pricing:
 - **$0.06** per secret per month
 - **$0.03** per 10,000 access operations
 
-**For SpeakEasy (4 secrets):**
-- Storage: 4 × $0.06 = $0.24/month
+**For SpeakEasy (5 secrets):**
+- Storage: 5 × $0.06 = $0.30/month
 - Access: ~100k calls/month = $0.30/month
-- **Total: ~$0.54/month** 💵
+- **Total: ~$0.60/month** 💵
 
 *Free tier: 6 secrets, 1M operations/month*
 

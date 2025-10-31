@@ -83,6 +83,12 @@ The script will:
 
 When prompted, enter your actual secret values:
 
+**Google Client ID (Web SDK):**
+```bash
+# Get from: Google Cloud Console → APIs & Services → Credentials
+Enter value: 768424738821-gb3i7pl82qm5r70q73nh6gg33i1f3tv0.apps.googleusercontent.com
+```
+
 **OpenAI API Key:**
 ```bash
 # Get from: https://platform.openai.com/api-keys
@@ -402,9 +408,9 @@ Secret Manager pricing:
 - **$0.03 per 10,000 access operations**
 
 **Example:**
-- 4 secrets × $0.06 = $0.24/month
+- 5 secrets × $0.06 = $0.30/month
 - 100,000 API calls × $0.03/10k = $0.30/month
-- **Total: ~$0.54/month** 💰
+- **Total: ~$0.60/month** 💰
 
 Free tier: 6 secrets, 1 million access operations/month
 
