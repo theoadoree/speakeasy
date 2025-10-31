@@ -37,7 +37,7 @@ struct RootView: View {
                     OnboardingView()
                 }
             } else {
-                LoginView()
+                AuthView()
             }
         }
     }

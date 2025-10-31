@@ -6,13 +6,22 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		565D8D4233404DCF48E01FEF /* Pods_SpeakEasy.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57EEBC91B1499331AEEDDDFE /* Pods_SpeakEasy.framework */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
+		0B201DC26F9AE4DC56EE49D4 /* Pods-SpeakEasy.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SpeakEasy.debug.xcconfig"; path = "Target Support Files/Pods-SpeakEasy/Pods-SpeakEasy.debug.xcconfig"; sourceTree = "<group>"; };
+		392939516E85BA18229EC064 /* Pods-SpeakEasy.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SpeakEasy.release.xcconfig"; path = "Target Support Files/Pods-SpeakEasy/Pods-SpeakEasy.release.xcconfig"; sourceTree = "<group>"; };
+		57EEBC91B1499331AEEDDDFE /* Pods_SpeakEasy.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SpeakEasy.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D2AF6DFF2EB1579600568110 /* SpeakEasy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SpeakEasy.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		D2AF6E012EB1579600568110 /* SpeakEasy */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = SpeakEasy;
 			sourceTree = "<group>";
 		};
@@ -23,17 +32,30 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				565D8D4233404DCF48E01FEF /* Pods_SpeakEasy.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		AE1B970BA8F4A97AAB2ABCA8 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				0B201DC26F9AE4DC56EE49D4 /* Pods-SpeakEasy.debug.xcconfig */,
+				392939516E85BA18229EC064 /* Pods-SpeakEasy.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
 		D2AF6DF62EB1579600568110 = {
 			isa = PBXGroup;
 			children = (
 				D2AF6E012EB1579600568110 /* SpeakEasy */,
 				D2AF6E002EB1579600568110 /* Products */,
+				AE1B970BA8F4A97AAB2ABCA8 /* Pods */,
+				EFFFF1C5352925E9F58AD7AB /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -45,6 +67,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		EFFFF1C5352925E9F58AD7AB /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				57EEBC91B1499331AEEDDDFE /* Pods_SpeakEasy.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -52,9 +82,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = D2AF6E0C2EB1579800568110 /* Build configuration list for PBXNativeTarget "SpeakEasy" */;
 			buildPhases = (
+				63CEB21C1999E54627380E89 /* [CP] Check Pods Manifest.lock */,
 				D2AF6DFB2EB1579600568110 /* Sources */,
 				D2AF6DFC2EB1579600568110 /* Frameworks */,
 				D2AF6DFD2EB1579600568110 /* Resources */,
+				8FC280D8F9106D5291C4AE40 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -64,8 +96,6 @@
 				D2AF6E012EB1579600568110 /* SpeakEasy */,
 			);
 			name = SpeakEasy;
-			packageProductDependencies = (
-			);
 			productName = SpeakEasy;
 			productReference = D2AF6DFF2EB1579600568110 /* SpeakEasy.app */;
 			productType = "com.apple.product-type.application";
@@ -113,6 +143,48 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		63CEB21C1999E54627380E89 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-SpeakEasy-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		8FC280D8F9106D5291C4AE40 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SpeakEasy/Pods-SpeakEasy-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SpeakEasy/Pods-SpeakEasy-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SpeakEasy/Pods-SpeakEasy-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		D2AF6DFB2EB1579600568110 /* Sources */ = {
@@ -243,6 +315,7 @@
 		};
 		D2AF6E0D2EB1579800568110 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0B201DC26F9AE4DC56EE49D4 /* Pods-SpeakEasy.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -288,6 +361,7 @@
 		};
 		D2AF6E0E2EB1579800568110 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 392939516E85BA18229EC064 /* Pods-SpeakEasy.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;

@@ -7,6 +7,8 @@
 
 import Foundation
 import Combine
+import AuthenticationServices
+// import GoogleSignIn  // TODO: Add via Swift Package Manager in Xcode
 
 @MainActor
 class AuthenticationManager: ObservableObject {
@@ -89,6 +91,79 @@ class AuthenticationManager: ObservableObject {
         }
 
         isLoading = false
+    }
+
+    // MARK: - Social Authentication
+    func signInWithApple(userId: String, email: String?, fullName: PersonNameComponents?) async {
+        isLoading = true
+        errorMessage = nil
+
+        do {
+            let response = try await apiService.signInWithApple(
+                userId: userId,
+                email: email,
+                fullName: fullName
+            )
+            user = response.data.user
+            isAuthenticated = true
+        } catch {
+            errorMessage = error.localizedDescription
+            isAuthenticated = false
+        }
+
+        isLoading = false
+    }
+
+    func signInWithGoogle() async {
+        // TODO: Implement Google Sign In
+        // Requires GoogleSignIn SDK via Swift Package Manager
+        errorMessage = "Google Sign In coming soon! Please use email or Apple Sign In."
+        /*
+        isLoading = true
+        errorMessage = nil
+
+        do {
+            // Get the root view controller
+            guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                  let rootViewController = windowScene.windows.first?.rootViewController else {
+                errorMessage = "Unable to find root view controller"
+                isLoading = false
+                return
+            }
+
+            // Configure Google Sign In
+            let config = GIDConfiguration(clientID: "823510409781-7am96n366leset271qt9c8djo265u24n.apps.googleusercontent.com")
+            GIDSignIn.sharedInstance.configuration = config
+
+            // Sign in
+            let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: rootViewController)
+
+            // Send to backend
+            if let idToken = result.user.idToken?.tokenString {
+                let response = try await apiService.signInWithGoogle(idToken: idToken)
+                user = response.data.user
+                isAuthenticated = true
+            } else {
+                errorMessage = "Failed to get Google ID token"
+                isAuthenticated = false
+            }
+        } catch {
+            errorMessage = error.localizedDescription
+            isAuthenticated = false
+        }
+
+        isLoading = false
+        */
+    }
+
+    // MARK: - User Existence Check
+    func checkUserExists(email: String) async -> Bool {
+        do {
+            return try await apiService.checkUserExists(email: email)
+        } catch {
+            errorMessage = error.localizedDescription
+            return false
+        }
     }
 
     // MARK: - Validation Helpers

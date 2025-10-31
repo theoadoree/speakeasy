@@ -117,6 +117,58 @@ class APIService {
         return response.data
     }
 
+    func signInWithApple(userId: String, email: String?, fullName: PersonNameComponents?) async throws -> AuthResponse {
+        var body: [String: Any] = ["userId": userId]
+        if let email = email {
+            body["email"] = email
+        }
+        if let fullName = fullName {
+            var nameDict: [String: String] = [:]
+            if let givenName = fullName.givenName {
+                nameDict["givenName"] = givenName
+            }
+            if let familyName = fullName.familyName {
+                nameDict["familyName"] = familyName
+            }
+            body["fullName"] = nameDict
+        }
+
+        let response: AuthResponse = try await request(
+            endpoint: "/api/auth/apple",
+            method: "POST",
+            body: body,
+            requiresAuth: false
+        )
+        authToken = response.data.token
+        return response
+    }
+
+    func signInWithGoogle(idToken: String) async throws -> AuthResponse {
+        let body: [String: Any] = ["idToken": idToken]
+        let response: AuthResponse = try await request(
+            endpoint: "/api/auth/google",
+            method: "POST",
+            body: body,
+            requiresAuth: false
+        )
+        authToken = response.data.token
+        return response
+    }
+
+    func checkUserExists(email: String) async throws -> Bool {
+        struct ExistsResponse: Codable {
+            let exists: Bool
+        }
+        let body: [String: Any] = ["email": email]
+        let response: ExistsResponse = try await request(
+            endpoint: "/api/auth/check-email",
+            method: "POST",
+            body: body,
+            requiresAuth: false
+        )
+        return response.exists
+    }
+
     // MARK: - Story Generation
     func generateStory(profile: UserProfile) async throws -> Story {
         let body: [String: Any] = [
@@ -182,6 +234,183 @@ class APIService {
         return response.data.message
     }
 
+    // MARK: - Lessons
+    func getLessons(language: String, level: String) async throws -> [Lesson] {
+        struct LessonsResponse: Codable {
+            let success: Bool
+            let data: [Lesson]
+        }
+        let body: [String: Any] = [
+            "language": language,
+            "level": level
+        ]
+        let response: LessonsResponse = try await request(
+            endpoint: "/api/lessons",
+            method: "POST",
+            body: body
+        )
+        return response.data
+    }
+
+    func getLesson(lessonId: String) async throws -> Lesson {
+        struct LessonResponse: Codable {
+            let success: Bool
+            let data: Lesson
+        }
+        let response: LessonResponse = try await request(
+            endpoint: "/api/lessons/\(lessonId)"
+        )
+        return response.data
+    }
+
+    func saveLessonProgress(lessonId: String, progress: LessonProgress) async throws {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let progressData = try encoder.encode(progress)
+        let progressDict = try JSONSerialization.jsonObject(with: progressData) as! [String: Any]
+
+        let body: [String: Any] = [
+            "lessonId": lessonId,
+            "progress": progressDict
+        ]
+        let _: EmptyResponse = try await request(
+            endpoint: "/api/lessons/progress",
+            method: "POST",
+            body: body
+        )
+    }
+
+    // MARK: - Quizzes
+    func submitQuiz(quizId: String, answers: [String: String]) async throws -> QuizResult {
+        struct QuizResultResponse: Codable {
+            let success: Bool
+            let data: QuizResult
+        }
+        let body: [String: Any] = [
+            "quizId": quizId,
+            "answers": answers
+        ]
+        let response: QuizResultResponse = try await request(
+            endpoint: "/api/quizzes/submit",
+            method: "POST",
+            body: body
+        )
+        return response.data
+    }
+
+    // MARK: - XP Leagues
+    func getCurrentLeague() async throws -> XPLeague {
+        struct LeagueResponse: Codable {
+            let success: Bool
+            let data: XPLeague
+        }
+        let response: LeagueResponse = try await request(
+            endpoint: "/api/leagues/current"
+        )
+        return response.data
+    }
+
+    func getLeagueHistory() async throws -> [XPLeague] {
+        struct LeagueHistoryResponse: Codable {
+            let success: Bool
+            let data: [XPLeague]
+        }
+        let response: LeagueHistoryResponse = try await request(
+            endpoint: "/api/leagues/history"
+        )
+        return response.data
+    }
+
+    func updateXP(amount: Int, activityType: String) async throws {
+        let body: [String: Any] = [
+            "amount": amount,
+            "activityType": activityType
+        ]
+        let _: EmptyResponse = try await request(
+            endpoint: "/api/xp/update",
+            method: "POST",
+            body: body
+        )
+    }
+
+    // MARK: - Music Integration
+    func searchMusicTracks(language: String, query: String? = nil, provider: String? = nil) async throws -> [MusicTrack] {
+        struct TracksResponse: Codable {
+            let success: Bool
+            let data: [MusicTrack]
+        }
+        var body: [String: Any] = ["language": language]
+        if let query = query {
+            body["query"] = query
+        }
+        if let provider = provider {
+            body["provider"] = provider
+        }
+        let response: TracksResponse = try await request(
+            endpoint: "/api/music/search",
+            method: "POST",
+            body: body
+        )
+        return response.data
+    }
+
+    func getMusicPlaylists(language: String) async throws -> [MusicPlaylist] {
+        struct PlaylistsResponse: Codable {
+            let success: Bool
+            let data: [MusicPlaylist]
+        }
+        let body: [String: Any] = ["language": language]
+        let response: PlaylistsResponse = try await request(
+            endpoint: "/api/music/playlists",
+            method: "POST",
+            body: body
+        )
+        return response.data
+    }
+
+    func getTrackLyrics(trackId: String) async throws -> MusicTrack {
+        struct TrackResponse: Codable {
+            let success: Bool
+            let data: MusicTrack
+        }
+        let response: TrackResponse = try await request(
+            endpoint: "/api/music/lyrics/\(trackId)"
+        )
+        return response.data
+    }
+
+    // MARK: - Level Assessment
+    func startAssessment(targetLanguage: String) async throws -> LevelAssessment {
+        struct AssessmentResponse: Codable {
+            let success: Bool
+            let data: LevelAssessment
+        }
+        let body: [String: Any] = ["targetLanguage": targetLanguage]
+        let response: AssessmentResponse = try await request(
+            endpoint: "/api/assessment/start",
+            method: "POST",
+            body: body
+        )
+        return response.data
+    }
+
+    func submitAssessment(answers: [String: String], targetLanguage: String) async throws -> AssessmentResult {
+        struct AssessmentResultResponse: Codable {
+            let success: Bool
+            let data: AssessmentResult
+        }
+        let body: [String: Any] = [
+            "answers": answers,
+            "targetLanguage": targetLanguage
+        ]
+        let response: AssessmentResultResponse = try await request(
+            endpoint: "/api/assessment/submit",
+            method: "POST",
+            body: body
+        )
+        return response.data
+    }
+
     // MARK: - Health Check
     func healthCheck() async throws -> Bool {
         struct HealthResponse: Codable {
@@ -193,6 +422,11 @@ class APIService {
         )
         return response.status == "ok"
     }
+}
+
+// MARK: - Empty Response
+struct EmptyResponse: Codable {
+    let success: Bool
 }
 
 // MARK: - API Errors
