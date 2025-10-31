@@ -2,31 +2,87 @@
 //  SpeakEasyApp.swift
 //  SpeakEasy
 //
-//  Created by Scott on 10/28/25.
+//  Main app entry point with authentication and navigation
 //
 
 import SwiftUI
-import SwiftData
 
 @main
 struct SpeakEasyApp: App {
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Item.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
+    @StateObject private var authManager = AuthenticationManager.shared
+    @StateObject private var appManager = AppManager.shared
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootView()
+                .environmentObject(authManager)
+                .environmentObject(appManager)
         }
-        .modelContainer(sharedModelContainer)
+    }
+}
+
+// MARK: - Root View with Conditional Navigation
+struct RootView: View {
+    @EnvironmentObject var authManager: AuthenticationManager
+    @EnvironmentObject var appManager: AppManager
+
+    var body: some View {
+        Group {
+            if authManager.isLoading {
+                LoadingView()
+            } else if authManager.isAuthenticated {
+                if appManager.isOnboardingComplete() {
+                    MainTabView()
+                } else {
+                    OnboardingView()
+                }
+            } else {
+                LoginView()
+            }
+        }
+    }
+}
+
+// MARK: - Main Tab View
+struct MainTabView: View {
+    var body: some View {
+        TabView {
+            HomeView()
+                .tabItem {
+                    Label("Learn", systemImage: "book.fill")
+                }
+
+            PracticeView()
+                .tabItem {
+                    Label("Practice", systemImage: "bubble.left.and.bubble.right.fill")
+                }
+
+            SettingsView()
+                .tabItem {
+                    Label("Settings", systemImage: "gear")
+                }
+        }
+    }
+}
+
+// MARK: - Loading View
+struct LoadingView: View {
+    var body: some View {
+        ZStack {
+            Color(.systemBackground)
+                .ignoresSafeArea()
+
+            VStack(spacing: 20) {
+                Image(systemName: "message.fill")
+                    .font(.system(size: 60))
+                    .foregroundColor(.blue)
+
+                ProgressView()
+                    .scaleEffect(1.5)
+
+                Text("Loading...")
+                    .foregroundColor(.secondary)
+            }
+        }
     }
 }
