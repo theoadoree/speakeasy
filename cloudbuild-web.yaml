@@ -1,35 +1,33 @@
 steps:
-  # Install dependencies
-  - name: 'node:20'
-    entrypoint: npm
-    args: ['install']
-    id: 'install-deps'
-
-  # Build Expo web app
-  - name: 'node:20'
-    entrypoint: npm
-    args: ['run', 'build:web']
-    id: 'build-web-app'
-    waitFor: ['install-deps']
-
-  # Build Docker image
+  # Build Docker image (Dockerfile handles Vite build + static server)
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'build'
+      - '-f'
+      - 'Dockerfile'
       - '-t'
-      - 'gcr.io/modular-analog-476221-h8/speakeasy-web:$COMMIT_SHA'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/speakeasy-web:$COMMIT_SHA'
       - '-t'
-      - 'gcr.io/modular-analog-476221-h8/speakeasy-web:latest'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/speakeasy-web:latest'
+      - '--build-arg'
+      - 'BACKEND_URL=${_BACKEND_URL}'
       - '.'
     id: 'build-docker-image'
-    waitFor: ['build-web-app']
 
-  # Push Docker image
+  # Push Docker image (SHA tag)
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      - 'gcr.io/modular-analog-476221-h8/speakeasy-web:latest'
-    id: 'push-docker-image'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/speakeasy-web:$COMMIT_SHA'
+    id: 'push-docker-image-sha'
+    waitFor: ['build-docker-image']
+
+  # Push Docker image (latest tag)
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/speakeasy-web:latest'
+    id: 'push-docker-image-latest'
     waitFor: ['build-docker-image']
 
   # Deploy to Cloud Run
@@ -40,7 +38,7 @@ steps:
       - 'deploy'
       - 'speakeasy-web'
       - '--image'
-      - 'gcr.io/modular-analog-476221-h8/speakeasy-web:latest'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/speakeasy-web:$COMMIT_SHA'
       - '--region'
       - 'us-central1'
       - '--platform'
@@ -59,12 +57,12 @@ steps:
       - '--set-env-vars'
       - 'NODE_ENV=production'
     id: 'deploy-to-cloud-run'
-    waitFor: ['push-docker-image']
+    waitFor: ['push-docker-image-sha']
 
-# Store images in Container Registry
+# Store images in Artifact Registry
 images:
-  - 'gcr.io/modular-analog-476221-h8/speakeasy-web:$COMMIT_SHA'
-  - 'gcr.io/modular-analog-476221-h8/speakeasy-web:latest'
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/speakeasy-web:$COMMIT_SHA'
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/speakeasy-web:latest'
 
 # Build options
 options:
@@ -73,3 +71,7 @@ options:
 
 # Timeout for entire build
 timeout: '1200s'
+
+substitutions:
+  _AR_REPOSITORY: cloud-run
+  _BACKEND_URL: https://speakeasy-backend-823510409781.us-central1.run.app

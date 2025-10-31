@@ -851,6 +851,10 @@
             }
         }
     </style>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 </head>
 <body>
     <!-- Onboarding Modal -->
@@ -1094,8 +1098,24 @@
 
         loadUser();
 
+          // Firebase Configuration
+          const firebaseConfig = {
+            apiKey: "AIzaSyAQKDl8VGUodzYe0Cq9sC3wzot6Hb4YVEI",
+            authDomain: "modular-analog-476221-h8.firebaseapp.com",
+            projectId: "modular-analog-476221-h8",
+            storageBucket: "modular-analog-476221-h8.firebasestorage.app",
+            messagingSenderId: "823510409781",
+            appId: "1:823510409781:web:f9e3b1e5c8d7a6b5c4d3e2"
+          };
+
+          // Initialize Firebase
+          if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+            console.log('✅ Firebase initialized');
+          }
+
           // Google OAuth Configuration
-          const GOOGLE_CLIENT_ID = '823510409781-s5d3hrffelmjcl8kjvchcv3tlbp0shbo.apps.googleusercontent.com';
+          const GOOGLE_CLIENT_ID = '823510409781-7am96n366leset271qt9c8djo265u24n.apps.googleusercontent.com';
         
         // Auth Functions
         async function loginWithGoogle() {

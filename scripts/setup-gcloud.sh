@@ -43,12 +43,12 @@ echo "APIs enabled successfully!"
 echo ""
 
 # Create service account for GitHub Actions
-SA_NAME="github-actions"
+SA_NAME="gh-actions-cloudrun"
 SA_EMAIL="${SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
 
 echo "Creating service account for CI/CD..."
 gcloud iam service-accounts create $SA_NAME \
-    --display-name "GitHub Actions Deployment" \
+    --display-name "GitHub Actions Cloud Run" \
     --description "Service account for automated deployments from GitHub Actions" \
     2>/dev/null || echo "Service account already exists"
 
@@ -61,19 +61,77 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
 
 gcloud projects add-iam-policy-binding $PROJECT_ID \
     --member="serviceAccount:${SA_EMAIL}" \
-    --role="roles/storage.admin" \
+    --role="roles/artifactregistry.admin" \
     --condition=None
 
 gcloud projects add-iam-policy-binding $PROJECT_ID \
     --member="serviceAccount:${SA_EMAIL}" \
-    --role="roles/iam.serviceAccountUser" \
+    --role="roles/cloudbuild.builds.editor" \
     --condition=None
 
-# Create and download service account key
-KEY_FILE="gcloud-sa-key.json"
-echo "Creating service account key..."
-gcloud iam service-accounts keys create $KEY_FILE \
-    --iam-account=$SA_EMAIL
+# Ensure Artifact Registry repository exists
+AR_REPO="cloud-run"
+echo ""
+echo "Creating Artifact Registry repository (${AR_REPO}) if needed..."
+gcloud artifacts repositories create $AR_REPO \
+    --repository-format=DOCKER \
+    --location=us-central1 \
+    --description="Docker images for SpeakEasy Cloud Run services" \
+    2>/dev/null || echo "Repository '${AR_REPO}' already exists"
+
+# Configure Workload Identity Federation
+POOL_ID="gh-oidc-pool"
+PROVIDER_ID="gh-provider"
+
+echo ""
+echo "Configuring Workload Identity Federation..."
+
+if ! gcloud iam workload-identity-pools describe $POOL_ID \
+    --project=$PROJECT_ID \
+    --location=global &>/dev/null; then
+    gcloud iam workload-identity-pools create $POOL_ID \
+        --project=$PROJECT_ID \
+        --location=global \
+        --display-name="GitHub OIDC Pool"
+else
+    echo "Workload Identity Pool '${POOL_ID}' already exists"
+fi
+
+if ! gcloud iam workload-identity-pools providers describe $PROVIDER_ID \
+    --project=$PROJECT_ID \
+    --location=global \
+    --workload-identity-pool=$POOL_ID &>/dev/null; then
+    gcloud iam workload-identity-pools providers create-oidc $PROVIDER_ID \
+        --project=$PROJECT_ID \
+        --location=global \
+        --workload-identity-pool=$POOL_ID \
+        --display-name="GitHub Provider" \
+        --issuer-uri="https://token.actions.githubusercontent.com" \
+        --attribute-mapping="google.subject=assertion.sub,attribute.repository=assertion.repository,attribute.ref=assertion.ref"
+else
+    echo "OIDC provider '${PROVIDER_ID}' already exists"
+fi
+
+read -p "Enter your GitHub repository (owner/repo): " GITHUB_REPO
+
+if [ -z "$GITHUB_REPO" ]; then
+    echo "Error: GitHub repository cannot be empty"
+    exit 1
+fi
+
+WIP_FULLNAME=$(gcloud iam workload-identity-pools describe $POOL_ID \
+    --project=$PROJECT_ID \
+    --location=global \
+    --format='value(name)')
+
+echo "Granting GitHub workload identity user permission..."
+gcloud iam service-accounts add-iam-policy-binding $SA_EMAIL \
+    --project=$PROJECT_ID \
+    --role="roles/iam.workloadIdentityUser" \
+    --member="principalSet://iam.googleapis.com/${WIP_FULLNAME}/providers/${PROVIDER_ID}/attribute.repository:${GITHUB_REPO}" \
+    2>/dev/null || echo "Workload identity binding already exists"
+
+WI_PROVIDER_RESOURCE="${WIP_FULLNAME}/providers/${PROVIDER_ID}"
 
 echo ""
 echo "=== Setup Complete! ==="
@@ -81,7 +139,9 @@ echo ""
 echo "Next steps:"
 echo "1. Add the following secrets to your GitHub repository:"
 echo "   - GCP_PROJECT_ID: $PROJECT_ID"
-echo "   - GCP_SA_KEY: (contents of $KEY_FILE)"
+echo "   - GCP_WORKLOAD_IDENTITY_PROVIDER: ${WI_PROVIDER_RESOURCE}"
+echo "   - GCP_SERVICE_ACCOUNT_EMAIL: ${SA_EMAIL}"
+echo "   - GCP_ARTIFACT_REPOSITORY: ${AR_REPO}"
 echo "   - OLLAMA_URL: Your Ollama server URL (e.g., http://your-ollama-server:11434)"
 echo "   - EXPO_TOKEN: Your Expo access token (from expo.dev)"
 echo ""
@@ -92,6 +152,4 @@ echo "   - Follow DNS configuration instructions"
 echo ""
 echo "3. Push to main branch to trigger deployment"
 echo ""
-echo "Service account key saved to: $KEY_FILE"
-echo "⚠️  IMPORTANT: Keep this file secure and never commit it to git!"
-echo ""
+echo "GitHub Actions can now authenticate with Workload Identity Federation (no JSON keys needed)."

@@ -153,19 +153,42 @@ export default function OnboardingScreen({ navigation }) {
           <View style={styles.stepContainer}>
             <Text style={styles.title}>What's your native language? 🌍</Text>
             <Text style={styles.subtitle}>This helps us tailor lessons to you</Text>
-            <View style={styles.pickerContainer}>
-              <Picker
-                selectedValue={nativeLanguage}
-                onValueChange={(itemValue) => setNativeLanguage(itemValue)}
-                style={styles.picker}
-                itemStyle={styles.pickerItem}
-              >
-                <Picker.Item label="Select your native language..." value="" />
-                {NATIVE_LANGUAGES.map((lang) => (
-                  <Picker.Item key={lang} label={lang} value={lang} />
-                ))}
-              </Picker>
-            </View>
+            {Platform.OS === 'web' ? (
+              <View style={styles.pickerContainer}>
+                <select
+                  value={nativeLanguage}
+                  onChange={(e) => setNativeLanguage(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: 15,
+                    fontSize: 16,
+                    border: 'none',
+                    backgroundColor: 'transparent',
+                    outline: 'none',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <option value="">Select your native language...</option>
+                  {NATIVE_LANGUAGES.map((lang) => (
+                    <option key={lang} value={lang}>{lang}</option>
+                  ))}
+                </select>
+              </View>
+            ) : (
+              <View style={styles.pickerContainer}>
+                <Picker
+                  selectedValue={nativeLanguage}
+                  onValueChange={(itemValue) => setNativeLanguage(itemValue)}
+                  style={styles.picker}
+                  itemStyle={styles.pickerItem}
+                >
+                  <Picker.Item label="Select your native language..." value="" />
+                  {NATIVE_LANGUAGES.map((lang) => (
+                    <Picker.Item key={lang} label={lang} value={lang} />
+                  ))}
+                </Picker>
+              </View>
+            )}
           </View>
         )}
 
@@ -176,20 +199,44 @@ export default function OnboardingScreen({ navigation }) {
             <Text style={styles.subtitle}>
               Powered by OpenAI • {availableLearningLanguages.length} languages available
             </Text>
-            <View style={styles.pickerContainer}>
-              <Picker
-                selectedValue={targetLanguage}
-                onValueChange={(itemValue) => setTargetLanguage(itemValue)}
-                style={styles.picker}
-                itemStyle={styles.pickerItem}
-                enabled={availableLearningLanguages.length > 0}
-              >
-                <Picker.Item label="Select language to learn..." value="" />
-                {availableLearningLanguages.map((lang) => (
-                  <Picker.Item key={lang} label={lang} value={lang} />
-                ))}
-              </Picker>
-            </View>
+            {Platform.OS === 'web' ? (
+              <View style={styles.pickerContainer}>
+                <select
+                  value={targetLanguage}
+                  onChange={(e) => setTargetLanguage(e.target.value)}
+                  disabled={availableLearningLanguages.length === 0}
+                  style={{
+                    width: '100%',
+                    padding: 15,
+                    fontSize: 16,
+                    border: 'none',
+                    backgroundColor: 'transparent',
+                    outline: 'none',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <option value="">Select language to learn...</option>
+                  {availableLearningLanguages.map((lang) => (
+                    <option key={lang} value={lang}>{lang}</option>
+                  ))}
+                </select>
+              </View>
+            ) : (
+              <View style={styles.pickerContainer}>
+                <Picker
+                  selectedValue={targetLanguage}
+                  onValueChange={(itemValue) => setTargetLanguage(itemValue)}
+                  style={styles.picker}
+                  itemStyle={styles.pickerItem}
+                  enabled={availableLearningLanguages.length > 0}
+                >
+                  <Picker.Item label="Select language to learn..." value="" />
+                  {availableLearningLanguages.map((lang) => (
+                    <Picker.Item key={lang} label={lang} value={lang} />
+                  ))}
+                </Picker>
+              </View>
+            )}
             {availableLearningLanguages.length === 0 && (
               <Text style={styles.warningText}>
                 ⚠️ Please select a different native language to see available learning languages

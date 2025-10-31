@@ -4,7 +4,7 @@ const logger = require('../utils/logger');
 class GoogleAuthService {
   constructor() {
     this.client = new OAuth2Client(
-      process.env.GOOGLE_CLIENT_ID || '823510409781-s5d3hrffelmjcl8kjvchcv3tlbp0shbo.apps.googleusercontent.com'
+      process.env.GOOGLE_CLIENT_ID || '823510409781-7am96n366leset271qt9c8djo265u24n.apps.googleusercontent.com'
     );
   }
 
@@ -17,7 +17,7 @@ class GoogleAuthService {
     try {
       const ticket = await this.client.verifyIdToken({
         idToken: idToken,
-        audience: process.env.GOOGLE_CLIENT_ID || '823510409781-s5d3hrffelmjcl8kjvchcv3tlbp0shbo.apps.googleusercontent.com',
+        audience: process.env.GOOGLE_CLIENT_ID || '823510409781-7am96n366leset271qt9c8djo265u24n.apps.googleusercontent.com',
       });
 
       const payload = ticket.getPayload();

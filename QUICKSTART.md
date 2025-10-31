@@ -24,8 +24,8 @@ cd speakeasy
 
 This will:
 - Enable required Google Cloud APIs
-- Create service accounts
-- Generate credentials
+- Create the GitHub Actions service account
+- Configure Workload Identity Federation (no JSON keys)
 - Configure IAM permissions
 
 ### Step 2: GitHub Secrets (2 minutes)
@@ -33,9 +33,11 @@ This will:
 Add these secrets to your GitHub repository (Settings → Secrets → Actions):
 
 1. **GCP_PROJECT_ID**: Your Google Cloud project ID
-2. **GCP_SA_KEY**: Contents of `gcloud-sa-key.json` (from Step 1)
-3. **OLLAMA_URL**: Your Ollama server URL
-4. **EXPO_TOKEN**: From https://expo.dev/accounts/[username]/settings/access-tokens
+2. **GCP_WORKLOAD_IDENTITY_PROVIDER**: Value from `scripts/setup-gcloud.sh`
+3. **GCP_SERVICE_ACCOUNT_EMAIL**: `gh-actions-cloudrun@<project>.iam.gserviceaccount.com`
+4. **GCP_ARTIFACT_REPOSITORY**: Usually `cloud-run` (printed by setup script)
+5. **OLLAMA_URL**: Your Ollama server URL
+6. **EXPO_TOKEN**: From https://expo.dev/accounts/[username]/settings/access-tokens
 
 ### Step 3: Deploy Backend (5 minutes)
 

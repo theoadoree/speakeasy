@@ -19,12 +19,52 @@ export default function MoreScreen() {
 
   const menuItems = [
     {
+      id: 'progress',
+      title: 'Progress Dashboard',
+      subtitle: 'Track your fluency journey',
+      icon: 'stats-chart',
+      screen: 'ProgressDashboard',
+      color: '#007AFF'
+    },
+    {
+      id: 'immersion',
+      title: 'Immersion Hub',
+      subtitle: 'Real content in your target language',
+      icon: 'globe',
+      screen: 'Immersion',
+      color: '#34C759'
+    },
+    {
+      id: 'fluency',
+      title: 'Fluency Analyzer',
+      subtitle: 'Measure your speaking skills',
+      icon: 'mic',
+      screen: 'FluencyAnalyzer',
+      color: '#FF3B30'
+    },
+    {
+      id: 'cultural',
+      title: 'Cultural Context',
+      subtitle: 'Learn idioms, customs & etiquette',
+      icon: 'people',
+      screen: 'CulturalContext',
+      color: '#FF9500'
+    },
+    {
+      id: 'writing',
+      title: 'Writing Workshop',
+      subtitle: 'Improve your writing with AI feedback',
+      icon: 'create',
+      screen: 'WritingWorkshop',
+      color: '#5856D6'
+    },
+    {
       id: 'review',
-      title: 'Review',
-      subtitle: 'Practice words you\'ve learned',
+      title: 'Vocabulary Review',
+      subtitle: 'Spaced repetition practice',
       icon: 'refresh-circle',
       screen: 'Review',
-      color: '#FF9500'
+      color: '#FF2D55'
     },
     {
       id: 'settings',

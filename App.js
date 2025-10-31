@@ -23,6 +23,11 @@ import ReaderScreen from './src/screens/ReaderScreen';
 import LyricsLessonScreen from './src/screens/LyricsLessonScreen';
 import LessonDetailScreen from './src/screens/LessonDetailScreen';
 import QuizScreen from './src/screens/QuizScreen';
+import ImmersionScreen from './src/screens/ImmersionScreen';
+import FluencyAnalyzerScreen from './src/screens/FluencyAnalyzerScreen';
+import CulturalContextScreen from './src/screens/CulturalContextScreen';
+import WritingWorkshopScreen from './src/screens/WritingWorkshopScreen';
+import ProgressDashboardScreen from './src/screens/ProgressDashboardScreen';
 import { Ionicons } from '@expo/vector-icons';
 import ErrorBoundary from './src/components/ErrorBoundary';
 
@@ -96,6 +101,11 @@ function AppNavigator() {
             <Stack.Screen name="LyricsLesson" component={LyricsLessonScreen} options={{ headerShown: true, headerTitle: 'Music Lesson', headerBackTitle: 'Back' }} />
             <Stack.Screen name="LessonDetail" component={LessonDetailScreen} options={{ headerShown: true, headerTitle: 'Lesson', headerBackTitle: 'Back' }} />
             <Stack.Screen name="Quiz" component={QuizScreen} options={{ headerShown: true, headerTitle: 'Quiz', headerBackTitle: 'Back' }} />
+            <Stack.Screen name="Immersion" component={ImmersionScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="FluencyAnalyzer" component={FluencyAnalyzerScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="CulturalContext" component={CulturalContextScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="WritingWorkshop" component={WritingWorkshopScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="ProgressDashboard" component={ProgressDashboardScreen} options={{ headerShown: false }} />
           </>
         )}
       </Stack.Navigator>

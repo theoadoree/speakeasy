@@ -3,6 +3,12 @@ import react from '@vitejs/plugin-react';
 import reactNativeWeb from 'vite-plugin-react-native-web';
 import path from 'path';
 
+const backendUrl =
+  process.env.VITE_BACKEND_URL ||
+  process.env.EXPO_PUBLIC_BACKEND_URL ||
+  process.env.REACT_APP_API_URL ||
+  'https://speakeasy-backend-823510409781.us-central1.run.app';
+
 export default defineConfig({
   plugins: [
     react({
@@ -20,7 +26,9 @@ export default defineConfig({
     global: 'globalThis',
     __DEV__: JSON.stringify(false),
     'process.env.NODE_ENV': JSON.stringify('production'),
-    'process.env.EXPO_PUBLIC_BACKEND_URL': JSON.stringify(process.env.VITE_BACKEND_URL || 'https://speakeasy-backend-823510409781.us-central1.run.app'),
+    'process.env.EXPO_PUBLIC_BACKEND_URL': JSON.stringify(backendUrl),
+    'process.env.VITE_BACKEND_URL': JSON.stringify(backendUrl),
+    'process.env.REACT_APP_API_URL': JSON.stringify(backendUrl),
   },
   build: {
     outDir: 'dist',

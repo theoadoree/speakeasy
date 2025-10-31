@@ -18,6 +18,31 @@ This guide will help you set up automatic deployment for the SpeakEasy web app. 
 
 ## Setup Steps
 
+### 0. Configure GitHub Authentication (one-time, ~5 minutes)
+
+Before creating build triggers, make sure GitHub Actions can authenticate to Google Cloud **without JSON keys**.
+
+```bash
+# Run the helper script (prompts for project + repo)
+./scripts/setup-gcloud.sh
+```
+
+This will:
+- Enable required APIs (Run, Cloud Build, Artifact Registry, Secret Manager)
+- Create service account `gh-actions-cloudrun@<project>.iam.gserviceaccount.com`
+- Assign minimal roles: `run.admin`, `artifactregistry.admin`, `cloudbuild.builds.editor`
+- Create Workload Identity Pool/Provider (`gh-oidc-pool` / `gh-provider`)
+- Grant your GitHub repo permission to impersonate the service account
+- Print the values to add as GitHub secrets:
+  - `GCP_PROJECT_ID`
+  - `GCP_WORKLOAD_IDENTITY_PROVIDER`
+  - `GCP_SERVICE_ACCOUNT_EMAIL`
+  - `GCP_ARTIFACT_REPOSITORY` (defaults to `cloud-run`)
+  - `OLLAMA_URL`
+  - `EXPO_TOKEN`
+
+> Prefer to do it manually? See the command reference at the end of this guide.
+
 ### 1. Open Cloud Build Triggers
 
 Visit: https://console.cloud.google.com/cloud-build/triggers?project=modular-analog-476221-h8
@@ -140,6 +165,7 @@ In the Cloud Console:
 1. Verify trigger is enabled in Cloud Console
 2. Check branch name matches exactly: `main`
 3. Ensure GitHub App has repository access
+4. Confirm GitHub secrets `GCP_PROJECT_ID`, `GCP_WORKLOAD_IDENTITY_PROVIDER`, and `GCP_SERVICE_ACCOUNT_EMAIL` are set
 
 ## Build Costs
 
@@ -165,6 +191,59 @@ This runs the same build process locally.
 - ✅ No secrets in cloudbuild-web.yaml
 - ✅ Cloud Run service uses managed service account
 - ✅ Domain SSL certificate auto-renewed
+- ✅ GitHub Actions authenticates via Workload Identity Federation (no long-lived keys)
+
+## Command Reference: Manual WIF Setup
+
+If you skipped the helper script, run these commands once (replace placeholders):
+
+```bash
+PROJECT_ID=your-project-id
+REGION=us-central1
+SA_NAME=gh-actions-cloudrun
+SA_EMAIL="$SA_NAME@$PROJECT_ID.iam.gserviceaccount.com"
+POOL_ID=gh-oidc-pool
+PROVIDER_ID=gh-provider
+GITHUB_REPO=OWNER/REPO    # e.g. theoadoree/speakeasy
+
+# Service account + roles
+gcloud iam service-accounts create $SA_NAME --project $PROJECT_ID
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member="serviceAccount:$SA_EMAIL" \
+  --role="roles/run.admin"
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member="serviceAccount:$SA_EMAIL" \
+  --role="roles/artifactregistry.admin"
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member="serviceAccount:$SA_EMAIL" \
+  --role="roles/cloudbuild.builds.editor"
+
+# Artifact Registry repository (optional if already created)
+gcloud artifacts repositories create cloud-run \
+  --project=$PROJECT_ID \
+  --repository-format=DOCKER \
+  --location=us-central1 \
+  --description="Docker images for SpeakEasy Cloud Run services"
+
+# Enable required APIs
+gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com \
+  --project $PROJECT_ID
+
+# Workload Identity pool + provider
+gcloud iam workload-identity-pools create $POOL_ID \
+  --project=$PROJECT_ID --location=global --display-name="GitHub OIDC Pool"
+gcloud iam workload-identity-pools providers create-oidc $PROVIDER_ID \
+  --project=$PROJECT_ID --location=global --workload-identity-pool=$POOL_ID \
+  --display-name="GitHub Provider" \
+  --issuer-uri="https://token.actions.githubusercontent.com" \
+  --attribute-mapping="google.subject=assertion.sub,attribute.repository=assertion.repository,attribute.ref=assertion.ref"
+
+WIP="projects/$(gcloud iam workload-identity-pools describe $POOL_ID --project=$PROJECT_ID --location=global --format='value(name)')/providers/$PROVIDER_ID"
+gcloud iam service-accounts add-iam-policy-binding $SA_EMAIL \
+  --project=$PROJECT_ID \
+  --role="roles/iam.workloadIdentityUser" \
+  --member="principalSet://iam.googleapis.com/$WIP/attribute.repository:$GITHUB_REPO"
+```
 
 ## Next Steps
 
