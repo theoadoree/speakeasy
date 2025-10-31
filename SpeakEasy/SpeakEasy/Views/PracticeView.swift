@@ -10,11 +10,19 @@ import SwiftUI
 struct PracticeView: View {
     @StateObject private var appManager = AppManager.shared
     @State private var messageText = ""
+    @State private var autoSpeakEnabled = true
     @FocusState private var isInputFocused: Bool
 
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
+                // Animated Teacher Avatar
+                AnimatedTeacherView(autoSpeakEnabled: $autoSpeakEnabled)
+                    .padding(.vertical, 12)
+                    .background(Color(.systemGray6).opacity(0.5))
+
+                Divider()
+
                 // Messages List
                 ScrollViewReader { proxy in
                     ScrollView {

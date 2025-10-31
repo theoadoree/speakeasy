@@ -28,7 +28,10 @@
     "setup:gcloud": "./scripts/setup-gcloud.sh",
     "setup:oauth": "./scripts/oauth-quickstart.sh",
     "setup:oauth:advanced": "node scripts/configure-oauth-providers.js",
-    "preview": "npx vite preview"
+    "preview": "npx vite preview",
+    "generate:prompts": "node scripts/extract-prompts-for-manual-generation.js",
+    "generate:images": "node scripts/generate-with-imagen.js",
+    "view:prompts": "cat image-prompts/01-PRIORITY-PROMPTS.md"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",

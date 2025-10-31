@@ -1,0 +1,76 @@
+Scenario #,Name,Category,ID,Filename
+1,"Job Interview",misc,job-interview,job-interview.png
+2,"Ordering Food (Restaurant)",misc,ordering-food-restaurant,ordering-food-restaurant.png
+3,"Making Friends",misc,making-friends,making-friends.png
+4,"Doctor Visit",misc,doctor-visit,doctor-visit.png
+5,"Shopping/Retail",misc,shopping-retail,shopping-retail.png
+6,"Hotel Check-in",misc,hotel-check-in,hotel-check-in.png
+7,"Coffee Shop Order",daily-life,coffee-shop-order,coffee-shop-order.png
+8,"Public Transportation",daily-life,public-transportation,public-transportation.png
+9,"Grocery Shopping",daily-life,grocery-shopping,grocery-shopping.png
+10,"Pharmacy/Drugstore",daily-life,pharmacy-drugstore,pharmacy-drugstore.png
+11,"Bank/ATM",daily-life,bank-atm,bank-atm.png
+12,"Post Office",daily-life,post-office,post-office.png
+13,"Hair Salon/Barber",daily-life,hair-salon-barber,hair-salon-barber.png
+14,"Gym/Fitness Center",daily-life,gym-fitness-center,gym-fitness-center.png
+15,"Apartment Rental Viewing",daily-life,apartment-rental-viewing,apartment-rental-viewing.png
+16,"Lost & Asking Directions",daily-life,lost-&-asking-directions,lost-&-asking-directions.png
+17,"Laundromat",daily-life,laundromat,laundromat.png
+18,"Pet Shop/Veterinarian",daily-life,pet-shop-veterinarian,pet-shop-veterinarian.png
+19,"Car Rental/Gas Station",daily-life,car-rental-gas-station,car-rental-gas-station.png
+20,"Library",daily-life,library,library.png
+21,"Movie Theater/Cinema",daily-life,movie-theater-cinema,movie-theater-cinema.png
+22,"Office Small Talk",professional,office-small-talk,office-small-talk.png
+23,"Business Meeting",professional,business-meeting,business-meeting.png
+24,"Phone Call (Business)",professional,phone-call-business,phone-call-business.png
+25,"Networking Event",professional,networking-event,networking-event.png
+26,"Performance Review",professional,performance-review,performance-review.png
+27,"Customer Service Complaint",professional,customer-service-complaint,customer-service-complaint.png
+28,"Project Presentation",professional,project-presentation,project-presentation.png
+29,"Email Writing",professional,email-writing,email-writing.png
+30,"Birthday Party",social,birthday-party,birthday-party.png
+31,"First Date",social,first-date,first-date.png
+32,"House Party",social,house-party,house-party.png
+33,"Sports Event/Stadium",social,sports-event-stadium,sports-event-stadium.png
+34,"Wedding/Formal Event",social,wedding-formal-event,wedding-formal-event.png
+35,"Beach/Park Hangout",social,beach-park-hangout,beach-park-hangout.png
+36,"Bar/Nightclub",social,bar-nightclub,bar-nightclub.png
+37,"Book Club/Study Group",social,book-club-study-group,book-club-study-group.png
+38,"Potluck/Dinner Party",social,potluck-dinner-party,potluck-dinner-party.png
+39,"Volunteering",social,volunteering,volunteering.png
+40,"Airport Check-in",travel,airport-check-in,airport-check-in.png
+41,"Customs/Immigration",travel,customs-immigration,customs-immigration.png
+42,"Taxi/Rideshare",travel,taxi-rideshare,taxi-rideshare.png
+43,"Train Station Ticket Purchase",travel,train-station-ticket-purchase,train-station-ticket-purchase.png
+44,"Tourist Information",travel,tourist-information,tourist-information.png
+45,"Museum/Gallery Visit",travel,museum-gallery-visit,museum-gallery-visit.png
+46,"Souvenir Shopping",travel,souvenir-shopping,souvenir-shopping.png
+47,"Hotel Concierge",travel,hotel-concierge,hotel-concierge.png
+48,"Hostel Common Room",travel,hostel-common-room,hostel-common-room.png
+49,"Beach Resort",travel,beach-resort,beach-resort.png
+50,"Camping/Outdoor",travel,camping-outdoor,camping-outdoor.png
+51,"City Walking Tour",travel,city-walking-tour,city-walking-tour.png
+52,"Police Station (Reporting)",emergency,police-station-reporting,police-station-reporting.png
+53,"Emergency Room",emergency,emergency-room,emergency-room.png
+54,"Dentist Appointment",emergency,dentist-appointment,dentist-appointment.png
+55,"Eye Doctor/Optician",emergency,eye-doctor-optician,eye-doctor-optician.png
+56,"Insurance Office",emergency,insurance-office,insurance-office.png
+57,"Lost Item Report",emergency,lost-item-report,lost-item-report.png
+58,"Plumber/Electrician Visit",home-services,plumber-electrician-visit,plumber-electrician-visit.png
+59,"Moving/Furniture Delivery",home-services,moving-furniture-delivery,moving-furniture-delivery.png
+60,"Internet/Phone Setup",home-services,internet-phone-setup,internet-phone-setup.png
+61,"Landlord Meeting",home-services,landlord-meeting,landlord-meeting.png
+62,"Neighbor Introduction",home-services,neighbor-introduction,neighbor-introduction.png
+63,"HOA/Building Meeting",home-services,hoa-building-meeting,hoa-building-meeting.png
+64,"Handyman/Contractor Quote",home-services,handyman-contractor-quote,handyman-contractor-quote.png
+65,"Waste/Recycling Question",home-services,waste-recycling-question,waste-recycling-question.png
+66,"Religious Service",cultural,religious-service,religious-service.png
+67,"Farmers Market",cultural,farmers-market,farmers-market.png
+68,"Festival/Cultural Event",cultural,festival-cultural-event,festival-cultural-event.png
+69,"Language Exchange Meetup",cultural,language-exchange-meetup,language-exchange-meetup.png
+70,"Cooking Class",cultural,cooking-class,cooking-class.png
+71,"Art/Dance Class",cultural,art-dance-class,art-dance-class.png
+72,"Job Fair/Career Event",cultural,job-fair-career-event,job-fair-career-event.png
+73,"School/University Enrollment",cultural,school-university-enrollment,school-university-enrollment.png
+74,"Courtroom/Legal",cultural,courtroom-legal,courtroom-legal.png
+75,"Government Office (Visa/License)",cultural,government-office-visa-license,government-office-visa-license.png
