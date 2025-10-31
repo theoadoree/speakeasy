@@ -1137,31 +1137,33 @@
 
         async function handleGoogleCredential(credential) {
             try {
+                console.log('🔐 Authenticating with Google...');
+
                 // Send the credential to backend for verification
                 const response = await fetch(`${API_URL}/api/auth/google`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        idToken: credential,
-                        name: '',
-                        email: '',
-                        imageUrl: ''
+                        idToken: credential
                     })
                 });
 
                 const data = await response.json();
-                if (data.success) {
-                    user = data.user;
-                    sessionId = data.sessionId;
+                console.log('Backend response:', data);
+
+                if (data.success && data.data) {
+                    user = data.data.user;
+                    sessionId = data.data.token;
                     localStorage.setItem('speakeasy_session', sessionId);
                     localStorage.setItem('speakeasy_user', JSON.stringify(user));
+                    console.log('✅ Login successful:', user.name);
                     nextStep('auth', 'profile');
                 } else {
                     throw new Error(data.error || 'Authentication failed');
                 }
             } catch (error) {
-                console.error('Google credential handling error:', error);
-                alert('Login failed. Please try again.');
+                console.error('❌ Google credential handling error:', error);
+                alert('Login failed: ' + error.message);
             }
         }
 
@@ -1221,10 +1223,12 @@
                         });
 
                         const backendData = await backendResponse.json();
-                        if (backendData.success) {
-                            user = backendData.user;
-                            sessionId = backendData.sessionId;
+                        if (backendData.success && backendData.data) {
+                            user = backendData.data.user;
+                            sessionId = backendData.data.token;
                             localStorage.setItem('speakeasy_session', sessionId);
+                            localStorage.setItem('speakeasy_user', JSON.stringify(user));
+                            console.log('✅ Apple login successful:', user.name);
                             nextStep('auth', 'profile');
                             return;
                         }
@@ -1279,6 +1283,8 @@
 
         async function continueAsGuest() {
             try {
+                console.log('👤 Logging in as guest...');
+
                 const response = await fetch(`${API_URL}/api/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1287,19 +1293,23 @@
                         name: 'Guest User'
                     })
                 });
-                
+
                 const data = await response.json();
-                if (data.success) {
-                    user = data.user;
-                    sessionId = data.sessionId;
+                console.log('Guest login response:', data);
+
+                if (data.success && data.data) {
+                    user = data.data.user;
+                    sessionId = data.data.token;
                     localStorage.setItem('speakeasy_session', sessionId);
+                    localStorage.setItem('speakeasy_user', JSON.stringify(user));
+                    console.log('✅ Guest login successful');
                     nextStep('auth', 'profile');
                 } else {
                     alert('Guest login failed. Please try again.');
                 }
             } catch (error) {
-                console.error('Guest login error:', error);
-                alert('Guest login failed. Please try again.');
+                console.error('❌ Guest login error:', error);
+                alert('Guest login failed: ' + error.message);
             }
         }
 
