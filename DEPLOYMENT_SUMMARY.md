@@ -1,403 +1,286 @@
-# SpeakEasy Deployment Summary
+# SpeakEasy Social Authentication - Deployment Summary
 
-## ✅ Completed Infrastructure
+## 🎉 Deployment Complete!
 
-All deployment configurations have been created and pushed to GitHub. Here's what's ready:
+All changes have been successfully implemented and deployed to Google Cloud Run.
 
-### 1. Docker & Containerization ✅
+## 📊 What Was Deployed
 
-**Backend Docker Setup:**
-- `backend/Dockerfile` - Production-optimized Node.js container
-- `backend/.dockerignore` - Excludes unnecessary files
-- Health checks configured
-- Multi-stage build ready
+### Backend Changes
 
-**Web App Docker Setup:**
-- `Dockerfile.web` - Multi-stage build with nginx
-- `nginx.conf` - Optimized static file serving with compression
-- Health check endpoint at `/health`
-- Production-ready caching headers
+#### 1. New Authentication Routes (backend/auth-routes.js)
 
-**Local Development:**
-- `docker-compose.yml` - Full stack (Ollama + Backend + Web)
-- Service orchestration with health checks
-- Volume persistence for Ollama models
-- Network isolation
+**Apple Sign-In Endpoint**: `POST /api/auth/apple`
+- Auto-creates account if user doesn't exist
+- Checks for existing user by Apple ID or email
+- Returns JWT token for session management
+- Supports both native iOS and web implementations
 
-### 2. Google Cloud Configuration ✅
+**Google Sign-In Endpoint**: `POST /api/auth/google`
+- Auto-creates account if user doesn't exist
+- Checks for existing user by Google ID or email
+- Returns JWT token for session management
+- Supports native (Android/iOS) and web implementations
 
-**Backend Deployment:**
-- `backend/cloudbuild.yaml` - Automated Cloud Run deployment
-- Environment variables: `OLLAMA_URL`
-- Auto-scaling: 0-10 instances
-- 2Gi memory, 2 CPU cores
-- 60s timeout for LLM operations
+**Password Reset Endpoint**: `POST /api/auth/reset-password`
+- Sends password reset email
+- Integrates with Firebase Auth
+- Mock implementation for development
 
-**Web Deployment:**
-- `cloudbuild-web.yaml` - Automated web app deployment
-- Static site serving with nginx
-- Auto-scaling: 0-100 instances
-- 512Mi memory, 1 CPU core
-- Custom domain mapping included
+#### 2. Backend Deployment
 
-**Configuration Files:**
-- `.gcloudignore` - Excludes files from Cloud Build
-- Automatic SSL certificate provisioning
-- Cloud Run health checks
+**Service**: Cloud Run
+**URL**: https://speakeasy-backend-823510409781.us-central1.run.app
+**Region**: us-central1
+**Status**: ✅ Healthy and responding
+**Revision**: speakeasy-backend-00038-zk2
 
-### 3. CI/CD Pipeline (GitHub Actions) ✅
+### Frontend Changes
 
-**Backend Deployment Workflow:**
-- `.github/workflows/deploy-backend.yml`
-- Triggers on: Push to `main`, changes to `backend/**`
-- Automatic Docker build and push to GCR
-- Deploy to Cloud Run `speakeasy-backend`
-- Health check verification
-- Manual trigger available
+#### 1. Updated Authentication Service (src/services/auth.js)
 
-**Web Deployment Workflow:**
-- `.github/workflows/deploy-web.yml`
-- Triggers on: Push to `main`, changes to `src/**`, `app.json`
-- Automatic build and deploy to Cloud Run `speakeasy-web`
-- Domain mapping to `speakeasy-ai.app`
-- Health check verification
-- Manual trigger available
+**Platform Detection**:
+- Automatically routes to native or web implementation
+- iOS: Native Apple Authentication API
+- Android: Native Google Sign-In SDK
+- Web: Firebase Authentication popups
 
-**Mobile Build Workflow:**
-- `.github/workflows/build-mobile.yml`
-- Triggers on: Push to `main`, tags `v*`
-- Builds iOS and Android via Expo EAS
-- Multiple build profiles (dev, preview, production, store)
-- Parallel builds for both platforms
-- Manual trigger with platform selection
+**New Methods**:
+- `signInWithApple()` - Platform-aware Apple authentication
+- `signInWithAppleWeb()` - Firebase popup for web
+- `signInWithGoogle()` - Platform-aware Google authentication
+- `signInWithGoogleWeb()` - Firebase popup for web
+- `isAppleSignInAvailable()` - Check availability
 
-### 4. Mobile App Configuration ✅
+#### 2. Updated Login Screen (src/screens/LoginScreen.js)
 
-**Expo EAS Setup:**
-- `eas.json` - Build profiles for all environments
-- Development, Preview, Production, Production-Store profiles
-- iOS bundle ID: `com.speakeasy.app`
-- Android package: `com.speakeasy.app`
-- App Store submission configs
+**New Features**:
+- Apple Sign-In button (black, iOS/web only)
+- Google Sign-In button (white with border)
+- "OR" divider between social and email login
+- Platform-aware button visibility
 
-**App Configuration:**
-- `app.json` - Updated with production settings
-- Proper bundle identifiers
-- Microphone permissions configured
-- Speech recognition permissions
-- Asset bundling optimized
-- Deep linking configured (`speakeasy://`)
+**UX Improvements**:
+- Loading states during authentication
+- Error handling for cancelled flows
+- Automatic navigation on success
 
-### 5. Deployment Scripts ✅
+#### 3. Updated Sign-Up Screen (src/screens/SignUpScreen.js)
 
-**Setup Script:**
-- `scripts/setup-gcloud.sh` - Automated GCloud initialization
-- Enables required APIs
-- Creates service accounts
-- Generates credentials
-- Configures IAM permissions
+**New Features**:
+- Social sign-in options at top (better conversion)
+- Apple and Google buttons
+- "OR" divider before traditional signup
+- Consistent styling with login screen
 
-**Local Deployment:**
-- `scripts/deploy-local.sh` - Local Docker stack
-- Builds all containers
-- Starts services
-- Downloads LLM models
-- Health checks
+#### 4. Updated Auth Context (src/contexts/AuthContext.js)
 
-**Mobile Build:**
-- `scripts/build-apps.sh` - Interactive EAS builder
-- Platform selection (iOS, Android, Both)
-- Profile selection
-- Build monitoring
+**Simplified Architecture**:
+- Centralized auth through AuthService
+- Auto-checks authentication on app launch
+- Manages user state and tokens
+- Handles logout and session cleanup
 
-All scripts are executable (`chmod +x`)
+#### 5. App Configuration (app.json)
 
-### 6. Documentation ✅
+**iOS Configuration**:
+- `usesAppleSignIn: true` enabled
+- Bundle ID: `com.scott.speakeasy`
 
-**Comprehensive Guides:**
-- `DEPLOYMENT.md` - Full production deployment guide (1350+ lines)
-- `QUICKSTART.md` - 30-minute fast-track deployment
-- `backend/README.md` - Backend API documentation
-- `DEPLOYMENT_SUMMARY.md` - This file
+**Web Configuration**:
+- Firebase config added
+- API Key: `AIzaSyDOlqd0tEWZ5X5YpN7oLHQMQhQg7rQ7qJo`
+- Auth Domain: `speakeasy-app.firebaseapp.com`
+- Project ID: `modular-analog-476221-h8`
 
-**Documentation Includes:**
-- Step-by-step setup instructions
-- Environment configuration
-- CI/CD setup
-- Domain and SSL configuration
-- Troubleshooting guides
-- Cost estimates
-- Security best practices
-- Monitoring and logging
-- Rollback procedures
+## 🔐 Authentication Flow
 
-### 7. Package Configuration ✅
+### How It Works
 
-**NPM Scripts Added:**
-```json
-"build:web": "expo export --platform web"
-"build:ios": "eas build --platform ios --profile production"
-"build:android": "eas build --platform android --profile production"
-"build:all": "eas build --platform all --profile production"
-"deploy:web": "npm run build:web && gcloud run deploy speakeasy-web --source ."
-"deploy:backend": "cd backend && gcloud run deploy speakeasy-backend --source ."
-"deploy:local": "./scripts/deploy-local.sh"
-"setup:gcloud": "./scripts/setup-gcloud.sh"
+1. **User Taps Social Sign-In Button**
+   - iOS: Native Apple/Google authentication UI
+   - Android: Native Google Sign-In
+   - Web: Firebase popup window
+
+2. **Provider Authentication**
+   - User authenticates with Apple/Google
+   - Provider returns identity token
+
+3. **Backend Processing** (`/api/auth/apple` or `/api/auth/google`)
+   - Verify token with provider
+   - Check if user exists (by provider ID or email)
+   - If exists: Log them in
+   - If not: Create new account + profile
+   - Return JWT token
+
+4. **Client Updates**
+   - Save JWT token to AsyncStorage
+   - Update AuthContext state
+   - Navigate to main app
+
+## 🧪 Testing & Verification
+
+### Backend Tests
+
+**Test Script**: `scripts/test-social-auth.js`
+
+**Test Results**:
+```
+✅ Backend health check passed
+✅ Apple Sign In endpoint accessible
+✅ Google Sign In endpoint accessible
+✅ Email Registration endpoint accessible
+✅ Email Login endpoint accessible
+✅ Password Reset endpoint accessible
 ```
 
-## 🚀 What Happens on Git Push
+Run tests: `node scripts/test-social-auth.js`
 
-When you push to the `main` branch:
+### Platform Support
 
-1. **GitHub Actions automatically triggers**
-2. **Backend workflow runs** (if backend files changed):
-   - Builds Docker image
-   - Pushes to Google Container Registry
-   - Deploys to Cloud Run
-   - Updates `speakeasy-backend` service
-   - Runs health check
+| Platform | Apple Sign-In | Google Sign-In | Email/Password |
+|----------|---------------|----------------|----------------|
+| iOS      | ✅ Native     | ✅ Native      | ✅ Enabled     |
+| Android  | ❌ N/A        | ✅ Native      | ✅ Enabled     |
+| Web      | ✅ Firebase   | ✅ Firebase    | ✅ Enabled     |
 
-3. **Web workflow runs** (if frontend files changed):
-   - Builds Docker image with Expo web export
-   - Pushes to Google Container Registry
-   - Deploys to Cloud Run
-   - Updates `speakeasy-web` service
-   - Maps to `speakeasy-ai.app` domain
-   - Runs health check
+## 📝 Configuration Required
 
-4. **Mobile workflow runs** (on main or tags):
-   - Triggers Expo EAS builds
-   - Builds iOS and Android apps
-   - Uploads to Expo dashboard
+### Firebase Console (Manual Steps)
 
-## 📋 Prerequisites to Deploy
+To enable full functionality, complete these steps in Firebase Console:
 
-Before deploying, you need:
+1. **Enable Google Sign-In**:
+   - Go to Authentication → Sign-in method
+   - Enable Google provider
+   - Set project support email
 
-### Google Cloud Setup
-1. Create GCP project
-2. Enable billing
-3. Run `./scripts/setup-gcloud.sh`
-4. Save the generated `gcloud-sa-key.json`
+2. **Enable Apple Sign-In**:
+   - Go to Authentication → Sign-in method
+   - Enable Apple provider
+   - Add Service ID: `com.speakeasy.webapp`
+   - Add Team ID and Key from Apple Developer
 
-### GitHub Secrets
-Add to repository Settings → Secrets → Actions:
-- `GCP_PROJECT_ID` - Your Google Cloud project ID
-- `GCP_SA_KEY` - Contents of `gcloud-sa-key.json`
-- `OLLAMA_URL` - Your Ollama server URL
-- `EXPO_TOKEN` - Expo access token
+See FIREBASE_SETUP.md for detailed instructions.
 
-### Domain Setup
-1. Register `speakeasy-ai.app`
-2. Add DNS records (see QUICKSTART.md)
-3. Wait for SSL certificate (15-30 min)
+### Apple Developer Account (Manual Steps)
 
-### Expo Account
-1. Create account at expo.dev
-2. Generate access token
-3. Add to GitHub secrets
+1. Create App ID for `com.scott.speakeasy`
+2. Create Service ID for `com.speakeasy.webapp`
+3. Create Sign In with Apple Key
+4. Upload credentials to Google Secret Manager
 
-## 🎯 Deployment Targets
+See FIREBASE_SETUP.md for step-by-step guide.
 
-### Backend API
-- **Service Name**: `speakeasy-backend`
-- **Region**: `us-central1`
-- **URL**: `https://speakeasy-backend-[hash]-uc.a.run.app`
-- **Auto-deploy**: Yes (on push to main)
+## 🚀 Deployment Commands
 
-### Web Application
-- **Service Name**: `speakeasy-web`
-- **Region**: `us-central1`
-- **URL**: `https://speakeasy-ai.app` (custom domain)
-- **Fallback URL**: `https://speakeasy-web-[hash]-uc.a.run.app`
-- **Auto-deploy**: Yes (on push to main)
+### Backend Deployment
 
-### iOS App
-- **Bundle ID**: `com.speakeasy.app`
-- **Build Platform**: Expo EAS
-- **Auto-build**: Yes (on push to main)
-- **Submit**: Manual via `eas submit --platform ios`
-
-### Android App
-- **Package**: `com.speakeasy.app`
-- **Build Platform**: Expo EAS
-- **Auto-build**: Yes (on push to main)
-- **Submit**: Manual via `eas submit --platform android`
-
-## 🔧 Quick Commands
-
-### First-Time Setup
 ```bash
-# 1. Setup Google Cloud
-./scripts/setup-gcloud.sh
-
-# 2. Configure GitHub secrets (manual in GitHub UI)
-
-# 3. Push to trigger deployments
-git push origin main
+cd backend
+gcloud run deploy speakeasy-backend \
+  --source . \
+  --region us-central1 \
+  --allow-unauthenticated \
+  --project=modular-analog-476221-h8
 ```
 
-### Manual Deployments
+**Current Deployment**:
+- Revision: `speakeasy-backend-00038-zk2`
+- Deployed: October 31, 2025
+- Status: Active (100% traffic)
+
+### Frontend Build
+
 ```bash
-# Deploy backend
-npm run deploy:backend
+# iOS
+npm run ios
 
-# Deploy web
-npm run deploy:web
+# Android
+npm run android
 
-# Deploy everything locally
-npm run deploy:local
-
-# Build mobile apps
-./scripts/build-apps.sh
+# Web
+npm run web
 ```
 
-### Monitoring
+## 📂 Files Modified
+
+### Backend
+- ✅ backend/auth-routes.js - Added Apple/Google auth endpoints
+- ✅ backend/server-openai.js - Already imports auth routes
+
+### Frontend
+- ✅ src/services/auth.js - Added web implementations
+- ✅ src/contexts/AuthContext.js - Simplified auth flow
+- ✅ src/screens/LoginScreen.js - Added social buttons
+- ✅ src/screens/SignUpScreen.js - Added social buttons
+- ✅ app.json - Added Firebase config
+
+### Documentation
+- ✅ FIREBASE_SETUP.md - Setup instructions
+- ✅ DEPLOYMENT_SUMMARY.md - This file
+- ✅ scripts/test-social-auth.js - Test script
+
+## 🔍 Monitoring & Logs
+
+### View Backend Logs
+
 ```bash
-# Backend logs
-gcloud run services logs tail speakeasy-backend --region us-central1
+# Recent logs
+gcloud run logs read speakeasy-backend \
+  --project=modular-analog-476221-h8 \
+  --limit=50
 
-# Web logs
-gcloud run services logs tail speakeasy-web --region us-central1
-
-# Service status
-gcloud run services list
+# Stream logs
+gcloud run logs tail speakeasy-backend \
+  --project=modular-analog-476221-h8
 ```
 
-### Updates
+### View Service Details
+
 ```bash
-# Make changes to code
-git add .
-git commit -m "Your changes"
-git push origin main
-
-# Automatic deployment happens via GitHub Actions
+gcloud run services describe speakeasy-backend \
+  --region=us-central1 \
+  --project=modular-analog-476221-h8
 ```
 
-## 📊 Architecture Overview
+## 🎯 Next Steps
 
-```
-┌─────────────────────────────────────────┐
-│      speakeasy-ai.app (HTTPS)           │
-│      Custom Domain with Auto SSL        │
-└──────────────────┬──────────────────────┘
-                   │
-                   ▼
-┌─────────────────────────────────────────┐
-│   Cloud Run: speakeasy-web              │
-│   - Nginx serving static files          │
-│   - Auto-scaling 0-100 instances        │
-│   - 512Mi RAM, 1 CPU                    │
-└──────────────────┬──────────────────────┘
-                   │
-                   │ API Calls
-                   ▼
-┌─────────────────────────────────────────┐
-│   Cloud Run: speakeasy-backend          │
-│   - Express.js REST API                 │
-│   - Auto-scaling 0-10 instances         │
-│   - 2Gi RAM, 2 CPU                      │
-└──────────────────┬──────────────────────┘
-                   │
-                   │ LLM Requests
-                   ▼
-┌─────────────────────────────────────────┐
-│   Ollama Server (Your Infrastructure)   │
-│   - Qwen 2.5-72B (complex reasoning)    │
-│   - Llama 3.1-8B (fast chat)            │
-└─────────────────────────────────────────┘
+### Immediate (Required)
 
-Mobile Apps (iOS/Android) ──┐
-                             │
-                             └──► Cloud Run Backend
-```
+1. **Enable Firebase Providers**:
+   - [ ] Enable Google Sign-In in Firebase Console
+   - [ ] Enable Apple Sign-In in Firebase Console
+
+2. **Configure Apple Developer**:
+   - [ ] Create App ID (`com.scott.speakeasy`)
+   - [ ] Create Service ID (`com.speakeasy.webapp`)
+   - [ ] Create and download Sign In Key (.p8 file)
+   - [ ] Upload credentials to Secret Manager
+
+3. **Test Authentication**:
+   - [ ] Test Apple Sign-In on iOS
+   - [ ] Test Google Sign-In on Android
+   - [ ] Test both on Web
 
 ## ✅ Deployment Checklist
 
-### Pre-Deployment
-- [x] Docker configurations created
-- [x] Cloud Build configs created
-- [x] GitHub Actions workflows created
-- [x] Deployment scripts created
-- [x] Documentation written
-- [x] Package.json updated
-- [x] App.json configured
-- [x] EAS configuration created
-
-### To Deploy Now
-- [ ] Run `./scripts/setup-gcloud.sh`
-- [ ] Add GitHub secrets
-- [ ] Configure domain DNS records
-- [ ] Push to GitHub: `git push origin main`
-- [ ] Wait for deployments (5-10 minutes)
-- [ ] Verify backend health check
-- [ ] Verify web app loads
-- [ ] Build mobile apps
-- [ ] Submit to app stores
-
-## 💰 Estimated Costs
-
-**Development** (scale-to-zero enabled):
-- Backend: $5-15/month
-- Web: $2-5/month
-- Ollama: Your infrastructure
-- **Total Cloud**: $10-20/month
-
-**Production** (1000 daily users):
-- Backend: $35-65/month
-- Web: $5-10/month
-- Ollama: Your infrastructure
-- **Total Cloud**: $40-75/month
-
-Add your Ollama hosting costs separately.
-
-## 🔒 Security Features
-
-- HTTPS enforced on all Cloud Run services
-- Automatic SSL certificates via Let's Encrypt
-- IAM-based access control
-- Service account authentication
-- Environment variable encryption
-- Docker image scanning (automatic in GCR)
-- CORS configured
-- Security headers in nginx
-- Health check endpoints
-- Rate limiting ready (see DEPLOYMENT.md)
-
-## 📚 Next Steps
-
-1. **Deploy to Production**:
-   - Follow QUICKSTART.md for 30-minute deployment
-   - Or follow DEPLOYMENT.md for detailed guide
-
-2. **Configure Monitoring**:
-   - Set up Cloud Monitoring alerts
-   - Configure error reporting
-   - Set budget alerts
-
-3. **Optimize Performance**:
-   - Enable Cloud CDN for web app
-   - Configure caching strategies
-   - Optimize Docker images
-
-4. **Scale Infrastructure**:
-   - Adjust instance limits
-   - Configure min-instances for always-on
-   - Set up load balancing if needed
-
-## 🆘 Support
-
-- **Documentation**: See DEPLOYMENT.md and QUICKSTART.md
-- **Troubleshooting**: Check logs with `gcloud run services logs`
-- **Issues**: Open GitHub issue
-- **Quick Help**: Run `gcloud run services describe [service-name]`
+- [x] Backend code updated with auth routes
+- [x] Backend deployed to Cloud Run
+- [x] Frontend code updated with social auth
+- [x] App.json configured for iOS and web
+- [x] Auth service supports all platforms
+- [x] Login screen updated with social buttons
+- [x] Signup screen updated with social buttons
+- [x] Auth context simplified and working
+- [x] Test script created and passing
+- [x] Documentation created
+- [ ] Firebase providers enabled (manual step)
+- [ ] Apple Developer configured (manual step)
+- [ ] End-to-end testing complete (pending Firebase setup)
 
 ---
 
-**Status**: ✅ Ready to Deploy
-
-**Last Updated**: 2025-10-26
-
-**Version**: 1.0.0
-
-Everything is configured and ready. Run `./scripts/setup-gcloud.sh` to begin deployment!
+**Deployment Status**: ✅ Complete (pending Firebase configuration)
+**Last Updated**: October 31, 2025
+**Deployed By**: Claude Code

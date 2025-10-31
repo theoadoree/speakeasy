@@ -18,6 +18,7 @@ import * as Speech from 'expo-speech';
 import { useApp } from '../contexts/AppContext';
 import { useTheme } from '../contexts/ThemeContext';
 import IntelligentLLMService from '../services/intelligentLLM';
+import AssessmentService from '../services/assessment';
 import StorageService from '../utils/storage';
 import TeacherAnimation from '../components/TeacherAnimation';
 import ImmersiveVoiceMode from '../components/ImmersiveVoiceMode';
@@ -109,7 +110,7 @@ function ChatBubble({ message, index }) {
  * Now with immersive ChatGPT-style voice mode!
  */
 export default function PracticeScreen({ navigation }) {
-  const { userProfile } = useApp();
+  const { userProfile, setUserProfile } = useApp();
   const { theme, isDark } = useTheme();
   const scrollViewRef = useRef(null);
 
@@ -120,6 +121,9 @@ export default function PracticeScreen({ navigation }) {
 
   // Conversation state
   const [messages, setMessages] = useState([]);
+
+  // Assessment state
+  const [assessmentTriggered, setAssessmentTriggered] = useState(false);
 
   // UI preferences
   const [voiceMode, setVoiceMode] = useState(true);
@@ -208,6 +212,11 @@ export default function PracticeScreen({ navigation }) {
     const name = userProfile?.name || 'there';
     const interests = userProfile?.interests?.[0] || 'topics you enjoy';
 
+    // Different message if assessment is pending
+    if (userProfile?.assessmentPending) {
+      return `Hi ${name}! Welcome to SpeakEasy! 🎉 Let's have a quick conversation in ${targetLang} so I can understand your current level. Don't worry - just relax and chat with me naturally. We can talk about ${interests} or anything else you'd like. Ready? Just tap the button and start speaking!`;
+    }
+
     return `Hi ${name}! Ready to practice ${targetLang}? I'm here to help you improve naturally. We can talk about ${interests} or anything else you'd like. Just tap the button and start speaking!`;
   };
 
@@ -293,10 +302,120 @@ export default function PracticeScreen({ navigation }) {
       setTimeout(() => {
         scrollViewRef.current?.scrollToEnd({ animated: true });
       }, 100);
+
+      // Check if we should trigger level assessment
+      await checkAndTriggerAssessment(finalMessages);
     } catch (error) {
       setIsProcessing(false);
       Alert.alert('Error', 'Failed to get response. Please try again.');
       console.error('Practice error:', error);
+    }
+  };
+
+  /**
+   * Check if user needs assessment and trigger it after sufficient conversation
+   */
+  const checkAndTriggerAssessment = async (conversationMessages) => {
+    // Don't trigger if already triggered or if user already has a level
+    if (assessmentTriggered || !userProfile || !userProfile.assessmentPending) {
+      return;
+    }
+
+    // Count user messages (excluding system messages)
+    const userMessageCount = conversationMessages.filter(msg => msg.role === 'user').length;
+    const minExchanges = AssessmentService.getMinimumExchanges();
+
+    // Trigger assessment after minimum exchanges
+    if (userMessageCount >= minExchanges) {
+      setAssessmentTriggered(true);
+      await performAssessment(conversationMessages);
+    }
+  };
+
+  /**
+   * Perform level assessment based on conversation
+   */
+  const performAssessment = async (conversationMessages) => {
+    try {
+      console.log('🎯 Triggering level assessment...');
+
+      // Show processing message
+      const processingMessage = {
+        role: 'assistant',
+        content: "Let me evaluate your language level based on our conversation... 🤔",
+        timestamp: new Date().toISOString(),
+      };
+      setMessages([...conversationMessages, processingMessage]);
+
+      // Perform assessment
+      const assessmentResult = await AssessmentService.evaluateLevel(
+        conversationMessages,
+        userProfile.targetLanguage
+      );
+
+      if (assessmentResult.success) {
+        // Update user profile with assessed level
+        const updatedProfile = {
+          ...userProfile,
+          level: assessmentResult.level,
+          assessmentPending: false,
+          assessmentDate: new Date().toISOString(),
+          assessmentFeedback: assessmentResult.feedback
+        };
+
+        await setUserProfile(updatedProfile);
+
+        // Get level description
+        const levelDescription = AssessmentService.getLevelDescription(assessmentResult.level);
+
+        // Show assessment results
+        const resultMessage = {
+          role: 'assistant',
+          content: `Great job! 🎉 Based on our conversation, I've assessed your ${userProfile.targetLanguage} level as:\n\n📊 ${assessmentResult.level}: ${levelDescription}\n\n${assessmentResult.feedback}\n\nYour lessons will now be tailored to this level. Keep practicing to improve! 💪`,
+          timestamp: new Date().toISOString(),
+        };
+
+        const finalMessages = [...conversationMessages, resultMessage];
+        setMessages(finalMessages);
+        await saveConversationHistory(finalMessages);
+
+        // Speak the result if in voice mode
+        if (voiceMode) {
+          await speakText(resultMessage.content);
+        }
+
+        // Show alert with results
+        setTimeout(() => {
+          Alert.alert(
+            '🎯 Level Assessment Complete!',
+            `You've been assessed at ${assessmentResult.level}: ${levelDescription}\n\n${assessmentResult.feedback}`,
+            [{ text: 'Great!', style: 'default' }]
+          );
+        }, 1000);
+
+      } else {
+        // Assessment failed - default to A1
+        console.error('Assessment failed:', assessmentResult.error);
+        const updatedProfile = {
+          ...userProfile,
+          level: 'A1',
+          assessmentPending: false
+        };
+        await setUserProfile(updatedProfile);
+
+        const fallbackMessage = {
+          role: 'assistant',
+          content: "Let's start with beginner level (A1) for now. We can adjust as we continue practicing together! 😊",
+          timestamp: new Date().toISOString(),
+        };
+
+        const finalMessages = [...conversationMessages, fallbackMessage];
+        setMessages(finalMessages);
+        await saveConversationHistory(finalMessages);
+      }
+    } catch (error) {
+      console.error('Assessment error:', error);
+      // Silently fail and continue - user can be assessed later
     }
   };
 
@@ -550,8 +669,23 @@ export default function PracticeScreen({ navigation }) {
           </View>
         </View>
 
+        {/* Assessment Pending Card */}
+        {userProfile?.assessmentPending && !assessmentTriggered && (
+          <Card variant="filled" padding="md" style={styles.assessmentCard}>
+            <View style={styles.lessonHeader}>
+              <Text style={styles.lessonEmoji}>🎯</Text>
+              <View style={styles.lessonInfo}>
+                <Text style={styles.lessonTopic}>Level Assessment</Text>
+                <Text style={styles.lessonLevel}>
+                  Chat with me to determine your {userProfile.targetLanguage} level
+                </Text>
+              </View>
+            </View>
+          </Card>
+        )}
+
         {/* Current Lesson Card */}
-        {currentLesson && (
+        {currentLesson && !userProfile?.assessmentPending && (
           <Card variant="filled" padding="md" style={styles.lessonCard}>
             <View style={styles.lessonHeader}>
               <Text style={styles.lessonEmoji}>📚</Text>
@@ -801,6 +935,11 @@ const styles = StyleSheet.create({
   lessonCard: {
     marginHorizontal: spacing.lg,
     marginTop: spacing.md,
+  },
+  assessmentCard: {
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.md,
+    backgroundColor: '#FFF9E6', // Warm yellow background
   },
   lessonHeader: {
     flexDirection: 'row',

@@ -68,3 +68,4 @@ gcloud-sa-key.json
 *.p8
 .env.local
 .env.production
+node_modules

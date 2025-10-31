@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,9 @@ import {
   Alert,
   Image,
 } from 'react-native';
+import * as AppleAuthentication from 'expo-apple-authentication';
 import { useAuth } from '../contexts/AuthContext';
+import AuthService from '../services/auth';
 
 export default function LoginScreen({ navigation }) {
   const { login, authError, clearError } = useAuth();
@@ -20,6 +22,16 @@ export default function LoginScreen({ navigation }) {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [isAppleAvailable, setIsAppleAvailable] = useState(false);
+
+  useEffect(() => {
+    checkAppleAuth();
+  }, []);
+
+  const checkAppleAuth = async () => {
+    const available = await AuthService.isAppleSignInAvailable();
+    setIsAppleAvailable(available || Platform.OS === 'web');
+  };
 
   const validateForm = () => {
     const newErrors = {};
@@ -81,6 +93,42 @@ export default function LoginScreen({ navigation }) {
         },
       ]
     );
+  };
+
+  const handleAppleSignIn = async () => {
+    setIsLoading(true);
+    clearError();
+    try {
+      const result = await AuthService.signInWithApple();
+      if (result.success) {
+        // Force reload auth state
+        window.location.reload?.() || navigation.navigate('Home');
+      } else if (result.error !== 'User cancelled') {
+        Alert.alert('Sign In Failed', result.error || 'Apple Sign In failed');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'An unexpected error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+    clearError();
+    try {
+      const result = await AuthService.signInWithGoogle();
+      if (result.success) {
+        // Force reload auth state
+        window.location.reload?.() || navigation.navigate('Home');
+      } else if (result.error !== 'User cancelled') {
+        Alert.alert('Sign In Failed', result.error || 'Google Sign In failed');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'An unexpected error occurred');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -164,6 +212,32 @@ export default function LoginScreen({ navigation }) {
             ) : (
               <Text style={styles.buttonText}>Sign In</Text>
             )}
+          </TouchableOpacity>
+
+          <View style={styles.dividerContainer}>
+            <View style={styles.divider} />
+            <Text style={styles.dividerText}>OR</Text>
+            <View style={styles.divider} />
+          </View>
+
+          {/* Apple Sign In */}
+          {isAppleAvailable && (
+            <TouchableOpacity
+              style={[styles.socialButton, styles.appleButton, isLoading && styles.buttonDisabled]}
+              onPress={handleAppleSignIn}
+              disabled={isLoading}
+            >
+              <Text style={styles.socialButtonText}>🍎 Continue with Apple</Text>
+            </TouchableOpacity>
+          )}
+
+          {/* Google Sign In */}
+          <TouchableOpacity
+            style={[styles.socialButton, styles.googleButton, isLoading && styles.buttonDisabled]}
+            onPress={handleGoogleSignIn}
+            disabled={isLoading}
+          >
+            <Text style={[styles.socialButtonText, styles.googleButtonText]}>G Continue with Google</Text>
           </TouchableOpacity>
 
           <View style={styles.signupContainer}>
@@ -283,5 +357,44 @@ const styles = StyleSheet.create({
     color: '#007AFF',
     fontSize: 14,
     fontWeight: '600',
+  },
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 24,
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#E0E0E0',
+  },
+  dividerText: {
+    color: '#999',
+    fontSize: 14,
+    marginHorizontal: 16,
+    fontWeight: '500',
+  },
+  socialButton: {
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    marginBottom: 12,
+    borderWidth: 1,
+  },
+  appleButton: {
+    backgroundColor: '#000',
+    borderColor: '#000',
+  },
+  googleButton: {
+    backgroundColor: '#FFF',
+    borderColor: '#E0E0E0',
+  },
+  socialButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFF',
+  },
+  googleButtonText: {
+    color: '#1A1A1A',
   },
 });

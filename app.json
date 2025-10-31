@@ -8,6 +8,16 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "scheme": "speakeasy",
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
+          }
+        }
+      ]
+    ],
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -46,10 +56,18 @@
     },
     "web": {
       "favicon": "./assets/favicon.png",
-      "bundler": "metro"
+      "bundler": "metro",
+      "config": {
+        "firebase": {
+          "apiKey": "AIzaSyDOlqd0tEWZ5X5YpN7oLHQMQhQg7rQ7qJo",
+          "authDomain": "speakeasy-app.firebaseapp.com",
+          "projectId": "modular-analog-476221-h8"
+        }
+      }
     },
     "extra": {
       "eas": {
+        "projectId": "d020297a-5011-4fda-aee9-16ca52d5ca3f"
       }
     },
     "runtimeVersion": {

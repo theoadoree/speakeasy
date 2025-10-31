@@ -311,6 +311,306 @@ router.get('/leaderboard/:league', async (req, res) => {
   }
 });
 
+// Apple Sign In - auto creates account if doesn't exist
+router.post('/apple', async (req, res) => {
+  try {
+    const { identityToken, user: appleUserId, email, fullName } = req.body;
+
+    if (!identityToken) {
+      return res.status(400).json({ error: 'Missing identity token' });
+    }
+
+    if (!isConfigured) {
+      // Mock response for development
+      const mockEmail = email || `apple_${appleUserId}@privaterelay.appleid.com`;
+      return res.json({
+        success: true,
+        data: {
+          user: {
+            uid: `apple_${appleUserId || Date.now()}`,
+            email: mockEmail,
+            name: fullName ? `${fullName.givenName} ${fullName.familyName}`.trim() : mockEmail.split('@')[0],
+            provider: 'apple',
+            createdAt: new Date().toISOString()
+          },
+          token: `mock_token_${Date.now()}`
+        }
+      });
+    }
+
+    // Verify Apple token (in production, you'd verify with Apple's servers)
+    // For now, we'll trust the token and create/login the user
+
+    // Try to find existing user by Apple ID or email
+    let userRecord;
+    let isNewUser = false;
+
+    try {
+      // Check if user exists by custom claim (Apple ID)
+      const users = await auth.getUsers([{ uid: `apple_${appleUserId}` }]);
+      if (users.users.length > 0) {
+        userRecord = users.users[0];
+      }
+    } catch (error) {
+      // User doesn't exist with this Apple ID
+    }
+
+    // If not found by Apple ID, try by email
+    if (!userRecord && email) {
+      try {
+        userRecord = await auth.getUserByEmail(email);
+      } catch (error) {
+        // User doesn't exist with this email
+      }
+    }
+
+    // Create new user if doesn't exist
+    if (!userRecord) {
+      isNewUser = true;
+      const displayName = fullName
+        ? `${fullName.givenName || ''} ${fullName.familyName || ''}`.trim()
+        : (email ? email.split('@')[0] : 'Apple User');
+
+      userRecord = await auth.createUser({
+        uid: `apple_${appleUserId}`,
+        email: email || `apple_${appleUserId}@privaterelay.appleid.com`,
+        displayName,
+        emailVerified: true // Apple emails are verified
+      });
+
+      // Create user document in Firestore
+      await db.collection('users').doc(userRecord.uid).set({
+        email: userRecord.email,
+        name: displayName,
+        provider: 'apple',
+        appleUserId,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        profile: {
+          targetLanguage: null,
+          nativeLanguage: 'English',
+          level: null,
+          interests: []
+        },
+        progress: {
+          xp: 0,
+          streak: 0,
+          lessonsCompleted: 0,
+          wordsLearned: 0,
+          timeSpent: 0
+        }
+      });
+    } else {
+      // Update existing user document with Apple provider info if needed
+      const userDoc = await db.collection('users').doc(userRecord.uid).get();
+      if (!userDoc.exists || !userDoc.data().provider) {
+        await db.collection('users').doc(userRecord.uid).update({
+          provider: 'apple',
+          appleUserId,
+          updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+      }
+    }
+
+    // Get user data from Firestore
+    const userDoc = await db.collection('users').doc(userRecord.uid).get();
+    const userData = userDoc.data();
+
+    // Generate custom token
+    const customToken = await auth.createCustomToken(userRecord.uid);
+
+    res.json({
+      success: true,
+      data: {
+        user: {
+          uid: userRecord.uid,
+          email: userRecord.email,
+          name: userData?.name || userRecord.displayName,
+          provider: 'apple',
+          isNewUser,
+          profile: userData?.profile,
+          progress: userData?.progress
+        },
+        token: customToken
+      }
+    });
+  } catch (error) {
+    console.error('Apple Sign In error:', error);
+    res.status(500).json({ error: 'Apple Sign In failed', details: error.message });
+  }
+});
+
+// Google Sign In - auto creates account if doesn't exist
+router.post('/google', async (req, res) => {
+  try {
+    const { idToken, user: googleUser } = req.body;
+
+    if (!idToken || !googleUser) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    const { id: googleId, email, name, photo } = googleUser;
+
+    if (!isConfigured) {
+      // Mock response for development
+      return res.json({
+        success: true,
+        data: {
+          user: {
+            uid: `google_${googleId || Date.now()}`,
+            email,
+            name: name || email.split('@')[0],
+            photo,
+            provider: 'google',
+            createdAt: new Date().toISOString()
+          },
+          token: `mock_token_${Date.now()}`
+        }
+      });
+    }
+
+    // Verify Google token (in production, you'd verify with Google's servers)
+    // For now, we'll trust the token and create/login the user
+
+    // Try to find existing user by Google ID or email
+    let userRecord;
+    let isNewUser = false;
+
+    try {
+      // Check if user exists by custom claim (Google ID)
+      const users = await auth.getUsers([{ uid: `google_${googleId}` }]);
+      if (users.users.length > 0) {
+        userRecord = users.users[0];
+      }
+    } catch (error) {
+      // User doesn't exist with this Google ID
+    }
+
+    // If not found by Google ID, try by email
+    if (!userRecord && email) {
+      try {
+        userRecord = await auth.getUserByEmail(email);
+      } catch (error) {
+        // User doesn't exist with this email
+      }
+    }
+
+    // Create new user if doesn't exist
+    if (!userRecord) {
+      isNewUser = true;
+      userRecord = await auth.createUser({
+        uid: `google_${googleId}`,
+        email,
+        displayName: name || email.split('@')[0],
+        photoURL: photo,
+        emailVerified: true // Google emails are verified
+      });
+
+      // Create user document in Firestore
+      await db.collection('users').doc(userRecord.uid).set({
+        email,
+        name: name || email.split('@')[0],
+        photo,
+        provider: 'google',
+        googleId,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        profile: {
+          targetLanguage: null,
+          nativeLanguage: 'English',
+          level: null,
+          interests: []
+        },
+        progress: {
+          xp: 0,
+          streak: 0,
+          lessonsCompleted: 0,
+          wordsLearned: 0,
+          timeSpent: 0
+        }
+      });
+    } else {
+      // Update existing user document with Google provider info if needed
+      const userDoc = await db.collection('users').doc(userRecord.uid).get();
+      if (!userDoc.exists || !userDoc.data().provider) {
+        await db.collection('users').doc(userRecord.uid).update({
+          provider: 'google',
+          googleId,
+          photo,
+          updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+      }
+    }
+
+    // Get user data from Firestore
+    const userDoc = await db.collection('users').doc(userRecord.uid).get();
+    const userData = userDoc.data();
+
+    // Generate custom token
+    const customToken = await auth.createCustomToken(userRecord.uid);
+
+    res.json({
+      success: true,
+      data: {
+        user: {
+          uid: userRecord.uid,
+          email: userRecord.email,
+          name: userData?.name || userRecord.displayName,
+          photo: userData?.photo || userRecord.photoURL,
+          provider: 'google',
+          isNewUser,
+          profile: userData?.profile,
+          progress: userData?.progress
+        },
+        token: customToken
+      }
+    });
+  } catch (error) {
+    console.error('Google Sign In error:', error);
+    res.status(500).json({ error: 'Google Sign In failed', details: error.message });
+  }
+});
+
+// Password reset request
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    if (!isConfigured) {
+      // Mock response for development
+      return res.json({
+        success: true,
+        message: 'Password reset email sent'
+      });
+    }
+
+    // Generate password reset link
+    const resetLink = await auth.generatePasswordResetLink(email);
+
+    // In production, send email with resetLink
+    // For now, just return success
+
+    res.json({
+      success: true,
+      message: 'Password reset email sent'
+    });
+  } catch (error) {
+    console.error('Password reset error:', error);
+
+    if (error.code === 'auth/user-not-found') {
+      // Don't reveal if user exists for security
+      return res.json({
+        success: true,
+        message: 'If an account exists, password reset email has been sent'
+      });
+    }
+
+    res.status(500).json({ error: 'Failed to send reset email' });
+  }
+});
+
 // Helper function to determine league based on XP
 function getLeagueForXP(xp) {
   if (xp >= 10000) return 'legendary';

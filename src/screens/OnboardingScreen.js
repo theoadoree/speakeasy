@@ -7,8 +7,10 @@ import {
   TouchableOpacity,
   ScrollView,
   SafeAreaView,
-  Image
+  Image,
+  Platform
 } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import { useApp } from '../contexts/AppContext';
 import StorageService from '../utils/storage';
 
@@ -27,7 +29,7 @@ const NATIVE_LANGUAGES = [
   'Japanese', 'Korean', 'Mandarin Chinese', 'Arabic', 'Russian', 'Hindi',
   'Dutch', 'Swedish', 'Norwegian', 'Danish', 'Polish', 'Turkish',
   'Greek', 'Hebrew', 'Vietnamese', 'Thai', 'Indonesian', 'Filipino',
-  'Bengali', 'Urdu', 'Farsi', 'Swahili', 'Other'
+  'Bengali', 'Urdu', 'Farsi', 'Swahili'
 ];
 
 const LEVELS = [
@@ -77,7 +79,8 @@ export default function OnboardingScreen({ navigation }) {
       name,
       targetLanguage,
       nativeLanguage,
-      level,
+      level: 'unknown', // Will be determined after first conversation
+      assessmentPending: true, // Flag to trigger assessment
       interests: selectedInterests,
       createdAt: new Date().toISOString()
     };
@@ -96,8 +99,6 @@ export default function OnboardingScreen({ navigation }) {
       case 3:
         return targetLanguage.length > 0;
       case 4:
-        return level.length > 0;
-      case 5:
         return selectedInterests.length >= 3;
       default:
         return false;
@@ -120,7 +121,7 @@ export default function OnboardingScreen({ navigation }) {
 
         {/* Progress Indicator */}
         <View style={styles.progressContainer}>
-          {[1, 2, 3, 4, 5].map((s) => (
+          {[1, 2, 3, 4].map((s) => (
             <View
               key={s}
               style={[
@@ -152,27 +153,19 @@ export default function OnboardingScreen({ navigation }) {
           <View style={styles.stepContainer}>
             <Text style={styles.title}>What's your native language? 🌍</Text>
             <Text style={styles.subtitle}>This helps us tailor lessons to you</Text>
-            <ScrollView style={styles.scrollableOptions} contentContainerStyle={styles.optionsGrid}>
-              {NATIVE_LANGUAGES.map((lang) => (
-                <TouchableOpacity
-                  key={lang}
-                  style={[
-                    styles.optionButton,
-                    nativeLanguage === lang && styles.optionButtonSelected
-                  ]}
-                  onPress={() => setNativeLanguage(lang)}
-                >
-                  <Text
-                    style={[
-                      styles.optionText,
-                      nativeLanguage === lang && styles.optionTextSelected
-                    ]}
-                  >
-                    {lang}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={nativeLanguage}
+                onValueChange={(itemValue) => setNativeLanguage(itemValue)}
+                style={styles.picker}
+                itemStyle={styles.pickerItem}
+              >
+                <Picker.Item label="Select your native language..." value="" />
+                {NATIVE_LANGUAGES.map((lang) => (
+                  <Picker.Item key={lang} label={lang} value={lang} />
+                ))}
+              </Picker>
+            </View>
           </View>
         )}
 
@@ -183,27 +176,20 @@ export default function OnboardingScreen({ navigation }) {
             <Text style={styles.subtitle}>
               Powered by OpenAI • {availableLearningLanguages.length} languages available
             </Text>
-            <ScrollView style={styles.scrollableOptions} contentContainerStyle={styles.optionsGrid}>
-              {availableLearningLanguages.map((lang) => (
-                <TouchableOpacity
-                  key={lang}
-                  style={[
-                    styles.optionButton,
-                    targetLanguage === lang && styles.optionButtonSelected
-                  ]}
-                  onPress={() => setTargetLanguage(lang)}
-                >
-                  <Text
-                    style={[
-                      styles.optionText,
-                      targetLanguage === lang && styles.optionTextSelected
-                    ]}
-                  >
-                    {lang}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={targetLanguage}
+                onValueChange={(itemValue) => setTargetLanguage(itemValue)}
+                style={styles.picker}
+                itemStyle={styles.pickerItem}
+                enabled={availableLearningLanguages.length > 0}
+              >
+                <Picker.Item label="Select language to learn..." value="" />
+                {availableLearningLanguages.map((lang) => (
+                  <Picker.Item key={lang} label={lang} value={lang} />
+                ))}
+              </Picker>
+            </View>
             {availableLearningLanguages.length === 0 && (
               <Text style={styles.warningText}>
                 ⚠️ Please select a different native language to see available learning languages
@@ -212,54 +198,8 @@ export default function OnboardingScreen({ navigation }) {
           </View>
         )}
 
-        {/* Step 4: Level */}
+        {/* Step 4: Interests */}
         {step === 4 && (
-          <View style={styles.stepContainer}>
-            <Text style={styles.title}>What's your current level in {targetLanguage}? 📊</Text>
-            {LEVELS.map((lvl) => (
-              <TouchableOpacity
-                key={lvl.code}
-                style={[
-                  styles.levelButton,
-                  level === lvl.code && styles.levelButtonSelected
-                ]}
-                onPress={() => setLevel(lvl.code)}
-              >
-                <View style={styles.levelContent}>
-                  <Text
-                    style={[
-                      styles.levelCode,
-                      level === lvl.code && styles.levelCodeSelected
-                    ]}
-                  >
-                    {lvl.code}
-                  </Text>
-                  <View style={styles.levelInfo}>
-                    <Text
-                      style={[
-                        styles.levelName,
-                        level === lvl.code && styles.levelNameSelected
-                      ]}
-                    >
-                      {lvl.name}
-                    </Text>
-                    <Text
-                      style={[
-                        styles.levelDesc,
-                        level === lvl.code && styles.levelDescSelected
-                      ]}
-                    >
-                      {lvl.desc}
-                    </Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
-
-        {/* Step 5: Interests */}
-        {step === 5 && (
           <View style={styles.stepContainer}>
             <Text style={styles.title}>What are you interested in? 🎯</Text>
             <Text style={styles.subtitle}>Select at least 3 topics you'd like to learn about</Text>
@@ -302,7 +242,7 @@ export default function OnboardingScreen({ navigation }) {
         <TouchableOpacity
           style={[styles.continueButton, !canContinue() && styles.continueButtonDisabled]}
           onPress={() => {
-            if (step < 5) {
+            if (step < 4) {
               setStep(step + 1);
             } else {
               handleComplete();
@@ -311,7 +251,7 @@ export default function OnboardingScreen({ navigation }) {
           disabled={!canContinue()}
         >
           <Text style={styles.continueButtonText}>
-            {step === 5 ? 'Get Started! 🎉' : 'Continue'}
+            {step === 4 ? 'Start Learning! 🎉' : 'Continue'}
           </Text>
         </TouchableOpacity>
       </View>
@@ -389,34 +329,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 10
   },
-  scrollableOptions: {
-    maxHeight: 200,
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: '#DDD',
+    borderRadius: 12,
+    backgroundColor: '#F8F8F8',
+    overflow: 'hidden',
     marginBottom: 20
   },
-  optionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10
+  picker: {
+    height: Platform.OS === 'ios' ? 200 : 50,
+    width: '100%'
   },
-  optionButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 25,
-    borderWidth: 2,
-    borderColor: '#E0E0E0',
-    backgroundColor: '#F8F8F8'
-  },
-  optionButtonSelected: {
-    borderColor: '#007AFF',
-    backgroundColor: '#007AFF'
-  },
-  optionText: {
+  pickerItem: {
     fontSize: 16,
-    color: '#666'
-  },
-  optionTextSelected: {
-    color: '#FFF',
-    fontWeight: '600'
+    height: Platform.OS === 'ios' ? 200 : 50
   },
   levelButton: {
     padding: 15,
