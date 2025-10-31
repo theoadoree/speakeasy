@@ -68,6 +68,14 @@ class AuthenticationManager: ObservableObject {
     }
 
     func validateSession() async {
+        // Check if we have a token first
+        guard KeychainHelper.shared.getToken() != nil else {
+            // No token, skip validation
+            isAuthenticated = false
+            isLoading = false
+            return
+        }
+
         isLoading = true
 
         do {
