@@ -4,14 +4,19 @@ import * as AppleAuthentication from 'expo-apple-authentication';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import StorageService from '../utils/storage';
 
-// Configure your API base URL here
-// Production Cloud Run URL
-export const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://speakeasy-backend-823510409781.us-central1.run.app';
+// Configure your API base URL here with sane fallbacks
+const resolvedApiUrl =
+  process.env.EXPO_PUBLIC_BACKEND_URL ||
+  process.env.VITE_BACKEND_URL ||
+  process.env.REACT_APP_API_URL ||
+  'https://speakeasy-backend-823510409781.us-central1.run.app';
+
+export const API_BASE_URL = resolvedApiUrl;
 
 // Configure Google Sign In (only on native platforms)
 if (Platform.OS !== 'web') {
   GoogleSignin.configure({
-    webClientId: '823510409781-s5d3hrffelmjcl8kjvchcv3tlbp0shbo.apps.googleusercontent.com',
+    webClientId: '823510409781-7am96n366leset271qt9c8djo265u24n.apps.googleusercontent.com',
     iosClientId: '768424738821-gb3i7pl82qm5r70q73nh6gg33i1f3tv0.apps.googleusercontent.com',
     offlineAccess: true,
   });
