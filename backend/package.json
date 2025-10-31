@@ -4,7 +4,7 @@
   "description": "SpeakEasy Authentication API with OAuth and RevenueCat integration",
   "main": "server-openai.js",
   "scripts": {
-    "start": "node server-openai.js",
+    "start": "node server-ios.js",
     "start:simple": "node server-simple-auth.js",
     "dev": "nodemon server-openai.js",
     "test": "jest"
