@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 import AuthenticationServices
-// import GoogleSignIn  // TODO: Add via Swift Package Manager in Xcode
+import GoogleSignIn
 
 @MainActor
 class AuthenticationManager: ObservableObject {
@@ -115,10 +115,6 @@ class AuthenticationManager: ObservableObject {
     }
 
     func signInWithGoogle() async {
-        // TODO: Implement Google Sign In
-        // Requires GoogleSignIn SDK via Swift Package Manager
-        errorMessage = "Google Sign In coming soon! Please use email or Apple Sign In."
-        /*
         isLoading = true
         errorMessage = nil
 
@@ -153,7 +149,6 @@ class AuthenticationManager: ObservableObject {
         }
 
         isLoading = false
-        */
     }
 
     // MARK: - User Existence Check

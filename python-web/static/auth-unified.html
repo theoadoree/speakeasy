@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SpeakEasy AI - Welcome</title>
     <link rel="icon" type="image/png" href="/static/assets/favicon.png">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         * {
             margin: 0;
@@ -389,12 +390,58 @@
             }
         }
 
+        // Google OAuth Configuration
+        const GOOGLE_CLIENT_ID = '823510409781-YOUR_CLIENT_ID.apps.googleusercontent.com'; // TODO: Replace with actual client ID
+
         function signInWithGoogle() {
-            alert('Google OAuth will be implemented in Phase 2! For now, use email signup.');
+            if (!window.google) {
+                alert('Google Sign-In is loading. Please wait a moment and try again.');
+                return;
+            }
+
+            // Initialize Google Sign-In
+            google.accounts.id.initialize({
+                client_id: GOOGLE_CLIENT_ID,
+                callback: handleGoogleCallback
+            });
+
+            // Prompt the user to select an account
+            google.accounts.id.prompt();
+        }
+
+        async function handleGoogleCallback(response) {
+            const errorEl = document.getElementById('form-error');
+
+            try {
+                // Send Google JWT token to our backend
+                const res = await fetch('/api/auth/google', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ credential: response.credential })
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    // Store token and user data
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+
+                    // Redirect to main app
+                    window.location.href = '/';
+                } else {
+                    errorEl.textContent = data.detail || 'Google sign-in failed';
+                    errorEl.classList.add('show');
+                }
+            } catch (error) {
+                errorEl.textContent = 'Connection error. Please try again.';
+                errorEl.classList.add('show');
+                console.error('Google auth error:', error);
+            }
         }
 
         function signInWithApple() {
-            alert('Apple Sign In will be implemented in Phase 2! For now, use email signup.');
+            alert('Apple Sign In requires Apple Developer Account ($99/year). This will be implemented when you provide Apple credentials. For now, use Google or email signup.');
         }
 
         // Auto-show new user fields after email/password entered

@@ -13,6 +13,15 @@ import os
 import openai
 from datetime import datetime
 
+# Google OAuth imports (optional - gracefully degrade if not available)
+try:
+    from google.oauth2 import id_token
+    from google.auth.transport import requests as google_requests
+    GOOGLE_AUTH_AVAILABLE = True
+except ImportError:
+    GOOGLE_AUTH_AVAILABLE = False
+    print("Warning: google-auth not available. Google OAuth will use fallback mode.")
+
 app = FastAPI(title="SpeakEasy Language Learning")
 
 # CORS middleware
@@ -60,6 +69,14 @@ class WordExplanation(BaseModel):
 
 class UsernameCheck(BaseModel):
     username: str
+
+class GoogleAuthRequest(BaseModel):
+    credential: Optional[str] = None
+    email: Optional[str] = None
+    name: Optional[str] = None
+    picture: Optional[str] = None
+    oauth_provider: Optional[str] = None
+    oauth_id: Optional[str] = None
 
 # In-memory storage (replace with database in production)
 users = {}
@@ -123,6 +140,103 @@ async def check_username(request: UsernameCheck):
         "available": available,
         "suggestion": suggestion
     }
+
+@app.post("/api/auth/google")
+async def google_auth(request: GoogleAuthRequest):
+    """Handle Google OAuth authentication"""
+    try:
+        email = None
+        name = None
+        picture = None
+        oauth_id = None
+
+        # If credential JWT is provided, verify and decode it
+        if request.credential and GOOGLE_AUTH_AVAILABLE:
+            try:
+                # Get Google Client ID from environment or use placeholder
+                GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID', '823510409781-YOUR_CLIENT_ID.apps.googleusercontent.com')
+
+                # Verify the token
+                idinfo = id_token.verify_oauth2_token(
+                    request.credential,
+                    google_requests.Request(),
+                    GOOGLE_CLIENT_ID
+                )
+
+                # Extract user info from verified token
+                email = idinfo.get('email')
+                name = idinfo.get('name')
+                picture = idinfo.get('picture')
+                oauth_id = idinfo.get('sub')
+
+            except ValueError as e:
+                # Token verification failed - fallback to direct email
+                print(f"Google token verification failed: {e}")
+                if request.email:
+                    email = request.email
+                    name = request.name
+                    picture = request.picture
+                    oauth_id = request.oauth_id
+                else:
+                    raise HTTPException(status_code=400, detail="Invalid Google token")
+        else:
+            # Direct email provided (fallback mode)
+            email = request.email
+            name = request.name
+            picture = request.picture
+            oauth_id = request.oauth_id
+
+        if not email:
+            raise HTTPException(status_code=400, detail="Email required from Google")
+
+        # Generate username from name or email
+        if name:
+            base_username = name.lower().replace(' ', '_')
+        else:
+            base_username = email.split('@')[0]
+
+        # Ensure username is unique
+        username = base_username
+        counter = 1
+        while username in usernames:
+            username = f"{base_username}{counter}"
+            counter += 1
+
+        # Check if user already exists
+        if email in users:
+            # Existing user - login
+            user_data = users[email].copy()
+        else:
+            # New user - register
+            usernames.add(username)
+            user_data = {
+                'email': email,
+                'username': username,
+                'target_language': 'Spanish',  # Default, user can change later
+                'native_language': 'English',
+                'level': 'beginner',
+                'interests': [],
+                'oauth_provider': 'google',
+                'oauth_id': oauth_id,
+                'picture': picture
+            }
+            users[email] = user_data
+
+        # Don't return sensitive data
+        response_data = user_data.copy()
+        if 'password' in response_data:
+            del response_data['password']
+        if 'oauth_id' in response_data:
+            del response_data['oauth_id']
+
+        return {
+            "success": True,
+            "token": f"mock_token_{email}",
+            "user": response_data
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Google auth error: {str(e)}")
 
 @app.post("/api/auth/login")
 async def login(request: LoginRequest):

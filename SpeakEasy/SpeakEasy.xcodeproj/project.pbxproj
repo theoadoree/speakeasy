@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		565D8D4233404DCF48E01FEF /* Pods_SpeakEasy.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57EEBC91B1499331AEEDDDFE /* Pods_SpeakEasy.framework */; };
 		D2C0173E2EB509C400DCB0C0 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = D2C0173D2EB509C400DCB0C0 /* GoogleSignIn */; };
 		D2C017402EB509C400DCB0C0 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = D2C0173F2EB509C400DCB0C0 /* GoogleSignInSwift */; };
 		D2C017422EB50A0900DCB0C0 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = D2C017412EB50A0900DCB0C0 /* GoogleSignIn */; };
