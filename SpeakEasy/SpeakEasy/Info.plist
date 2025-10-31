@@ -15,12 +15,10 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleIdentifier</key>
-			<string></string>
 			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
+			<string>None</string>
 			<key>CFBundleURLName</key>
-			<string></string>
+			<string>second</string>
 		</dict>
 	</array>
 </dict>

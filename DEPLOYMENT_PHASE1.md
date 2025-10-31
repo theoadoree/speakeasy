@@ -5,10 +5,10 @@
 **Live URL**: https://speakeasy-python-web-823510409781.us-central1.run.app
 **Custom Domain**: https://speakeasy-ai.app (once DNS propagates)
 
-**Latest Deployment**: a40f64ce-f1db-4a0d-8eb3-850e0c4d2a81
-**Status**: ✅ SUCCESS (43s build time)
-**Timestamp**: 2025-10-31 15:18:13 UTC
-**Revision**: speakeasy-python-web-00008-n6k
+**Latest Deployment**: f786c88a-d719-4465-806f-dad4d1f15352
+**Status**: ✅ SUCCESS (46s build time)
+**Timestamp**: 2025-10-31 15:29:10 UTC
+**Revision**: speakeasy-python-web-00009-8hr
 
 ---
 
@@ -40,8 +40,12 @@
 ### Frontend:
 - ✅ Existing UI still works (teacher animation, stories, chat)
 - ✅ Unified signin/signup page created (`/static/auth-unified.html`)
-- ⏳ Settings icon not yet added (next step)
-- ⏳ Light/dark mode toggle not yet added (next step)
+- ✅ Auth protection on main app (redirects to login if no token)
+- ✅ Settings icon (⚙️) in upper right corner
+- ✅ Dark/light mode toggle with persistent preference
+- ✅ User info display in settings menu (email, username)
+- ✅ Logout functionality
+- ✅ Text-only logo ("SpeakEasy AI" instead of graphic)
 
 ---
 
@@ -111,7 +115,7 @@ curl -X POST https://speakeasy-python-web-823510409781.us-central1.run.app/api/s
 ## 📊 Phase 1 Progress
 
 ```
-████████████████████░░░░░░░░░ 70%
+████████████████████████████░ 100% ✅ COMPLETE!
 
 ✅ Completed:
 - Database models and CRUD
@@ -122,15 +126,20 @@ curl -X POST https://speakeasy-python-web-823510409781.us-central1.run.app/api/s
 - Unified signin/signup page
 - Email and username uniqueness checks
 - In-memory storage fallback (works without database)
+- Settings icon (⚙️) with dropdown menu
+- Dark/light mode toggle with persistence
+- Auth protection on main app
+- User info display (email, username)
+- Logout functionality
+- Text-only logo ("SpeakEasy AI")
 
-🔄 In Progress:
-- Settings icon + dark mode
-- Integrate auth page into main app
+🎯 Phase 1 Status: COMPLETE AND DEPLOYED!
 
-⏳ Pending:
-- Cloud SQL setup (optional, has fallback)
-- Text-only logo integration
-- Dark/light theme toggle
+⏳ Next: Phase 2
+- OAuth integration (Google + Apple)
+- Cloud SQL database (optional - has fallback)
+- Profile management
+- Auto-save progress
 ```
 
 ---
@@ -249,15 +258,27 @@ I'll continue building the signin UI and settings (1-2 hours total)
 
 ---
 
-**Status**: Phase 1 is 70% complete - backend 100% working, unified auth page created!
+**Status**: Phase 1 is 100% COMPLETE! 🎉
 
 **Test it now**:
-- Main app: https://speakeasy-python-web-823510409781.us-central1.run.app
 - Auth page: https://speakeasy-python-web-823510409781.us-central1.run.app/static/auth-unified.html
+- Main app: https://speakeasy-python-web-823510409781.us-central1.run.app (requires login)
 
-**Latest fixes**:
-- ✅ Fixed login endpoint to accept JSON body (was expecting query params)
-- ✅ Added username uniqueness checks with suggestions
-- ✅ Register endpoint now returns JWT token
-- ✅ Both endpoints exclude password from responses
-- ✅ In-memory storage working perfectly
+**What's New (Latest Deployment)**:
+- ✅ Auth protection - redirects to login if no token
+- ✅ Settings icon (⚙️) in upper right corner
+- ✅ Dark/light mode toggle (persists preference)
+- ✅ User info display in settings menu
+- ✅ Logout button
+- ✅ Text-only "SpeakEasy AI" logo
+- ✅ Smooth animations and transitions
+
+**Full Feature List**:
+- JWT authentication with 7-day tokens
+- Email and username uniqueness checks
+- In-memory storage (works without database)
+- Story generation with AI teacher animations
+- Interactive reading with word explanations
+- Conversation practice in target language
+- Dark/light theme support
+- Responsive design
