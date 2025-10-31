@@ -26,6 +26,8 @@
     "deploy:backend": "npm run backend:deploy",
     "deploy:local": "./scripts/deploy-local.sh",
     "setup:gcloud": "./scripts/setup-gcloud.sh",
+    "setup:oauth": "./scripts/oauth-quickstart.sh",
+    "setup:oauth:advanced": "node scripts/configure-oauth-providers.js",
     "preview": "npx vite preview"
   },
   "dependencies": {
