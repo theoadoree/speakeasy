@@ -574,6 +574,392 @@
         .save-indicator.show {
             opacity: 1;
         }
+
+        /* Lessons Styles */
+        .progress-overview {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .progress-overview h3 {
+            margin: 0 0 10px 0;
+        }
+
+        .progress-bar-container {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            height: 30px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            background: white;
+            height: 100%;
+            border-radius: 20px;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #667eea;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .lesson-filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #667eea;
+            transition: all 0.3s;
+        }
+
+        body.dark-mode .filter-btn {
+            background: #2a2a3e;
+            border-color: #3a3a4e;
+            color: #9f7aea;
+        }
+
+        .filter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        .lessons-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .lesson-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        body.dark-mode .lesson-card {
+            background: #2a2a3e;
+            border-color: #3a3a4e;
+        }
+
+        .lesson-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            border-color: #667eea;
+        }
+
+        .lesson-card.completed {
+            border-color: #10b981;
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        }
+
+        body.dark-mode .lesson-card.completed {
+            background: linear-gradient(135deg, #1a3a2e 0%, #2a4a3e 100%);
+        }
+
+        .lesson-number {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #667eea;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .lesson-card.completed .lesson-number {
+            background: #10b981;
+        }
+
+        .lesson-level {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .lesson-level.beginner {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .lesson-level.intermediate {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .lesson-level.advanced {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        body.dark-mode .lesson-level.beginner {
+            background: #1e40af;
+            color: #dbeafe;
+        }
+
+        body.dark-mode .lesson-level.intermediate {
+            background: #92400e;
+            color: #fef3c7;
+        }
+
+        body.dark-mode .lesson-level.advanced {
+            background: #991b1b;
+            color: #fee2e2;
+        }
+
+        .lesson-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin: 10px 0;
+        }
+
+        body.dark-mode .lesson-title {
+            color: #e0e0e0;
+        }
+
+        .lesson-grammar {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        body.dark-mode .lesson-grammar {
+            color: #b0b0b0;
+        }
+
+        .lesson-status {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #e0e0e0;
+            font-size: 14px;
+        }
+
+        body.dark-mode .lesson-status {
+            border-top-color: #3a3a4e;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.6);
+        }
+
+        .modal.active {
+            display: block;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 800px;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        body.dark-mode .modal-content {
+            background-color: #1a1a2e;
+            color: #e0e0e0;
+        }
+
+        .close-modal {
+            color: #aaa;
+            float: right;
+            font-size: 32px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close-modal:hover {
+            color: #667eea;
+        }
+
+        .lesson-detail h3 {
+            color: #667eea;
+            margin-top: 20px;
+        }
+
+        body.dark-mode .lesson-detail h3 {
+            color: #9f7aea;
+        }
+
+        .vocabulary-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .vocab-tag {
+            background: #f0f0f0;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        body.dark-mode .vocab-tag {
+            background: #2a2a3e;
+            color: #e0e0e0;
+        }
+
+        .quiz-question {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 15px 0;
+        }
+
+        body.dark-mode .quiz-question {
+            background: #2a2a3e;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .quiz-option {
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        body.dark-mode .quiz-option {
+            border-color: #3a3a4e;
+        }
+
+        .quiz-option:hover {
+            border-color: #667eea;
+            background: #f0f0f0;
+        }
+
+        body.dark-mode .quiz-option:hover {
+            background: #3a3a4e;
+        }
+
+        .quiz-option.selected {
+            border-color: #667eea;
+            background: #e8edff;
+        }
+
+        body.dark-mode .quiz-option.selected {
+            background: #3a3a5e;
+        }
+
+        .quiz-option.correct {
+            border-color: #10b981;
+            background: #d1fae5;
+        }
+
+        body.dark-mode .quiz-option.correct {
+            background: #1a3a2e;
+        }
+
+        .quiz-option.incorrect {
+            border-color: #ef4444;
+            background: #fee2e2;
+        }
+
+        body.dark-mode .quiz-option.incorrect {
+            background: #3a1a1e;
+        }
+
+        .quiz-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        body.dark-mode .quiz-input {
+            background: #2a2a3e;
+            color: #e0e0e0;
+            border-color: #3a3a4e;
+        }
+
+        .quiz-result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .quiz-result.pass {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        body.dark-mode .quiz-result.pass {
+            background: #1a3a2e;
+            color: #6ee7b7;
+        }
+
+        .quiz-result.fail {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        body.dark-mode .quiz-result.fail {
+            background: #3a1a1e;
+            color: #fca5a5;
+        }
+
+        .xp-earned {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
     </style>
 </head>
 <body>
@@ -646,6 +1032,7 @@
 
         <div class="tabs">
             <button class="tab-button active" onclick="showTab('learn')">📚 Learn</button>
+            <button class="tab-button" onclick="showTab('lessons')">🎓 Lessons</button>
             <button class="tab-button" onclick="showTab('practice')">💬 Practice</button>
             <button class="tab-button" onclick="showTab('setup')">⚙️ Setup</button>
         </div>
@@ -694,6 +1081,42 @@
                 <button onclick="generateStory()">Generate Story</button>
 
                 <div id="story-output"></div>
+            </div>
+
+            <!-- Lessons Tab -->
+            <div id="lessons" class="tab-content">
+                <h2>🎓 30-Lesson Curriculum</h2>
+
+                <div class="progress-overview" id="lessons-progress">
+                    <p>Loading your progress...</p>
+                </div>
+
+                <div class="lesson-filters">
+                    <button class="filter-btn active" onclick="filterLessons('all')">All Lessons</button>
+                    <button class="filter-btn" onclick="filterLessons('beginner')">Beginner (1-10)</button>
+                    <button class="filter-btn" onclick="filterLessons('intermediate')">Intermediate (11-20)</button>
+                    <button class="filter-btn" onclick="filterLessons('advanced')">Advanced (21-30)</button>
+                </div>
+
+                <div id="lessons-list" class="lessons-container">
+                    <p>Loading lessons...</p>
+                </div>
+
+                <!-- Lesson Detail Modal -->
+                <div id="lesson-modal" class="modal">
+                    <div class="modal-content lesson-detail">
+                        <span class="close-modal" onclick="closeLessonModal()">&times;</span>
+                        <div id="lesson-detail-content"></div>
+                    </div>
+                </div>
+
+                <!-- Quiz Modal -->
+                <div id="quiz-modal" class="modal">
+                    <div class="modal-content quiz-content">
+                        <span class="close-modal" onclick="closeQuizModal()">&times;</span>
+                        <div id="quiz-content"></div>
+                    </div>
+                </div>
             </div>
 
             <!-- Practice Tab -->
@@ -1193,6 +1616,308 @@
                 document.getElementById('setup-message').innerHTML = `<div class="error">Error: ${error.message}</div>`;
             }
         }
+
+        // ==================== LESSONS SYSTEM ====================
+
+        let allLessons = [];
+        let userProgress = {};
+        let currentLesson = null;
+        let currentQuizAnswers = {};
+
+        async function loadLessons() {
+            try {
+                const response = await fetch('/api/lessons');
+                const data = await response.json();
+
+                if (data.success) {
+                    allLessons = data.lessons;
+                    await loadUserProgress();
+                    displayLessons('all');
+                }
+            } catch (error) {
+                console.error('Error loading lessons:', error);
+                document.getElementById('lessons-list').innerHTML = '<p>Error loading lessons. Please refresh.</p>';
+            }
+        }
+
+        async function loadUserProgress() {
+            try {
+                const user = JSON.parse(localStorage.getItem('user'));
+                const response = await fetch('/api/lessons/progress/all', {
+                    headers: {
+                        'X-User-Email': user?.email || 'guest@example.com'
+                    }
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    userProgress = data.progress;
+                    updateProgressOverview(data.completed_lessons, data.total_lessons);
+                }
+            } catch (error) {
+                console.error('Error loading progress:', error);
+            }
+        }
+
+        function updateProgressOverview(completed, total) {
+            const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+            const progressHTML = `
+                <h3>Your Progress</h3>
+                <p>${completed} of ${total} lessons completed</p>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" style="width: ${percentage}%">
+                        ${percentage}%
+                    </div>
+                </div>
+            `;
+            document.getElementById('lessons-progress').innerHTML = progressHTML;
+        }
+
+        function filterLessons(level) {
+            // Update active filter button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            displayLessons(level);
+        }
+
+        function displayLessons(level) {
+            let filteredLessons = allLessons;
+
+            if (level !== 'all') {
+                filteredLessons = allLessons.filter(lesson => lesson.level === level);
+            }
+
+            const lessonsHTML = filteredLessons.map(lesson => {
+                const progress = userProgress[lesson.id] || {};
+                const isCompleted = progress.completed || false;
+                const score = progress.score || null;
+                const attempts = progress.attempts || 0;
+
+                return `
+                    <div class="lesson-card ${isCompleted ? 'completed' : ''}" onclick="openLesson(${lesson.id})">
+                        <div class="lesson-number">${lesson.id}</div>
+                        <div class="lesson-level ${lesson.level}">${lesson.level.toUpperCase()}</div>
+                        <div class="lesson-title">${lesson.title}</div>
+                        <div class="lesson-grammar">📝 ${lesson.grammar}</div>
+                        <div class="lesson-status">
+                            ${isCompleted ? `
+                                <div style="color: #10b981; font-weight: bold;">✓ Completed</div>
+                                <div>Score: ${score}%</div>
+                            ` : attempts > 0 ? `
+                                <div>Attempts: ${attempts}</div>
+                                <div>Best Score: ${score}%</div>
+                            ` : '<div>Not started</div>'}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('lessons-list').innerHTML = lessonsHTML || '<p>No lessons found.</p>';
+        }
+
+        function openLesson(lessonId) {
+            const lesson = allLessons.find(l => l.id === lessonId);
+            if (!lesson) return;
+
+            currentLesson = lesson;
+
+            const vocabularyHTML = lesson.vocabulary.map(word =>
+                `<span class="vocab-tag">${word}</span>`
+            ).join('');
+
+            const lessonHTML = `
+                <h2>Lesson ${lesson.id}: ${lesson.title}</h2>
+                <div class="lesson-level ${lesson.level}">${lesson.level.toUpperCase()}</div>
+
+                <h3>📖 Story</h3>
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; line-height: 1.8;">
+                    ${lesson.story}
+                </div>
+
+                <h3>📚 Vocabulary</h3>
+                <div class="vocabulary-list">
+                    ${vocabularyHTML}
+                </div>
+
+                <h3>📝 Grammar Point</h3>
+                <p>${lesson.grammar}</p>
+
+                <button onclick="startQuiz()" style="margin-top: 20px; width: 100%;">
+                    Start Quiz (${lesson.quiz.length} questions)
+                </button>
+            `;
+
+            document.getElementById('lesson-detail-content').innerHTML = lessonHTML;
+            document.getElementById('lesson-modal').classList.add('active');
+        }
+
+        function closeLessonModal() {
+            document.getElementById('lesson-modal').classList.remove('active');
+            currentLesson = null;
+        }
+
+        function startQuiz() {
+            if (!currentLesson) return;
+
+            currentQuizAnswers = {};
+
+            const quizHTML = `
+                <h2>Quiz: ${currentLesson.title}</h2>
+                <p>You need 70% to pass this lesson.</p>
+
+                ${currentLesson.quiz.map((question, index) => `
+                    <div class="quiz-question">
+                        <strong>Question ${index + 1}:</strong> ${question.question}
+
+                        ${question.type === 'multiple_choice' ? `
+                            <div class="quiz-options">
+                                ${question.options.map(option => `
+                                    <div class="quiz-option" onclick="selectOption(${question.id}, '${option.replace(/'/g, "\\'")}')">
+                                        ${option}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : `
+                            <input type="text" class="quiz-input" id="quiz-input-${question.id}"
+                                   placeholder="Type your answer..."
+                                   onchange="currentQuizAnswers[${question.id}] = this.value">
+                        `}
+                    </div>
+                `).join('')}
+
+                <button onclick="submitQuiz()" style="margin-top: 20px; width: 100%;">
+                    Submit Quiz
+                </button>
+            `;
+
+            document.getElementById('quiz-content').innerHTML = quizHTML;
+            closeLessonModal();
+            document.getElementById('quiz-modal').classList.add('active');
+        }
+
+        function selectOption(questionId, answer) {
+            currentQuizAnswers[questionId] = answer;
+
+            // Visually mark selected option
+            const questionDiv = event.target.closest('.quiz-question');
+            questionDiv.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+        }
+
+        async function submitQuiz() {
+            if (!currentLesson) return;
+
+            // Prepare submission
+            const answers = Object.entries(currentQuizAnswers).map(([questionId, answer]) => ({
+                question_id: parseInt(questionId),
+                answer: answer
+            }));
+
+            if (answers.length !== currentLesson.quiz.length) {
+                alert('Please answer all questions before submitting.');
+                return;
+            }
+
+            try {
+                const user = JSON.parse(localStorage.getItem('user'));
+                const response = await fetch(`/api/lessons/${currentLesson.id}/quiz`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-User-Email': user?.email || 'guest@example.com'
+                    },
+                    body: JSON.stringify({
+                        lesson_id: currentLesson.id,
+                        answers: answers
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showQuizResults(data);
+                    await loadUserProgress();
+                    displayLessons(document.querySelector('.filter-btn.active')?.textContent.includes('All') ? 'all' :
+                                   document.querySelector('.filter-btn.active')?.textContent.toLowerCase().split(' ')[0] || 'all');
+                }
+            } catch (error) {
+                console.error('Error submitting quiz:', error);
+                alert('Error submitting quiz. Please try again.');
+            }
+        }
+
+        function showQuizResults(data) {
+            const resultClass = data.passed ? 'pass' : 'fail';
+            const resultHTML = `
+                <div class="quiz-result ${resultClass}">
+                    <h2>${data.message}</h2>
+                    <div style="font-size: 48px; margin: 20px 0;">
+                        ${data.passed ? '🎉' : '📚'}
+                    </div>
+                    <div style="font-size: 24px; margin: 10px 0;">
+                        Score: ${data.score}%
+                    </div>
+                    <div>
+                        ${data.correct_answers} out of ${data.total_questions} correct
+                    </div>
+                    ${data.xp_earned > 0 ? `
+                        <div class="xp-earned">
+                            +${data.xp_earned} XP
+                        </div>
+                    ` : ''}
+                </div>
+
+                <h3 style="margin-top: 30px;">Review Your Answers:</h3>
+                ${data.detailed_results.map((result, index) => `
+                    <div class="quiz-question">
+                        <strong>Question ${index + 1}:</strong> ${result.question}<br>
+                        <div style="margin-top: 10px;">
+                            <div class="${result.is_correct ? 'quiz-option correct' : 'quiz-option incorrect'}">
+                                Your answer: ${result.user_answer} ${result.is_correct ? '✓' : '✗'}
+                            </div>
+                            ${!result.is_correct ? `
+                                <div class="quiz-option correct">
+                                    Correct answer: ${result.correct_answer}
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `).join('')}
+
+                <button onclick="closeQuizModal()" style="margin-top: 20px; width: 100%;">
+                    ${data.passed ? 'Continue' : 'Try Again'}
+                </button>
+            `;
+
+            document.getElementById('quiz-content').innerHTML = resultHTML;
+        }
+
+        function closeQuizModal() {
+            document.getElementById('quiz-modal').classList.remove('active');
+            currentQuizAnswers = {};
+        }
+
+        // Load lessons when switching to lessons tab
+        const originalShowTab = showTab;
+        showTab = function(tabName) {
+            originalShowTab(tabName);
+            if (tabName === 'lessons' && allLessons.length === 0) {
+                loadLessons();
+            }
+        };
+
+        // Load lessons on page load if on lessons tab
+        window.addEventListener('load', () => {
+            const activeTab = document.querySelector('.tab-content.active');
+            if (activeTab && activeTab.id === 'lessons') {
+                loadLessons();
+            }
+        });
     </script>
 </body>
 </html>

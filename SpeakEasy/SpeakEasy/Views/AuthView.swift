@@ -2,7 +2,7 @@
 //  AuthView.swift
 //  SpeakEasy
 //
-//  Unified authentication screen with email, Apple, and Google Sign In
+//  Unified authentication screen with Apple and Google Sign In
 //
 
 import SwiftUI
@@ -10,32 +10,35 @@ import AuthenticationServices
 
 struct AuthView: View {
     @EnvironmentObject var authManager: AuthenticationManager
-    @State private var email = ""
-    @State private var password = ""
-    @State private var name = ""
-    @State private var showingPasswordField = false
-    @State private var showingNameField = false
     @State private var isLoading = false
     @State private var errorMessage: String?
 
     var body: some View {
         NavigationView {
-            ScrollView {
-                VStack(spacing: 32) {
+            ZStack {
+                Color(.systemBackground)
+                    .ignoresSafeArea()
+
+                VStack(spacing: 40) {
+                    Spacer()
+
                     // Logo and Title
-                    VStack(spacing: 12) {
+                    VStack(spacing: 16) {
+                        // Logo placeholder - will show conversation bubble icon until logo is added
                         Image(systemName: "message.fill")
-                            .font(.system(size: 70))
+                            .font(.system(size: 80))
                             .foregroundColor(.blue)
+                            .shadow(color: .blue.opacity(0.3), radius: 10, x: 0, y: 5)
 
                         Text("SpeakEasy")
-                            .font(.system(size: 36, weight: .bold))
+                            .font(.system(size: 42, weight: .bold))
 
                         Text("AI-Powered Language Learning")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
-                    .padding(.top, 40)
+
+                    Spacer()
 
                     // Social Login Buttons
                     VStack(spacing: 16) {
@@ -50,121 +53,42 @@ struct AuthView: View {
                             }
                         )
                         .signInWithAppleButtonStyle(.black)
-                        .frame(height: 50)
-                        .cornerRadius(8)
+                        .frame(height: 56)
+                        .cornerRadius(12)
 
                         // Google Sign In
                         Button(action: handleGoogleSignIn) {
-                            HStack {
+                            HStack(spacing: 12) {
                                 Image(systemName: "globe")
-                                    .font(.system(size: 18))
+                                    .font(.system(size: 20))
                                 Text("Continue with Google")
-                                    .fontWeight(.semibold)
+                                    .font(.system(size: 17, weight: .semibold))
                             }
                             .frame(maxWidth: .infinity)
-                            .frame(height: 50)
+                            .frame(height: 56)
                             .background(Color(.systemBackground))
                             .foregroundColor(.primary)
                             .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(Color(.separator), lineWidth: 1)
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color(.separator), lineWidth: 1.5)
                             )
                         }
-                        .cornerRadius(8)
-                    }
-                    .padding(.horizontal)
-
-                    // Divider
-                    HStack {
-                        Rectangle()
-                            .fill(Color(.separator))
-                            .frame(height: 1)
-
-                        Text("or")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                            .padding(.horizontal, 12)
-
-                        Rectangle()
-                            .fill(Color(.separator))
-                            .frame(height: 1)
-                    }
-                    .padding(.horizontal)
-
-                    // Email Authentication
-                    VStack(spacing: 16) {
-                        // Email Field
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Email")
-                                .font(.subheadline)
-                                .fontWeight(.medium)
-
-                            TextField("your@email.com", text: $email)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .textContentType(.emailAddress)
-                                .autocapitalization(.none)
-                                .keyboardType(.emailAddress)
-                                .onChange(of: email) {
-                                    errorMessage = nil
-                                }
-                        }
-
-                        // Password Field (shown when email is entered)
-                        if showingPasswordField {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Password")
-                                    .font(.subheadline)
-                                    .fontWeight(.medium)
-
-                                SecureField("Enter password", text: $password)
-                                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    .textContentType(.password)
-                            }
-                            .transition(.move(edge: .top).combined(with: .opacity))
-                        }
-
-                        // Name Field (shown for new users)
-                        if showingNameField {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Full Name")
-                                    .font(.subheadline)
-                                    .fontWeight(.medium)
-
-                                TextField("John Doe", text: $name)
-                                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    .textContentType(.name)
-                            }
-                            .transition(.move(edge: .top).combined(with: .opacity))
-                        }
+                        .cornerRadius(12)
+                        .disabled(isLoading)
 
                         // Error Message
                         if let error = errorMessage {
                             Text(error)
                                 .font(.caption)
                                 .foregroundColor(.red)
+                                .multilineTextAlignment(.center)
                                 .padding(.horizontal)
                         }
-
-                        // Continue Button
-                        Button(action: handleEmailAuth) {
-                            if isLoading {
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                            } else {
-                                Text(showingPasswordField ? "Continue" : "Next")
-                                    .fontWeight(.semibold)
-                            }
-                        }
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 50)
-                        .background(email.isEmpty ? Color(.systemGray4) : Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                        .disabled(email.isEmpty || isLoading)
                     }
-                    .padding(.horizontal)
+                    .padding(.horizontal, 32)
 
                     Spacer()
+                        .frame(height: 60)
                 }
             }
             .navigationBarHidden(true)
@@ -173,6 +97,9 @@ struct AuthView: View {
 
     // MARK: - Apple Sign In Handler
     private func handleAppleSignIn(_ result: Result<ASAuthorization, Error>) {
+        isLoading = true
+        errorMessage = nil
+
         switch result {
         case .success(let authorization):
             if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
@@ -182,78 +109,37 @@ struct AuthView: View {
                         email: appleIDCredential.email,
                         fullName: appleIDCredential.fullName
                     )
+
+                    if let error = authManager.errorMessage {
+                        errorMessage = error
+                    }
+
+                    isLoading = false
                 }
             }
         case .failure(let error):
-            errorMessage = error.localizedDescription
+            let nsError = error as NSError
+            // Don't show error if user cancelled
+            if nsError.code != 1001 {
+                errorMessage = "Sign in failed. Please try again."
+            }
+            isLoading = false
         }
     }
 
     // MARK: - Google Sign In Handler
     private func handleGoogleSignIn() {
+        isLoading = true
+        errorMessage = nil
+
         Task {
             await authManager.signInWithGoogle()
-        }
-    }
 
-    // MARK: - Email Auth Handler
-    private func handleEmailAuth() {
-        guard !email.isEmpty else { return }
-
-        // Validate email format
-        guard authManager.isValidEmail(email) else {
-            errorMessage = "Please enter a valid email address"
-            return
-        }
-
-        if !showingPasswordField {
-            // First step: check if user exists
-            Task {
-                isLoading = true
-                let exists = await authManager.checkUserExists(email: email)
-                isLoading = false
-
-                withAnimation {
-                    showingPasswordField = true
-                    if !exists {
-                        showingNameField = true
-                    }
-                }
-            }
-        } else {
-            // Second step: login or register
-            guard !password.isEmpty else {
-                errorMessage = "Please enter a password"
-                return
+            if let error = authManager.errorMessage {
+                errorMessage = error
             }
 
-            guard authManager.isValidPassword(password) else {
-                errorMessage = "Password must be at least 6 characters"
-                return
-            }
-
-            Task {
-                isLoading = true
-
-                if showingNameField {
-                    // New user - register
-                    guard !name.isEmpty else {
-                        errorMessage = "Please enter your name"
-                        isLoading = false
-                        return
-                    }
-                    await authManager.register(email: email, password: password, name: name)
-                } else {
-                    // Existing user - login
-                    await authManager.login(email: email, password: password)
-                }
-
-                if let error = authManager.errorMessage {
-                    errorMessage = error
-                }
-
-                isLoading = false
-            }
+            isLoading = false
         }
     }
 }

@@ -6,6 +6,12 @@
     <title>SpeakEasy AI - Welcome</title>
     <link rel="icon" type="image/png" href="/static/assets/favicon.png">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script type="text/javascript" src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"></script>
+    <meta name="appleid-signin-client-id" content="com.speakeasy.webapp">
+    <meta name="appleid-signin-scope" content="name email">
+    <meta name="appleid-signin-redirect-uri" content="https://speakeasy-python-web-823510409781.us-central1.run.app/static/auth-unified.html">
+    <meta name="appleid-signin-state" content="signin">
+    <meta name="appleid-signin-use-popup" content="true">
     <style>
         * {
             margin: 0;
@@ -440,8 +446,64 @@
             }
         }
 
-        function signInWithApple() {
-            alert('Apple Sign In requires Apple Developer Account ($99/year). This will be implemented when you provide Apple credentials. For now, use Google or email signup.');
+        async function signInWithApple() {
+            try {
+                // Initialize Apple Sign In
+                if (!window.AppleID) {
+                    alert('Apple Sign In is loading. Please wait and try again.');
+                    return;
+                }
+
+                AppleID.auth.init({
+                    clientId: 'com.speakeasy.webapp',
+                    scope: 'name email',
+                    redirectURI: 'https://speakeasy-python-web-823510409781.us-central1.run.app/static/auth-unified.html',
+                    state: 'signin',
+                    usePopup: true
+                });
+
+                const data = await AppleID.auth.signIn();
+
+                // Send to backend
+                await handleAppleCallback(data);
+            } catch (error) {
+                console.error('Apple Sign In error:', error);
+                if (error.error !== 'popup_closed_by_user') {
+                    alert('Apple Sign In failed. Please try again.');
+                }
+            }
+        }
+
+        async function handleAppleCallback(response) {
+            const errorEl = document.getElementById('form-error');
+
+            try {
+                const res = await fetch('/api/auth/apple', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        identityToken: response.authorization.id_token,
+                        user: response.user,
+                        email: response.user?.email,
+                        fullName: response.user?.name
+                    })
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    window.location.href = '/';
+                } else {
+                    errorEl.textContent = data.detail || 'Apple sign-in failed';
+                    errorEl.classList.add('show');
+                }
+            } catch (error) {
+                errorEl.textContent = 'Connection error. Please try again.';
+                errorEl.classList.add('show');
+                console.error('Apple auth error:', error);
+            }
         }
 
         // Auto-show new user fields after email/password entered
