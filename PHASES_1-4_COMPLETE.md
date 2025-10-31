@@ -2,12 +2,13 @@
 
 ## 🚀 Live Production URLs
 
-**Main App**: https://speakeasy-python-web-823510409781.us-central1.run.app
-**Authentication**: https://speakeasy-python-web-823510409781.us-central1.run.app/static/auth-unified.html
+**Main App**: https://speakeasy-python-web-vlxo5frhwq-uc.a.run.app
+**Authentication**: https://speakeasy-python-web-vlxo5frhwq-uc.a.run.app/static/auth-unified.html
 
-**Latest Deployment**: Phase 4 - XP Leagues System
+**Latest Deployment**: OAuth-Only Authentication with Logo (Revision 00017-gpq)
 **Status**: ✅ LIVE AND FULLY FUNCTIONAL
 **Deployed**: 2025-10-31
+**Current Revision**: speakeasy-python-web-00017-gpq
 
 ---
 

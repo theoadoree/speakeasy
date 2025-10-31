@@ -12,6 +12,7 @@ struct AuthView: View {
     @EnvironmentObject var authManager: AuthenticationManager
     @State private var isLoading = false
     @State private var errorMessage: String?
+    @State private var debugMessage: String?
 
     var body: some View {
         NavigationView {
@@ -24,11 +25,13 @@ struct AuthView: View {
 
                     // Logo and Title
                     VStack(spacing: 16) {
-                        // Logo placeholder - will show conversation bubble icon until logo is added
-                        Image(systemName: "message.fill")
-                            .font(.system(size: 80))
-                            .foregroundColor(.blue)
-                            .shadow(color: .blue.opacity(0.3), radius: 10, x: 0, y: 5)
+                        // App Icon
+                        Image("AppIcon")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 120, height: 120)
+                            .cornerRadius(24)
+                            .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
 
                         Text("SpeakEasy")
                             .font(.system(size: 42, weight: .bold))
@@ -55,12 +58,18 @@ struct AuthView: View {
                         .signInWithAppleButtonStyle(.black)
                         .frame(height: 56)
                         .cornerRadius(12)
+                        .disabled(isLoading)
 
                         // Google Sign In
                         Button(action: handleGoogleSignIn) {
                             HStack(spacing: 12) {
-                                Image(systemName: "globe")
-                                    .font(.system(size: 20))
+                                if isLoading {
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle())
+                                } else {
+                                    Image(systemName: "globe")
+                                        .font(.system(size: 20))
+                                }
                                 Text("Continue with Google")
                                     .font(.system(size: 17, weight: .semibold))
                             }
@@ -76,6 +85,18 @@ struct AuthView: View {
                         .cornerRadius(12)
                         .disabled(isLoading)
 
+                        // Loading indicator
+                        if isLoading {
+                            HStack(spacing: 8) {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                                Text("Signing in...")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding(.top, 8)
+                        }
+
                         // Error Message
                         if let error = errorMessage {
                             Text(error)
@@ -83,6 +104,17 @@ struct AuthView: View {
                                 .foregroundColor(.red)
                                 .multilineTextAlignment(.center)
                                 .padding(.horizontal)
+                                .padding(.top, 8)
+                        }
+
+                        // Debug Message (shows auth state)
+                        if let debug = debugMessage {
+                            Text(debug)
+                                .font(.caption2)
+                                .foregroundColor(.orange)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal)
+                                .padding(.top, 4)
                         }
                     }
                     .padding(.horizontal, 32)
@@ -93,16 +125,22 @@ struct AuthView: View {
             }
             .navigationBarHidden(true)
         }
+        .onAppear {
+            debugMessage = "Auth: \(authManager.isAuthenticated), Loading: \(authManager.isLoading)"
+        }
     }
 
     // MARK: - Apple Sign In Handler
     private func handleAppleSignIn(_ result: Result<ASAuthorization, Error>) {
         isLoading = true
         errorMessage = nil
+        debugMessage = "Apple Sign In started..."
 
         switch result {
         case .success(let authorization):
             if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
+                debugMessage = "Got Apple credentials, calling backend..."
+
                 Task {
                     await authManager.signInWithApple(
                         userId: appleIDCredential.user,
@@ -110,11 +148,18 @@ struct AuthView: View {
                         fullName: appleIDCredential.fullName
                     )
 
-                    if let error = authManager.errorMessage {
-                        errorMessage = error
+                    await MainActor.run {
+                        if let error = authManager.errorMessage {
+                            errorMessage = "Apple Sign In failed: \(error)"
+                            debugMessage = "Backend error"
+                        } else if authManager.isAuthenticated {
+                            debugMessage = "✅ Authenticated! Should navigate now..."
+                        } else {
+                            errorMessage = "Sign in completed but not authenticated"
+                            debugMessage = "Auth flag not set"
+                        }
+                        isLoading = false
                     }
-
-                    isLoading = false
                 }
             }
         case .failure(let error):
@@ -122,6 +167,9 @@ struct AuthView: View {
             // Don't show error if user cancelled
             if nsError.code != 1001 {
                 errorMessage = "Sign in failed. Please try again."
+                debugMessage = "Apple auth error: \(nsError.code)"
+            } else {
+                debugMessage = "User cancelled"
             }
             isLoading = false
         }
@@ -131,15 +179,23 @@ struct AuthView: View {
     private func handleGoogleSignIn() {
         isLoading = true
         errorMessage = nil
+        debugMessage = "Google Sign In started..."
 
         Task {
             await authManager.signInWithGoogle()
 
-            if let error = authManager.errorMessage {
-                errorMessage = error
+            await MainActor.run {
+                if let error = authManager.errorMessage {
+                    errorMessage = "Google Sign In failed: \(error)"
+                    debugMessage = "Backend error: \(error)"
+                } else if authManager.isAuthenticated {
+                    debugMessage = "✅ Authenticated! Should navigate now..."
+                } else {
+                    errorMessage = "Sign in completed but not authenticated"
+                    debugMessage = "Auth flag not set"
+                }
+                isLoading = false
             }
-
-            isLoading = false
         }
     }
 }
