@@ -128,7 +128,7 @@ class AuthenticationManager: ObservableObject {
             }
 
             // Configure Google Sign In
-            let config = GIDConfiguration(clientID: "823510409781-7am96n366leset271qt9c8djo265u24n.apps.googleusercontent.com")
+            let config = GIDConfiguration(clientID: "823510409781-aqd90aoj080374pnfjultufdkk027qsp.apps.googleusercontent.com")
             GIDSignIn.sharedInstance.configuration = config
 
             // Sign in

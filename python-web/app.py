@@ -105,6 +105,94 @@ stories = {}
 conversations = {}
 user_lesson_progress = {}  # email -> {lesson_id: LessonProgress}
 
+# XP and Leagues system
+LEAGUES = {
+    'bronze': {'name': 'Bronze', 'min_xp': 0, 'max_xp': 499, 'color': '#CD7F32'},
+    'silver': {'name': 'Silver', 'min_xp': 500, 'max_xp': 1499, 'color': '#C0C0C0'},
+    'gold': {'name': 'Gold', 'min_xp': 1500, 'max_xp': 2999, 'color': '#FFD700'},
+    'diamond': {'name': 'Diamond', 'min_xp': 3000, 'max_xp': 5999, 'color': '#B9F2FF'},
+    'master': {'name': 'Master', 'min_xp': 6000, 'max_xp': float('inf'), 'color': '#9F00FF'}
+}
+
+user_xp = {}  # email -> {'total_xp': int, 'weekly_xp': int, 'streak_days': int, 'last_active': str}
+weekly_leaderboard = []  # List of {email, username, weekly_xp, league}
+
+import datetime
+
+def get_week_number():
+    """Get current week number of the year"""
+    return datetime.datetime.now().isocalendar()[1]
+
+current_week = get_week_number()
+
+def get_league_from_xp(total_xp):
+    """Determine league based on total XP"""
+    for league_id, league_data in LEAGUES.items():
+        if league_data['min_xp'] <= total_xp <= league_data['max_xp']:
+            return league_id
+    return 'bronze'
+
+def add_xp(email, xp_amount):
+    """Add XP to user and update league"""
+    global current_week
+
+    if email not in user_xp:
+        user_xp[email] = {
+            'total_xp': 0,
+            'weekly_xp': 0,
+            'streak_days': 1,
+            'last_active': datetime.datetime.utcnow().isoformat(),
+            'week': current_week
+        }
+
+    # Check if new week - reset weekly XP
+    if get_week_number() != current_week:
+        current_week = get_week_number()
+        for user_email in user_xp:
+            user_xp[user_email]['weekly_xp'] = 0
+            user_xp[user_email]['week'] = current_week
+
+    # Add XP
+    user_xp[email]['total_xp'] += xp_amount
+    user_xp[email]['weekly_xp'] += xp_amount
+
+    # Update streak
+    last_active = datetime.datetime.fromisoformat(user_xp[email]['last_active'])
+    now = datetime.datetime.utcnow()
+    days_diff = (now - last_active).days
+
+    if days_diff == 1:
+        user_xp[email]['streak_days'] += 1
+    elif days_diff > 1:
+        user_xp[email]['streak_days'] = 1
+
+    user_xp[email]['last_active'] = now.isoformat()
+
+    # Update leaderboard
+    update_leaderboard()
+
+def update_leaderboard():
+    """Update the weekly leaderboard"""
+    global weekly_leaderboard
+
+    leaderboard_data = []
+    for email, xp_data in user_xp.items():
+        user_data = users.get(email, {})
+        username = user_data.get('username', email.split('@')[0])
+        league = get_league_from_xp(xp_data['total_xp'])
+
+        leaderboard_data.append({
+            'email': email,
+            'username': username,
+            'weekly_xp': xp_data['weekly_xp'],
+            'total_xp': xp_data['total_xp'],
+            'league': league,
+            'streak_days': xp_data['streak_days']
+        })
+
+    # Sort by weekly XP descending
+    weekly_leaderboard = sorted(leaderboard_data, key=lambda x: x['weekly_xp'], reverse=True)
+
 @app.get("/", response_class=HTMLResponse)
 async def root():
     """Serve the main HTML page"""
@@ -564,6 +652,13 @@ async def submit_quiz(lesson_id: int, submission: QuizSubmission, request: Reque
             if attempts == 1:
                 xp_earned += 25  # Bonus for first attempt
 
+            # Award XP to user
+            add_xp(user_email, xp_earned)
+
+        # Get updated user stats
+        user_stats = user_xp.get(user_email, {})
+        current_league = get_league_from_xp(user_stats.get('total_xp', 0))
+
         return {
             "success": True,
             "score": score,
@@ -571,6 +666,9 @@ async def submit_quiz(lesson_id: int, submission: QuizSubmission, request: Reque
             "correct_answers": correct_answers,
             "total_questions": total_questions,
             "xp_earned": xp_earned,
+            "total_xp": user_stats.get('total_xp', 0),
+            "league": current_league,
+            "streak_days": user_stats.get('streak_days', 0),
             "detailed_results": detailed_results,
             "message": "Congratulations! You passed!" if passed else "Keep trying! You need 70% to pass."
         }
@@ -652,6 +750,150 @@ async def apple_auth(request: Request):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Apple auth error: {str(e)}")
+
+# ==================== LEAGUE ENDPOINTS ====================
+
+@app.get("/api/leagues/info")
+async def get_leagues_info():
+    """Get information about all leagues"""
+    return {
+        "success": True,
+        "leagues": LEAGUES
+    }
+
+@app.get("/api/leagues/leaderboard")
+async def get_leaderboard(limit: int = 50):
+    """Get weekly leaderboard"""
+    try:
+        # Update leaderboard first
+        update_leaderboard()
+
+        # Return top N users
+        top_users = weekly_leaderboard[:limit]
+
+        return {
+            "success": True,
+            "leaderboard": top_users,
+            "total_users": len(weekly_leaderboard),
+            "week_number": current_week
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching leaderboard: {str(e)}")
+
+@app.get("/api/leagues/my-stats")
+async def get_my_league_stats(request: Request):
+    """Get current user's league stats and ranking"""
+    try:
+        user_email = request.headers.get("X-User-Email", "guest@example.com")
+
+        # Update leaderboard
+        update_leaderboard()
+
+        # Get user stats
+        stats = user_xp.get(user_email, {
+            'total_xp': 0,
+            'weekly_xp': 0,
+            'streak_days': 0,
+            'last_active': datetime.datetime.utcnow().isoformat()
+        })
+
+        # Determine league
+        league_id = get_league_from_xp(stats['total_xp'])
+        league_info = LEAGUES[league_id]
+
+        # Find user's rank
+        rank = None
+        for i, user in enumerate(weekly_leaderboard):
+            if user['email'] == user_email:
+                rank = i + 1
+                break
+
+        # Get XP needed for next league
+        next_league_xp = None
+        next_league_name = None
+        league_keys = list(LEAGUES.keys())
+        current_league_index = league_keys.index(league_id)
+
+        if current_league_index < len(league_keys) - 1:
+            next_league_id = league_keys[current_league_index + 1]
+            next_league_info = LEAGUES[next_league_id]
+            next_league_xp = next_league_info['min_xp'] - stats['total_xp']
+            next_league_name = next_league_info['name']
+
+        return {
+            "success": True,
+            "total_xp": stats['total_xp'],
+            "weekly_xp": stats['weekly_xp'],
+            "streak_days": stats['streak_days'],
+            "league": league_info,
+            "league_id": league_id,
+            "rank": rank,
+            "total_competitors": len(weekly_leaderboard),
+            "next_league": {
+                "name": next_league_name,
+                "xp_needed": next_league_xp
+            } if next_league_name else None
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching stats: {str(e)}")
+
+@app.get("/api/leagues/by-league/{league_id}")
+async def get_league_leaderboard(league_id: str, limit: int = 20):
+    """Get leaderboard filtered by specific league"""
+    try:
+        if league_id not in LEAGUES:
+            raise HTTPException(status_code=404, detail="League not found")
+
+        # Update leaderboard
+        update_leaderboard()
+
+        # Filter by league
+        league_users = [user for user in weekly_leaderboard if user['league'] == league_id]
+        league_users = league_users[:limit]
+
+        return {
+            "success": True,
+            "league": LEAGUES[league_id],
+            "leaderboard": league_users,
+            "total_users": len(league_users)
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching league leaderboard: {str(e)}")
+
+@app.post("/api/xp/add")
+async def add_xp_manual(request: Request):
+    """Manually add XP (for activities like stories, practice, etc.)"""
+    try:
+        body = await request.json()
+        xp_amount = body.get("xp", 0)
+        activity = body.get("activity", "general")
+
+        if xp_amount <= 0 or xp_amount > 100:
+            raise HTTPException(status_code=400, detail="XP amount must be between 1 and 100")
+
+        user_email = request.headers.get("X-User-Email", "guest@example.com")
+
+        # Award XP
+        add_xp(user_email, xp_amount)
+
+        # Get updated stats
+        stats = user_xp.get(user_email, {})
+        league_id = get_league_from_xp(stats['total_xp'])
+
+        return {
+            "success": True,
+            "xp_added": xp_amount,
+            "total_xp": stats['total_xp'],
+            "weekly_xp": stats['weekly_xp'],
+            "league": league_id,
+            "activity": activity
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error adding XP: {str(e)}")
 
 # Mount static files
 if os.path.exists("static"):
