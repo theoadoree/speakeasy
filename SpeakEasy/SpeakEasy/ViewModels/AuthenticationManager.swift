@@ -14,7 +14,7 @@ class AuthenticationManager: ObservableObject {
 
     @Published var user: User?
     @Published var isAuthenticated = false
-    @Published var isLoading = false
+    @Published var isLoading = true  // Start as true while checking session
     @Published var errorMessage: String?
 
     private let apiService = APIService.shared
