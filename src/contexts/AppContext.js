@@ -104,8 +104,17 @@ export const AppProvider = ({ children }) => {
   };
 
   const updateUserProfile = async (profile) => {
-    await StorageService.saveUserProfile(profile);
-    setUserProfile(profile);
+    try {
+      const result = await StorageService.saveUserProfile(profile);
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to save profile');
+      }
+      setUserProfile(profile);
+      return { success: true };
+    } catch (error) {
+      console.error('Error updating user profile:', error);
+      throw error;
+    }
   };
 
   const updateLLMConfig = async (config) => {

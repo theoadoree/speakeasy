@@ -8,11 +8,22 @@ import {
   ScrollView,
   SafeAreaView,
   Image,
-  Platform
+  Platform,
+  Alert,
+  ActivityIndicator
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
 import { useApp } from '../contexts/AppContext';
 import StorageService from '../utils/storage';
+
+// Conditional import for mobile Picker (not used on web)
+let Picker;
+if (Platform.OS !== 'web') {
+  try {
+    Picker = require('@react-native-picker/picker').Picker;
+  } catch (e) {
+    console.warn('Picker not available:', e);
+  }
+}
 
 // OpenAI GPT-4 supports these languages well for learning
 // Based on OpenAI's language model capabilities
@@ -56,6 +67,7 @@ export default function OnboardingScreen({ navigation }) {
   const [nativeLanguage, setNativeLanguage] = useState('');
   const [level, setLevel] = useState('');
   const [selectedInterests, setSelectedInterests] = useState([]);
+  const [saving, setSaving] = useState(false);
 
   // Filter available learning languages based on:
   // 1. OpenAI support
@@ -75,19 +87,36 @@ export default function OnboardingScreen({ navigation }) {
   };
 
   const handleComplete = async () => {
-    const profile = {
-      name,
-      targetLanguage,
-      nativeLanguage,
-      level: 'unknown', // Will be determined after first conversation
-      assessmentPending: true, // Flag to trigger assessment
-      interests: selectedInterests,
-      createdAt: new Date().toISOString()
-    };
+    setSaving(true);
+    try {
+      const profile = {
+        name,
+        targetLanguage,
+        nativeLanguage,
+        level: 'unknown', // Will be determined after first conversation
+        assessmentPending: true, // Flag to trigger assessment
+        interests: selectedInterests,
+        createdAt: new Date().toISOString()
+      };
 
-    await setUserProfile(profile);
-    await StorageService.setOnboardingComplete(true);
-    navigation.replace('Main');
+      console.log('Saving profile:', profile);
+      await setUserProfile(profile);
+      await StorageService.setOnboardingComplete(true);
+
+      // Small delay to ensure everything is saved
+      setTimeout(() => {
+        navigation.replace('Main');
+      }, 100);
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      Alert.alert(
+        'Error',
+        'Failed to save profile. Please try again.',
+        [{ text: 'OK' }]
+      );
+    } finally {
+      setSaving(false);
+    }
   };
 
   const canContinue = () => {
@@ -287,7 +316,7 @@ export default function OnboardingScreen({ navigation }) {
         )}
 
         <TouchableOpacity
-          style={[styles.continueButton, !canContinue() && styles.continueButtonDisabled]}
+          style={[styles.continueButton, (!canContinue() || saving) && styles.continueButtonDisabled]}
           onPress={() => {
             if (step < 4) {
               setStep(step + 1);
@@ -295,11 +324,15 @@ export default function OnboardingScreen({ navigation }) {
               handleComplete();
             }
           }}
-          disabled={!canContinue()}
+          disabled={!canContinue() || saving}
         >
-          <Text style={styles.continueButtonText}>
-            {step === 4 ? 'Start Learning! 🎉' : 'Continue'}
-          </Text>
+          {saving ? (
+            <ActivityIndicator color="#FFF" />
+          ) : (
+            <Text style={styles.continueButtonText}>
+              {step === 4 ? 'Start Learning! 🎉' : 'Continue'}
+            </Text>
+          )}
         </TouchableOpacity>
       </View>
     </SafeAreaView>

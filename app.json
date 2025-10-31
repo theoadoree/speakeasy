@@ -16,7 +16,8 @@
             "useFrameworks": "static"
           }
         }
-      ]
+      ],
+      "@react-native-firebase/app"
     ],
     "splash": {
       "image": "./assets/splash-icon.png",
@@ -59,8 +60,8 @@
       "bundler": "metro",
       "config": {
         "firebase": {
-          "apiKey": "AIzaSyDOlqd0tEWZ5X5YpN7oLHQMQhQg7rQ7qJo",
-          "authDomain": "speakeasy-app.firebaseapp.com",
+          "apiKey": "AIzaSyAQKDl8VGUodzYe0Cq9sC3wzot6Hb4YVEI",
+          "authDomain": "modular-analog-476221-h8.firebaseapp.com",
           "projectId": "modular-analog-476221-h8"
         }
       }

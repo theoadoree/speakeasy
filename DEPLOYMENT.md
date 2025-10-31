@@ -1,39 +1,54 @@
 # SpeakEasy Deployment Guide
 
-Complete guide for deploying SpeakEasy to Google Cloud Platform with automated CI/CD, iOS, Android, and web applications at https://speakeasy-ai.app.
+## 🎯 Current Deployment Status (October 30, 2025)
 
-## 🎯 Overview
+**Backend**: ✅ Deployed to Google Cloud Run
+**URL**: https://speakeasy-backend-823510409781.us-central1.run.app
+**Region**: us-central1
+**Project**: modular-analog-476221-h8
+**Revision**: speakeasy-backend-00039-qdr
+**Status**: Healthy and operational
 
-SpeakEasy uses a **three-tier deployment architecture**:
+---
+
+Complete guide for deploying SpeakEasy to Google Cloud Platform with automated CI/CD, iOS, Android, and web applications.
+
+## 🏗️ Architecture Overview
+
+SpeakEasy uses a **cloud-native architecture**:
 
 ```
-Mobile/Web App → Express Backend API (Cloud Run) → Ollama LLM Server
+Mobile/Web App → Express Backend API (Cloud Run) → OpenAI GPT-4o-mini
 ```
 
 ### Architecture Components
 
-1. **Express Backend** (`/backend`)
+1. **Express Backend** (`/backend`) - **DEPLOYED ✅**
    - RESTful API with specialized endpoints for onboarding, practice, lessons, assessments
-   - Proxies requests to Ollama with proper model routing (Qwen vs Llama)
-   - Handles error management and request validation
-   - Deployed to Google Cloud Run
+   - OpenAI GPT-4o-mini integration for AI-powered features
+   - Google OAuth + Apple Sign In + Firebase authentication
+   - Session-based progress tracking
+   - Deployed to Google Cloud Run at: https://speakeasy-backend-823510409781.us-central1.run.app
 
-2. **Ollama LLM Server**
-   - Runs Qwen2.5-72B (complex reasoning) + Llama 3.1-8B (fast chat)
-   - Options: Cloud Run, Cloud VM, or local development
+2. **AI Provider** - OpenAI GPT-4o-mini
+   - Fast, cost-effective language model
+   - Response time: 1-3 seconds
+   - TTS voice generation for practice conversations
+   - Managed via Google Secret Manager
 
 3. **Mobile App** (React Native + Expo)
-   - iOS and Android builds via Expo EAS
-   - Connects to Express backend API
+   - iOS and Android builds
+   - Automatically connects to production backend
+   - No local setup required
 
 4. **Web App** (React Native Web)
-   - Deployed to Firebase Hosting
+   - Can be deployed to Firebase Hosting
    - Same codebase as mobile
 
 ### Environment Modes
 
-- **Development**: Local Ollama (Mac M1 Max) + Local Express backend
-- **Production**: Express backend on Cloud Run → Ollama on Cloud infrastructure
+- **Development**: Optional local backend OR use production backend
+- **Production**: Express backend on Cloud Run → OpenAI GPT-4o-mini API
 
 ## 📋 Prerequisites
 
