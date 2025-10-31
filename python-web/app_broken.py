@@ -1,9 +1,9 @@
 """
-SpeakEasy Language Learning - Python Web App
-FastAPI backend with HTML/CSS/JavaScript frontend
+SpeakEasy Language Learning - Python Web App V2
+FastAPI backend with authentication and database
 """
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Depends, Header
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,6 +12,38 @@ from typing import Optional, List
 import os
 import openai
 from datetime import datetime
+from sqlalchemy.orm import Session
+
+# Import database and services
+DATABASE_ENABLED = False
+get_db = None
+
+# Try to import database modules
+try:
+    from database import SessionLocal
+    from database import crud
+    from services import auth_service
+    # Test database connection
+    try:
+        db = SessionLocal()
+        db.execute("SELECT 1")
+        db.close()
+        DATABASE_ENABLED = True
+        print("✅ Database connected successfully")
+
+        def get_db():
+            """Dependency for getting database session"""
+            db = SessionLocal()
+            try:
+                yield db
+            finally:
+                db.close()
+    except Exception as e:
+        print(f"⚠️  Database connection failed: {e}")
+        print("⚠️  Using in-memory storage fallback")
+except ImportError as e:
+    print(f"⚠️  Database modules not found: {e}")
+    print("⚠️  Using in-memory storage")
 
 app = FastAPI(title="SpeakEasy Language Learning")
 
@@ -27,25 +59,25 @@ app.add_middleware(
 # OpenAI configuration
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-# Data models
-class User(BaseModel):
+# Pydantic models for API
+class RegisterRequest(BaseModel):
     email: str
-    password: Optional[str] = None
-    username: Optional[str] = None
+    password: str
+    username: str
     target_language: str
     native_language: str = "English"
-    level: str = "beginner"
-    interests: List[str] = []
 
 class LoginRequest(BaseModel):
     email: str
     password: str
 
+class UsernameCheckRequest(BaseModel):
+    username: str
+
 class StoryRequest(BaseModel):
     target_language: str
     level: str
     interests: List[str]
-    user_id: Optional[str] = None
 
 class ChatMessage(BaseModel):
     message: str
@@ -58,89 +90,167 @@ class WordExplanation(BaseModel):
     target_language: str
     native_language: str = "English"
 
-class UsernameCheck(BaseModel):
-    username: str
+# In-memory fallback storage
+users_memory = {}
+stories_memory = {}
+conversations_memory = {}
 
-# In-memory storage (replace with database in production)
-users = {}
-usernames = set()  # Track usernames for uniqueness
-stories = {}
-conversations = {}
+# Helper function to get current user from token
+async def get_current_user(authorization: Optional[str] = Header(None), db: Session = Depends(get_db)):
+    """Get current user from JWT token"""
+    if not authorization or not authorization.startswith("Bearer "):
+        return None
+
+    token = authorization.split(" ")[1]
+    try:
+        payload = auth_service.verify_token(token)
+        if DATABASE_ENABLED:
+            user = db.query(crud.User).filter(crud.User.id == payload["user_id"]).first()
+            return user
+    except:
+        return None
+    return None
 
 @app.get("/", response_class=HTMLResponse)
 async def root():
     """Serve the main HTML page"""
-    with open("static/index.html", "r") as f:
-        return HTMLResponse(content=f.read())
+    try:
+        with open("static/index.html", "r") as f:
+            return HTMLResponse(content=f.read())
+    except FileNotFoundError:
+        return HTMLResponse(content="<h1>SpeakEasy</h1><p>Welcome! Frontend not found.</p>")
 
 @app.get("/health")
 async def health():
     """Health check endpoint"""
-    return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
+    return {
+        "status": "healthy",
+        "timestamp": datetime.utcnow().isoformat(),
+        "database": "enabled" if DATABASE_ENABLED else "disabled"
+    }
 
+# Authentication endpoints
 @app.post("/api/auth/register")
-async def register(user: User):
+async def register(request: RegisterRequest):
     """Register a new user"""
-    if user.email in users:
-        raise HTTPException(status_code=400, detail="User already exists")
+    if not DATABASE_ENABLED:
+        # Fallback to in-memory
+        if request.email in users_memory:
+            raise HTTPException(status_code=400, detail="User already exists")
+        users_memory[request.email] = request.dict()
+        return {"success": True, "message": "User registered (in-memory)"}
 
-    # Check username uniqueness if provided
-    if user.username:
-        if user.username in usernames:
-            raise HTTPException(status_code=400, detail="Username already taken")
-        usernames.add(user.username)
+    # Get database session
+    db = SessionLocal()
+    try:
+        # Check if email exists
+        existing_user = crud.get_user_by_email(db, request.email)
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
 
-    user_data = user.dict()
-    users[user.email] = user_data
+    # Check if username exists
+    existing_username = crud.get_user_by_username(db, request.username)
+    if existing_username:
+        raise HTTPException(status_code=400, detail="Username already taken")
 
-    # Don't return password in response
-    response_data = user_data.copy()
-    if 'password' in response_data:
-        del response_data['password']
+    # Create user
+    user = crud.create_user(
+        db=db,
+        email=request.email,
+        username=request.username,
+        target_language=request.target_language,
+        password=request.password
+    )
+
+    # Create token
+    token = auth_service.create_access_token(
+        data={"user_id": user.id, "email": user.email, "username": user.username}
+    )
 
     return {
         "success": True,
-        "message": "User registered successfully",
-        "token": f"mock_token_{user.email}",
-        "user": response_data
-    }
-
-@app.post("/api/auth/check-username")
-async def check_username(request: UsernameCheck):
-    """Check if username is available"""
-    available = request.username not in usernames
-
-    # Generate suggestion if taken
-    suggestion = None
-    if not available:
-        base = request.username
-        counter = 1
-        while f"{base}{counter}" in usernames:
-            counter += 1
-        suggestion = f"{base}{counter}"
-
-    return {
-        "available": available,
-        "suggestion": suggestion
+        "token": token,
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "username": user.username,
+            "target_language": user.target_language
+        }
     }
 
 @app.post("/api/auth/login")
 async def login(request: LoginRequest):
-    """Login user (simplified - add proper auth in production)"""
-    if request.email not in users:
-        raise HTTPException(status_code=404, detail="User not found")
+    """Login user"""
+    if not DATABASE_ENABLED:
+        # Fallback
+        if request.email not in users_memory:
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+        return {"success": True, "token": f"mock_{request.email}"}
 
-    # In production, verify password hash here
-    user_data = users[request.email].copy()
-    if 'password' in user_data:
-        del user_data['password']  # Don't return password
+    # Get database session
+    db = SessionLocal()
+    try:
+        # Get user
+        user = crud.get_user_by_email(db, request.email)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    # Verify password
+    if not crud.verify_password(request.password, user.password_hash):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    # Update last login
+    crud.update_user_login(db, user.id)
+
+    # Create token
+    token = auth_service.create_access_token(
+        data={"user_id": user.id, "email": user.email, "username": user.username}
+    )
 
     return {
         "success": True,
-        "token": f"mock_token_{request.email}",
-        "user": user_data
+        "token": token,
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "username": user.username,
+            "target_language": user.target_language
+        }
     }
 
+@app.post("/api/auth/check-username")
+async def check_username(request: UsernameCheckRequest):
+    """Check if username is available"""
+    if not DATABASE_ENABLED:
+        available = request.username not in [u.get("username") for u in users_memory.values()]
+        return {"available": available}
+
+    db = SessionLocal()
+    try:
+        available = not crud.username_exists(db, request.username)
+        suggestion = None if available else crud.suggest_username(db, request.username)
+
+        return {
+            "available": available,
+            "suggestion": suggestion
+        }
+    finally:
+        db.close()
+
+@app.get("/api/auth/me")
+async def get_me(current_user = Depends(get_current_user)):
+    """Get current user info"""
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+
+    return {
+        "id": current_user.id,
+        "email": current_user.email,
+        "username": current_user.username,
+        "target_language": current_user.target_language
+    }
+
+# Original OpenAI endpoints (keep existing functionality)
 @app.post("/api/stories/generate")
 async def generate_story(request: StoryRequest):
     """Generate a personalized language learning story"""

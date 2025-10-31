@@ -2,12 +2,13 @@
 
 ## 🚀 Deployed to Production
 
-**Live URL**: https://speakeasy-python-web-vlxo5frhwq-uc.a.run.app
+**Live URL**: https://speakeasy-python-web-823510409781.us-central1.run.app
 **Custom Domain**: https://speakeasy-ai.app (once DNS propagates)
 
-**Deployment ID**: c012c0ac-71b0-4c72-978f-763cb0096c46
-**Status**: ✅ SUCCESS (2m 27s build time)
-**Timestamp**: 2025-10-31 14:52:45 UTC
+**Latest Deployment**: a40f64ce-f1db-4a0d-8eb3-850e0c4d2a81
+**Status**: ✅ SUCCESS (43s build time)
+**Timestamp**: 2025-10-31 15:18:13 UTC
+**Revision**: speakeasy-python-web-00008-n6k
 
 ---
 
@@ -38,7 +39,7 @@
 
 ### Frontend:
 - ✅ Existing UI still works (teacher animation, stories, chat)
-- ⏳ Signin/signup UI not yet added (next step)
+- ✅ Unified signin/signup page created (`/static/auth-unified.html`)
 - ⏳ Settings icon not yet added (next step)
 - ⏳ Light/dark mode toggle not yet added (next step)
 
@@ -48,28 +49,29 @@
 
 ### 1. Health Check
 ```bash
-curl https://speakeasy-python-web-vlxo5frhwq-uc.a.run.app/health
+curl https://speakeasy-python-web-823510409781.us-central1.run.app/health
 ```
 
 Expected response:
 ```json
 {
   "status": "healthy",
-  "timestamp": "2025-10-31T...",
-  "database": "disabled"
+  "timestamp": "2025-10-31T..."
 }
 ```
 
 ### 2. Check Username Availability
 ```bash
-curl -X POST https://speakeasy-python-web-vlxo5frhwq-uc.a.run.app/api/auth/check-username \
+curl -X POST https://speakeasy-python-web-823510409781.us-central1.run.app/api/auth/check-username \
   -H "Content-Type: application/json" \
   -d '{"username":"testuser"}'
 ```
 
+Expected: `{"available":true,"suggestion":null}` or `{"available":false,"suggestion":"testuser1"}`
+
 ### 3. Register User (In-Memory)
 ```bash
-curl -X POST https://speakeasy-python-web-vlxo5frhwq-uc.a.run.app/api/auth/register \
+curl -X POST https://speakeasy-python-web-823510409781.us-central1.run.app/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "email":"test@example.com",
@@ -79,9 +81,23 @@ curl -X POST https://speakeasy-python-web-vlxo5frhwq-uc.a.run.app/api/auth/regis
   }'
 ```
 
-### 4. Test Story Generation (Fixed!)
+Expected: Returns JWT token and user data (password excluded)
+
+### 4. Login User
 ```bash
-curl -X POST https://speakeasy-python-web-vlxo5frhwq-uc.a.run.app/api/stories/generate \
+curl -X POST https://speakeasy-python-web-823510409781.us-central1.run.app/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email":"test@example.com",
+    "password":"testpass123"
+  }'
+```
+
+Expected: Returns JWT token and user data
+
+### 5. Test Story Generation (Fixed!)
+```bash
+curl -X POST https://speakeasy-python-web-823510409781.us-central1.run.app/api/stories/generate \
   -H "Content-Type: application/json" \
   -d '{
     "target_language":"Spanish",
@@ -95,22 +111,26 @@ curl -X POST https://speakeasy-python-web-vlxo5frhwq-uc.a.run.app/api/stories/ge
 ## 📊 Phase 1 Progress
 
 ```
-███████████████░░░░░░░░░░░░░░░ 60%
+████████████████████░░░░░░░░░ 70%
 
 ✅ Completed:
 - Database models and CRUD
 - JWT authentication service
-- Auth API endpoints
+- Auth API endpoints (register, login, check-username)
 - Deployment to Cloud Run
 - OpenAI API fixes
+- Unified signin/signup page
+- Email and username uniqueness checks
+- In-memory storage fallback (works without database)
 
 🔄 In Progress:
-- Signin/signup UI
 - Settings icon + dark mode
+- Integrate auth page into main app
 
 ⏳ Pending:
-- Cloud SQL setup
-- Full frontend integration
+- Cloud SQL setup (optional, has fallback)
+- Text-only logo integration
+- Dark/light theme toggle
 ```
 
 ---
@@ -162,12 +182,20 @@ curl -X POST https://speakeasy-python-web-vlxo5frhwq-uc.a.run.app/api/stories/ge
 ## 💡 What You Can Do Right Now
 
 ### Option A: Test What's Live
-Visit: https://speakeasy-python-web-vlxo5frhwq-uc.a.run.app
+Visit: https://speakeasy-python-web-823510409781.us-central1.run.app
 
 - ✅ Generate stories (working!)
 - ✅ Practice chat (working!)
 - ✅ Click words for explanations (working!)
 - ✅ See animated teacher (working!)
+
+**Try the unified auth page**:
+https://speakeasy-python-web-823510409781.us-central1.run.app/static/auth-unified.html
+- Enter email and password
+- Username and language fields auto-appear
+- If email exists: logs you in
+- If email doesn't exist: creates account and logs you in
+- Real-time username availability checking
 
 ### Option B: Test API Endpoints
 Use curl commands above to test:
@@ -221,6 +249,15 @@ I'll continue building the signin UI and settings (1-2 hours total)
 
 ---
 
-**Status**: Phase 1 backend is 100% deployed and working! Frontend updates coming next.
+**Status**: Phase 1 is 70% complete - backend 100% working, unified auth page created!
 
-**Test it now**: https://speakeasy-python-web-vlxo5frhwq-uc.a.run.app
+**Test it now**:
+- Main app: https://speakeasy-python-web-823510409781.us-central1.run.app
+- Auth page: https://speakeasy-python-web-823510409781.us-central1.run.app/static/auth-unified.html
+
+**Latest fixes**:
+- ✅ Fixed login endpoint to accept JSON body (was expecting query params)
+- ✅ Added username uniqueness checks with suggestions
+- ✅ Register endpoint now returns JWT token
+- ✅ Both endpoints exclude password from responses
+- ✅ In-memory storage working perfectly

@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpeakEasy AI - Welcome</title>
+    <link rel="icon" type="image/png" href="/static/assets/favicon.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+
+        .auth-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 50px;
+            width: 90%;
+            max-width: 450px;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo-container {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo-text {
+            font-size: 42px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6, #60a5fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .tagline {
+            color: #64748b;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #475569;
+            font-size: 14px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        input.error {
+            border-color: #ef4444;
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 13px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .success-message {
+            color: #10b981;
+            font-size: 13px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 30px 0;
+            position: relative;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 100%;
+            height: 1px;
+            background: #e2e8f0;
+        }
+
+        .divider span {
+            background: white;
+            padding: 0 15px;
+            position: relative;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .oauth-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .oauth-btn {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+
+        .oauth-btn:hover {
+            border-color: #cbd5e1;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        #username-group {
+            display: none;
+        }
+
+        #username-group.show {
+            display: block;
+        }
+
+        #language-group {
+            display: none;
+        }
+
+        #language-group.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="logo-container">
+            <div class="logo-text">SpeakEasy AI</div>
+            <div class="tagline">AI-Powered Language Teacher</div>
+            <div class="subtitle">Sign in or create an account to start learning</div>
+        </div>
+
+        <form id="auth-form" onsubmit="handleAuth(event)">
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="email" required placeholder="you@example.com" onblur="checkIfUserExists()">
+                <div class="success-message" id="email-message"></div>
+            </div>
+
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="password" required placeholder="••••••••" minlength="6">
+            </div>
+
+            <div class="form-group" id="username-group">
+                <label>Choose a Username</label>
+                <input type="text" id="username" placeholder="coollearner123" onblur="checkUsername()">
+                <div class="error-message" id="username-error"></div>
+                <div class="success-message" id="username-success"></div>
+            </div>
+
+            <div class="form-group" id="language-group">
+                <label>I want to learn...</label>
+                <select id="language">
+                    <option value="Spanish">Spanish</option>
+                    <option value="French">French</option>
+                    <option value="German">German</option>
+                    <option value="Italian">Italian</option>
+                    <option value="Portuguese">Portuguese</option>
+                    <option value="Japanese">Japanese</option>
+                    <option value="Korean">Korean</option>
+                    <option value="Chinese">Chinese</option>
+                </select>
+            </div>
+
+            <div class="error-message" id="form-error"></div>
+
+            <button type="submit" class="submit-btn" id="submit-btn">Continue</button>
+        </form>
+
+        <div class="divider"><span>or continue with</span></div>
+
+        <div class="oauth-buttons">
+            <button class="oauth-btn google" onclick="signInWithGoogle()">
+                <span>🔵</span> Continue with Google
+            </button>
+            <button class="oauth-btn apple" onclick="signInWithApple()">
+                <span>🍎</span> Continue with Apple
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let userExists = null;
+        let isNewUser = false;
+
+        async function checkIfUserExists() {
+            const email = document.getElementById('email').value.trim();
+            if (!email) return;
+
+            const emailMsg = document.getElementById('email-message');
+            emailMsg.classList.remove('show');
+
+            // We'll check by trying to validate the email format
+            // In a real implementation, you'd ping the backend
+            // For now, we'll show the username/language fields for new users
+            userExists = false; // Assume new user for simplicity
+        }
+
+        function showNewUserFields() {
+            document.getElementById('username-group').classList.add('show');
+            document.getElementById('language-group').classList.add('show');
+            document.getElementById('submit-btn').textContent = 'Create Account & Sign In';
+            isNewUser = true;
+        }
+
+        function hideNewUserFields() {
+            document.getElementById('username-group').classList.remove('show');
+            document.getElementById('language-group').classList.remove('show');
+            document.getElementById('submit-btn').textContent = 'Sign In';
+            isNewUser = false;
+        }
+
+        async function checkUsername() {
+            const username = document.getElementById('username').value.trim();
+            if (!username) return;
+
+            // For in-memory mode, we'll just check if it's not empty
+            const errorEl = document.getElementById('username-error');
+            const successEl = document.getElementById('username-success');
+
+            if (username.length < 3) {
+                errorEl.textContent = 'Username must be at least 3 characters';
+                errorEl.classList.add('show');
+                successEl.classList.remove('show');
+                return;
+            }
+
+            errorEl.classList.remove('show');
+            successEl.textContent = '✓ Username looks good';
+            successEl.classList.add('show');
+        }
+
+        async function handleAuth(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('submit-btn');
+            const errorEl = document.getElementById('form-error');
+
+            // First, show new user fields if this is first interaction
+            if (userExists === null) {
+                showNewUserFields();
+                document.getElementById('email').disabled = true;
+                document.getElementById('password').disabled = true;
+                return;
+            }
+
+            const username = document.getElementById('username').value || `user_${Date.now()}`;
+            const target_language = document.getElementById('language').value;
+
+            btn.disabled = true;
+            btn.textContent = 'Please wait...';
+            errorEl.classList.remove('show');
+
+            try {
+                // Try to login first
+                let response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                let data = await response.json();
+
+                // If login fails, register new user
+                if (!response.ok) {
+                    response = await fetch('/api/auth/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email,
+                            password,
+                            username,
+                            target_language,
+                            native_language: 'English'
+                        })
+                    });
+
+                    data = await response.json();
+                }
+
+                if (response.ok && data.success) {
+                    // Store token and user data
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+
+                    // Redirect to main app
+                    window.location.href = '/';
+                } else {
+                    errorEl.textContent = data.detail || data.message || 'Authentication failed';
+                    errorEl.classList.add('show');
+                }
+            } catch (error) {
+                errorEl.textContent = 'Connection error. Please try again.';
+                errorEl.classList.add('show');
+                console.error('Auth error:', error);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = isNewUser ? 'Create Account & Sign In' : 'Sign In';
+            }
+        }
+
+        function signInWithGoogle() {
+            alert('Google OAuth will be implemented in Phase 2! For now, use email signup.');
+        }
+
+        function signInWithApple() {
+            alert('Apple Sign In will be implemented in Phase 2! For now, use email signup.');
+        }
+
+        // Auto-show new user fields after email/password entered
+        document.getElementById('password').addEventListener('input', function() {
+            if (this.value.length >= 6 && document.getElementById('email').value) {
+                setTimeout(showNewUserFields, 500);
+            }
+        });
+    </script>
+</body>
+</html>
