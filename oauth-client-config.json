@@ -1,0 +1,14 @@
+{
+  "clientId": "",
+  "clientSecret": "",
+  "redirectUris": [
+    "https://speakeasy-python-web-vlxo5frhwq-uc.a.run.app/static/auth-unified.html",
+    "https://speakeasy-python-web-vlxo5frhwq-uc.a.run.app/auth/callback",
+    "http://localhost:5000/static/auth-unified.html",
+    "http://localhost:5000/auth/callback"
+  ],
+  "javascriptOrigins": [
+    "https://speakeasy-python-web-vlxo5frhwq-uc.a.run.app",
+    "http://localhost:5000"
+  ]
+}

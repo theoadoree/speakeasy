@@ -370,6 +370,34 @@ async def generate_story(request: StoryRequest):
     try:
         interests_text = ", ".join(request.interests) if request.interests else "general topics"
 
+        # Check if OpenAI API key is available
+        if not openai.api_key or openai.api_key == "":
+            # Fallback: Return a sample story
+            print("Warning: OpenAI API key not set, using fallback story")
+            sample_stories = {
+                "Spanish": {
+                    "title": "Un Día en el Mercado",
+                    "content": "María camina por el mercado. Ella ve muchas frutas y vegetales. 'Buenos días,' dice el vendedor. '¿Qué necesitas hoy?' María responde, 'Necesito manzanas y naranjas, por favor.' El vendedor le da las frutas. María paga y dice, 'Gracias, adiós.' Es un día perfecto para comprar.",
+                    "difficulty": request.level,
+                    "vocabulary_count": 35
+                },
+                "French": {
+                    "title": "Au Café",
+                    "content": "Pierre entre dans un café. Il s'assoit à une table. Le serveur arrive et demande, 'Que voulez-vous?' Pierre dit, 'Un café au lait, s'il vous plaît.' Le serveur apporte le café. C'est délicieux! Pierre boit son café et lit un livre. Quelle belle matinée!",
+                    "difficulty": request.level,
+                    "vocabulary_count": 40
+                }
+            }
+
+            story = sample_stories.get(request.target_language, sample_stories["Spanish"])
+
+            return JSONResponse(content={
+                "success": True,
+                "story": story,
+                "demo_mode": True,
+                "message": "Using demo story. Configure OPENAI_API_KEY for AI-generated content."
+            })
+
         prompt = f"""Create a short story in {request.target_language} for a {request.level} level learner.
 
 The story should:
@@ -380,12 +408,12 @@ The story should:
 - Include some dialogue
 - Be engaging and educational
 
-Return the story in JSON format with:
+Return ONLY valid JSON (no markdown, no code blocks) with this exact format:
 {{
     "title": "story title in {request.target_language}",
     "content": "the full story text",
     "difficulty": "{request.level}",
-    "vocabulary_count": number of unique words
+    "vocabulary_count": 50
 }}
 """
 
@@ -393,14 +421,34 @@ Return the story in JSON format with:
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": "You are a language learning assistant creating personalized stories."},
+                {"role": "system", "content": "You are a language learning assistant. Return ONLY valid JSON, no markdown formatting."},
                 {"role": "user", "content": prompt}
             ],
             temperature=0.7,
             max_tokens=1000
         )
 
-        story_data = response.choices[0].message.content
+        story_text = response.choices[0].message.content.strip()
+
+        # Remove markdown code blocks if present
+        if story_text.startswith("```"):
+            story_text = story_text.split("```")[1]
+            if story_text.startswith("json"):
+                story_text = story_text[4:]
+            story_text = story_text.strip()
+
+        # Parse JSON
+        import json
+        try:
+            story_data = json.loads(story_text)
+        except json.JSONDecodeError:
+            # Fallback if JSON parsing fails
+            story_data = {
+                "title": f"Learning {request.target_language}",
+                "content": story_text,
+                "difficulty": request.level,
+                "vocabulary_count": 50
+            }
 
         return JSONResponse(content={
             "success": True,
@@ -408,6 +456,7 @@ Return the story in JSON format with:
         })
 
     except Exception as e:
+        print(f"Story generation error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error generating story: {str(e)}")
 
 @app.post("/api/words/explain")

@@ -1346,9 +1346,24 @@
             <!-- Practice Tab -->
             <div id="practice" class="tab-content">
                 <h2>Conversation Practice</h2>
+
+                <!-- Teacher Avatar -->
+                <div class="teacher-avatar-container" style="text-align: center; margin: 20px 0;">
+                    <img id="teacher-avatar" src="/static/assets/teacher/teacher-neutral.png"
+                         alt="Teacher Avatar"
+                         style="width: 120px; height: 120px; border-radius: 50%; transition: all 0.3s ease;"
+                         onerror="this.style.display='none'">
+                    <div class="voice-controls" style="margin-top: 15px;">
+                        <label style="display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" id="autovoice-toggle" checked onchange="toggleAutoVoice()">
+                            <span>🔊 Auto Voice</span>
+                        </label>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label>Practice Language</label>
-                    <select id="practice-language">
+                    <select id="practice-language" onchange="updateVoiceLanguage()">
                         <option value="Spanish">Spanish</option>
                         <option value="French">French</option>
                         <option value="German">German</option>
@@ -1365,6 +1380,7 @@
                     <div class="chat-input-container">
                         <input type="text" id="chat-input" placeholder="Type your message..." onkeypress="handleChatKeypress(event)">
                         <button onclick="sendMessage()">Send</button>
+                        <button onclick="startVoiceInput()" style="margin-left: 8px;">🎤</button>
                     </div>
                 </div>
             </div>
@@ -1775,14 +1791,12 @@
                 if (loadingMsg) loadingMsg.remove();
 
                 if (data.success) {
-                    // Show teacher speaking
-                    const stopSpeaking = teacherSpeaking();
-                    setTimeout(stopSpeaking, 1500);
-
                     conversationHistory.push({ role: 'assistant', content: data.message });
                     messagesDiv.innerHTML += `<div class="message assistant">${data.message}</div>`;
+
+                    // Speak the message with avatar animation
+                    await speakText(data.message, language);
                 } else {
-                    setTeacherExpression('neutral', 'Error in response');
                     messagesDiv.innerHTML += '<div class="message assistant error">Error in response</div>';
                 }
 
@@ -2330,6 +2344,170 @@
                 loadLeaderboard(currentFilter);
             }
         };
+
+        // ==================== TEXT-TO-SPEECH & AVATAR ANIMATION ====================
+
+        let autoVoiceEnabled = true;
+        let currentUtterance = null;
+
+        // Language to voice mapping
+        const voiceLanguageMap = {
+            'Spanish': 'es-ES',
+            'French': 'fr-FR',
+            'German': 'de-DE',
+            'Italian': 'it-IT',
+            'Portuguese': 'pt-PT',
+            'Japanese': 'ja-JP',
+            'Korean': 'ko-KR',
+            'Chinese': 'zh-CN'
+        };
+
+        function toggleAutoVoice() {
+            autoVoiceEnabled = document.getElementById('autovoice-toggle').checked;
+            console.log('Auto voice:', autoVoiceEnabled ? 'enabled' : 'disabled');
+        }
+
+        function updateVoiceLanguage() {
+            console.log('Voice language updated to:', document.getElementById('practice-language').value);
+        }
+
+        async function speakText(text, language) {
+            if (!autoVoiceEnabled) {
+                console.log('Auto voice disabled, skipping speech');
+                return;
+            }
+
+            // Stop any current speech
+            if (currentUtterance) {
+                window.speechSynthesis.cancel();
+            }
+
+            return new Promise((resolve) => {
+                const utterance = new SpeechSynthesisUtterance(text);
+                currentUtterance = utterance;
+
+                // Set language
+                const langCode = voiceLanguageMap[language] || 'es-ES';
+                utterance.lang = langCode;
+
+                // Try to find a voice for this language
+                const voices = window.speechSynthesis.getVoices();
+                const targetVoice = voices.find(voice => voice.lang.startsWith(langCode.split('-')[0]));
+                if (targetVoice) {
+                    utterance.voice = targetVoice;
+                }
+
+                // Configure speech parameters
+                utterance.rate = 0.9; // Slightly slower for learning
+                utterance.pitch = 1.1; // Slightly higher pitch
+                utterance.volume = 1.0;
+
+                // Avatar animation during speech
+                const avatar = document.getElementById('teacher-avatar');
+
+                utterance.onstart = () => {
+                    console.log('Speaking:', text);
+                    animateAvatarSpeaking(avatar, true);
+                };
+
+                utterance.onend = () => {
+                    console.log('Finished speaking');
+                    animateAvatarSpeaking(avatar, false);
+                    currentUtterance = null;
+                    resolve();
+                };
+
+                utterance.onerror = (error) => {
+                    console.error('Speech error:', error);
+                    animateAvatarSpeaking(avatar, false);
+                    currentUtterance = null;
+                    resolve();
+                };
+
+                // Speak!
+                window.speechSynthesis.speak(utterance);
+            });
+        }
+
+        function animateAvatarSpeaking(avatarElement, isSpeaking) {
+            if (!avatarElement) return;
+
+            if (isSpeaking) {
+                // Animate: scale slightly and add glow
+                avatarElement.style.transform = 'scale(1.1)';
+                avatarElement.style.boxShadow = '0 0 20px rgba(102, 126, 234, 0.6)';
+
+                // Pulse animation
+                const pulseInterval = setInterval(() => {
+                    const currentScale = parseFloat(avatarElement.style.transform.replace(/[^\d.]/g, '')) || 1;
+                    avatarElement.style.transform = `scale(${currentScale === 1.1 ? 1.05 : 1.1})`;
+                }, 300);
+
+                avatarElement.dataset.pulseInterval = pulseInterval;
+            } else {
+                // Stop animation
+                if (avatarElement.dataset.pulseInterval) {
+                    clearInterval(parseInt(avatarElement.dataset.pulseInterval));
+                    delete avatarElement.dataset.pulseInterval;
+                }
+
+                // Reset to normal
+                avatarElement.style.transform = 'scale(1)';
+                avatarElement.style.boxShadow = 'none';
+            }
+        }
+
+        function startVoiceInput() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert('Voice input is not supported in your browser. Please use Chrome or Edge.');
+                return;
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+
+            const language = document.getElementById('practice-language').value;
+            const langCode = voiceLanguageMap[language] || 'es-ES';
+            recognition.lang = langCode;
+
+            recognition.onstart = () => {
+                console.log('Voice input started. Speak now...');
+                const chatInput = document.getElementById('chat-input');
+                chatInput.placeholder = '🎤 Listening...';
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                console.log('Voice input:', transcript);
+
+                const chatInput = document.getElementById('chat-input');
+                chatInput.value = transcript;
+                chatInput.placeholder = 'Type your message...';
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Voice input error:', event.error);
+                const chatInput = document.getElementById('chat-input');
+                chatInput.placeholder = 'Type your message...';
+                alert('Voice input error: ' + event.error);
+            };
+
+            recognition.onend = () => {
+                console.log('Voice input ended');
+                const chatInput = document.getElementById('chat-input');
+                chatInput.placeholder = 'Type your message...';
+            };
+
+            recognition.start();
+        }
+
+        // Load voices when available
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = () => {
+                console.log('Voices loaded:', window.speechSynthesis.getVoices().length);
+            };
+        }
+
     </script>
 </body>
 </html>
