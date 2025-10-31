@@ -219,52 +219,13 @@
 <body>
     <div class="auth-container">
         <div class="logo-container">
+            <img src="/static/assets/logo.png" alt="SpeakEasy AI Logo" class="logo" style="width: 100px; height: 100px; margin-bottom: 20px;">
             <div class="logo-text">SpeakEasy AI</div>
             <div class="tagline">AI-Powered Language Teacher</div>
-            <div class="subtitle">Sign in or create an account to start learning</div>
+            <div class="subtitle">Sign in to start learning</div>
         </div>
 
-        <form id="auth-form" onsubmit="handleAuth(event)">
-            <div class="form-group">
-                <label>Email</label>
-                <input type="email" id="email" required placeholder="you@example.com" onblur="checkIfUserExists()">
-                <div class="success-message" id="email-message"></div>
-            </div>
-
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" id="password" required placeholder="••••••••" minlength="6">
-            </div>
-
-            <div class="form-group" id="username-group">
-                <label>Choose a Username</label>
-                <input type="text" id="username" placeholder="coollearner123" onblur="checkUsername()">
-                <div class="error-message" id="username-error"></div>
-                <div class="success-message" id="username-success"></div>
-            </div>
-
-            <div class="form-group" id="language-group">
-                <label>I want to learn...</label>
-                <select id="language">
-                    <option value="Spanish">Spanish</option>
-                    <option value="French">French</option>
-                    <option value="German">German</option>
-                    <option value="Italian">Italian</option>
-                    <option value="Portuguese">Portuguese</option>
-                    <option value="Japanese">Japanese</option>
-                    <option value="Korean">Korean</option>
-                    <option value="Chinese">Chinese</option>
-                </select>
-            </div>
-
-            <div class="error-message" id="form-error"></div>
-
-            <button type="submit" class="submit-btn" id="submit-btn">Continue</button>
-        </form>
-
-        <div class="divider"><span>or continue with</span></div>
-
-        <div class="oauth-buttons">
+        <div class="oauth-buttons" style="margin-top: 40px;">
             <button class="oauth-btn google" onclick="signInWithGoogle()">
                 <span>🔵</span> Continue with Google
             </button>
@@ -272,130 +233,11 @@
                 <span>🍎</span> Continue with Apple
             </button>
         </div>
+
+        <div class="error-message" id="form-error" style="margin-top: 20px;"></div>
     </div>
 
     <script>
-        let userExists = null;
-        let isNewUser = false;
-
-        async function checkIfUserExists() {
-            const email = document.getElementById('email').value.trim();
-            if (!email) return;
-
-            const emailMsg = document.getElementById('email-message');
-            emailMsg.classList.remove('show');
-
-            // We'll check by trying to validate the email format
-            // In a real implementation, you'd ping the backend
-            // For now, we'll show the username/language fields for new users
-            userExists = false; // Assume new user for simplicity
-        }
-
-        function showNewUserFields() {
-            document.getElementById('username-group').classList.add('show');
-            document.getElementById('language-group').classList.add('show');
-            document.getElementById('submit-btn').textContent = 'Create Account & Sign In';
-            isNewUser = true;
-        }
-
-        function hideNewUserFields() {
-            document.getElementById('username-group').classList.remove('show');
-            document.getElementById('language-group').classList.remove('show');
-            document.getElementById('submit-btn').textContent = 'Sign In';
-            isNewUser = false;
-        }
-
-        async function checkUsername() {
-            const username = document.getElementById('username').value.trim();
-            if (!username) return;
-
-            // For in-memory mode, we'll just check if it's not empty
-            const errorEl = document.getElementById('username-error');
-            const successEl = document.getElementById('username-success');
-
-            if (username.length < 3) {
-                errorEl.textContent = 'Username must be at least 3 characters';
-                errorEl.classList.add('show');
-                successEl.classList.remove('show');
-                return;
-            }
-
-            errorEl.classList.remove('show');
-            successEl.textContent = '✓ Username looks good';
-            successEl.classList.add('show');
-        }
-
-        async function handleAuth(event) {
-            event.preventDefault();
-
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const btn = document.getElementById('submit-btn');
-            const errorEl = document.getElementById('form-error');
-
-            // First, show new user fields if this is first interaction
-            if (userExists === null) {
-                showNewUserFields();
-                document.getElementById('email').disabled = true;
-                document.getElementById('password').disabled = true;
-                return;
-            }
-
-            const username = document.getElementById('username').value || `user_${Date.now()}`;
-            const target_language = document.getElementById('language').value;
-
-            btn.disabled = true;
-            btn.textContent = 'Please wait...';
-            errorEl.classList.remove('show');
-
-            try {
-                // Try to login first
-                let response = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-
-                let data = await response.json();
-
-                // If login fails, register new user
-                if (!response.ok) {
-                    response = await fetch('/api/auth/register', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            email,
-                            password,
-                            username,
-                            target_language,
-                            native_language: 'English'
-                        })
-                    });
-
-                    data = await response.json();
-                }
-
-                if (response.ok && data.success) {
-                    // Store token and user data
-                    localStorage.setItem('token', data.token);
-                    localStorage.setItem('user', JSON.stringify(data.user));
-
-                    // Redirect to main app
-                    window.location.href = '/';
-                } else {
-                    errorEl.textContent = data.detail || data.message || 'Authentication failed';
-                    errorEl.classList.add('show');
-                }
-            } catch (error) {
-                errorEl.textContent = 'Connection error. Please try again.';
-                errorEl.classList.add('show');
-                console.error('Auth error:', error);
-            } finally {
-                btn.disabled = false;
-                btn.textContent = isNewUser ? 'Create Account & Sign In' : 'Sign In';
-            }
-        }
-
         // Google OAuth Configuration
         const GOOGLE_CLIENT_ID = '823510409781-aqd90aoj080374pnfjultufdkk027qsp.apps.googleusercontent.com';
 
@@ -478,15 +320,21 @@
             const errorEl = document.getElementById('form-error');
 
             try {
+                // Extract data from Apple response
+                const authorization = response.authorization;
+                const user = response.user; // Only available on first signin
+
+                const payload = {
+                    identityToken: authorization.id_token,
+                    user: authorization.user || (user ? user.sub : null),
+                    email: user ? user.email : null,
+                    fullName: user ? user.name : null
+                };
+
                 const res = await fetch('/api/auth/apple', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        identityToken: response.authorization.id_token,
-                        user: response.user,
-                        email: response.user?.email,
-                        fullName: response.user?.name
-                    })
+                    body: JSON.stringify(payload)
                 });
 
                 const data = await res.json();
@@ -505,13 +353,6 @@
                 console.error('Apple auth error:', error);
             }
         }
-
-        // Auto-show new user fields after email/password entered
-        document.getElementById('password').addEventListener('input', function() {
-            if (this.value.length >= 6 && document.getElementById('email').value) {
-                setTimeout(showNewUserFields, 500);
-            }
-        });
     </script>
 </body>
 </html>
