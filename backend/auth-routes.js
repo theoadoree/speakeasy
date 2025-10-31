@@ -1,6 +1,10 @@
 const express = require('express');
-const { auth, db, isConfigured } = require('./firebase-config');
+const { OAuth2Client } = require('google-auth-library');
+const { admin, auth, db, isConfigured } = require('./firebase-config');
 const router = express.Router();
+
+// Initialize Google OAuth client for token verification
+const googleClient = new OAuth2Client();
 
 // Middleware to verify Firebase auth token
 async function verifyToken(req, res, next) {
@@ -442,13 +446,53 @@ router.post('/apple', async (req, res) => {
 // Google Sign In - auto creates account if doesn't exist
 router.post('/google', async (req, res) => {
   try {
-    const { idToken, user: googleUser } = req.body;
+    const { idToken } = req.body;
 
-    if (!idToken || !googleUser) {
-      return res.status(400).json({ error: 'Missing required fields' });
+    if (!idToken) {
+      return res.status(400).json({ error: 'Missing ID token' });
     }
 
-    const { id: googleId, email, name, photo } = googleUser;
+    // Verify Google ID token and extract user info
+    let googleId, email, name, photo;
+    const providedUser = req.body.user;
+
+    try {
+      // Verify token with Google - works for both iOS and web clients
+      const validAudiences = [
+        '823510409781-7am96n366leset271qt9c8djo265u24n.apps.googleusercontent.com', // Web client
+        '823510409781-aqd90aoj080374pnfjultufdkk027qsp.apps.googleusercontent.com', // iOS client
+        '823510409781-s5d3hrffelmjcl8kjvchcv3tlbp0shbo.apps.googleusercontent.com' // Fallback
+      ];
+
+      const ticket = await googleClient.verifyIdToken({
+        idToken: idToken,
+        audience: validAudiences
+      });
+
+      const payload = ticket.getPayload();
+      console.log('✅ Google token verified:', payload.sub);
+
+      // Use verified token data (most reliable)
+      googleId = payload.sub;
+      email = payload.email;
+      name = payload.name;
+      photo = payload.picture;
+
+    } catch (verifyError) {
+      console.error('❌ Google token verification failed:', verifyError.message);
+
+      // Fallback: use provided user info from request body (for development/testing)
+      if (providedUser) {
+        console.log('⚠️  Using provided user info (token verification failed)');
+        googleId = providedUser.id;
+        email = providedUser.email;
+        name = providedUser.name;
+        photo = providedUser.photo;
+      } else {
+        // No user info available at all
+        throw new Error('Failed to verify Google token and no fallback user info provided');
+      }
+    }
 
     if (!isConfigured) {
       // Mock response for development
