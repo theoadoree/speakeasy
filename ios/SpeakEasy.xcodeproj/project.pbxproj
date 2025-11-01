@@ -259,7 +259,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.speakeasy.ios.SpeakEasy2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.speakeasy.ios.SpeakEasy;
 				PRODUCT_NAME = SpeakEasy;
 				SWIFT_OBJC_BRIDGING_HEADER = "SpeakEasy/SpeakEasy-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -286,7 +286,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.speakeasy.ios.SpeakEasy2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.speakeasy.ios.SpeakEasy;
 				PRODUCT_NAME = SpeakEasy;
 				SWIFT_OBJC_BRIDGING_HEADER = "SpeakEasy/SpeakEasy-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
