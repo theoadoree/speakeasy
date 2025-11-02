@@ -1,0 +1,56 @@
+FIREBASE CONFIGURATION FILES IN SPEAKEASY REPOSITORY
+====================================================
+
+✅ FILES PRESENT IN REPOSITORY:
+-------------------------------
+
+1. firebase.json
+   └─ Main Firebase configuration (hosting, firestore references)
+
+2. .firebaserc  
+   └─ Firebase project ID: clicksclick-6e520
+
+3. firestore.rules
+   └─ Database security rules (users, leaderboards, content)
+
+4. firestore.indexes.json
+   └─ Database query indexes (leaderboards, progress)
+
+5. src/config/firebase.config.js
+   └─ Client SDK config for React Native (web/mobile)
+   └─ Project: modular-analog-476221-h8
+
+6. backend/firebase-config.js
+   └─ Backend Admin SDK configuration proxy
+
+7. backend/init-secrets.js
+   └─ Firebase Admin initialization with Secret Manager
+
+8. .env.example
+   └─ Template for Firebase environment variables
+
+
+❌ FILES MISSING (Need to Download from Firebase Console):
+----------------------------------------------------------
+
+1. ios/SpeakEasy/GoogleService-Info.plist
+   └─ iOS app configuration file
+   └─ Download from: Firebase Console > iOS App Settings
+   └─ Bundle ID: com.scott.speakeasy
+
+2. android/app/google-services.json
+   └─ Android app configuration file
+   └─ Download from: Firebase Console > Android App Settings
+
+
+📊 SUMMARY:
+-----------
+Total Firebase Config Files: 8 present, 2 missing
+Firebase Projects Used: 
+  - clicksclick-6e520 (default)
+  - modular-analog-476221-h8 (web app)
+
+Status: Web/Backend ✅ | iOS ⚠️ | Android ⚠️
+
+
+For detailed documentation, see: FIREBASE_CONFIG_FILES.md
